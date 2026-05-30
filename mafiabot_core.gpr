@@ -1,0 +1,36 @@
+project Mafiabot_Core is
+
+   for Source_Dirs use
+     ("src",
+      "src/core",
+      "src/daemons",
+      "src/network",
+      "src/payloads",
+      "config",
+      "tests");
+   for Object_Dir use "obj";
+   for Exec_Dir use "bin";
+   for Main use ("mafiabot.adb", "engine_tests.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022",
+         "-gnata",
+         "-gnatwa",
+         "-O2");
+   end Compiler;
+
+   --  Run: gnatprove -P mafiabot_core.gpr --level=2 --report=all
+   package Prove is
+      for Proof_Switches ("Ada") use
+        ("-j0",
+         "--level=2",
+         "--report=all",
+         "--no-axiom-guard");
+   end Prove;
+
+   package Binder is
+      for Switches ("Ada") use ("-E");
+   end Binder;
+
+end Mafiabot_Core;
