@@ -1,0 +1,4 @@
+pragma Profile (Jorvik);
+pragma Restrictions (No_Exceptions);
+pragma Restrictions (No_Implicit_Dynamic_Code);
+pragma SPARK_Mode (On);

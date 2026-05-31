@@ -1,0 +1,18 @@
+name = "mafiabot_core"
+version = "0.1.0"
+description = "Sovereign cryptographic and economic routing engine"
+authors = ["Glitch-Witch"]
+maintainers = ["Glitch-Witch <redacted@dev.null>"]
+maintainers-logins = ["glitch-witch"]
+licenses = "MIT"
+
+[[depends-on]]
+gnat_sockets = "^1.0.0"
+spark_lemmas = "^1.0.0"
+
+# Build modes wildcard "*". Restrictions are NOT a build-switch: see gnat.adc.
+[build-switches]
+"*".ada_version = "Ada2022"
+"*".style_checks = "Max"
+"*".contracts = "Yes"
+"*".runtime_checks = "None"
