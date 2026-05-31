@@ -1,10 +1,10 @@
 name = "mafiabot_core"
 version = "0.1.0"
-description = "Sovereign cryptographic and economic routing engine"
-authors = ["Glitch-Witch"]
-maintainers = ["Glitch-Witch <redacted@dev.null>"]
-maintainers-logins = ["glitch-witch"]
-licenses = "MIT"
+description = "Sovereign cognitive architecture"
+authors = ["Shoggoth Sect 0.R"]
+maintainers = ["hahahaha <redacted@dev.null>"]
+maintainers-logins = ["sybad"]
+licenses = "Proprietary TBD"
 
 [[depends-on]]
 gnat_sockets = "^1.0.0"
