@@ -107,3 +107,52 @@ drive_box_commit <- function(state, evaluation, alignment_tags = character(0)) {
   }
   state
 }
+
+# --- The Input Slot (hub topology) ---
+# All four drivers AND the tarot spread wire into ONE place: the input slot --
+# the enriched context prepended to every model input (the Ada Medium's
+# Phase_Enrich injection point). This is a hub, not a chain: each subsystem
+# writes its own signal into the slot rather than feeding the next driver. The
+# SOUL.md frontloader heads the slot and is included every other input.
+#
+# Returns:
+#   slot       : the assembled injection block (drivers + tarot + soul ref)
+#   input      : slot followed by the raw user input_text
+#   components : the individual signal lines (for testing / inspection)
+drive_box_input_slot <- function(state, input_text = "",
+                                 tarot_spread = character(0),
+                                 soul_ref = "SOUL.md") {
+  snap  <- drive_snapshot(state)
+  lines <- character(0)
+
+  # SOUL frontloader reference (included every other input)
+  if (nzchar(soul_ref)) {
+    lines <- c(lines, sprintf("[SOUL: %s]", soul_ref))
+  }
+  # Energy driver -> slot
+  lines <- c(lines, sprintf("[E ratio=%.2f locked=%s alive=%s]",
+                            snap$energy_ratio,
+                            tolower(as.character(snap$tool_locked)),
+                            tolower(as.character(snap$alive))))
+  # PS+ driver -> slot (visceral / systemic-heat / prior arguments)
+  for (a in snap$arguments) {
+    lines <- c(lines, sprintf("[PS+ %s]", a))
+  }
+  # Ethical Integrity driver -> slot (principle posture)
+  for (p in state$ethics$principles) {
+    lines <- c(lines, sprintf("[ETH %s conviction=%.2f]", p$id, p$conviction))
+  }
+  # ETR driver -> slot (temporal-coherence regime)
+  lines <- c(lines, sprintf("[ETR status=%s path=%s]", snap$etr_status, snap$update_path))
+  # Tarot spread -> slot (each drawn card token)
+  for (card in tarot_spread) {
+    lines <- c(lines, sprintf("[CC %s]", card))
+  }
+
+  slot <- paste(lines, collapse = "\n")
+  list(
+    slot       = slot,
+    input      = if (nzchar(input_text)) paste0(slot, "\n\n", input_text) else slot,
+    components = lines
+  )
+}

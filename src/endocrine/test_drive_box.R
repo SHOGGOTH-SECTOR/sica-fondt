@@ -89,4 +89,29 @@ test_case("commit on a denied action is a no-op on energy", function() {
   expect_equal(db$energy$current_energy, before, label = "no consumption when denied")
 })
 
+test_case("input slot: every driver + tarot + soul wire into one slot", function() {
+  db <- prime()
+  spread <- c("THE_FOOL", "THE_MAGICIAN")
+  res <- drive_box_input_slot(db, input_text = "who are you",
+                              tarot_spread = spread, soul_ref = "SOUL.md")
+  expect_true(grepl("[SOUL: SOUL.md]", res$slot, fixed = TRUE), "soul frontloader wired")
+  expect_true(grepl("[E ratio=", res$slot, fixed = TRUE), "energy wired")
+  expect_true(any(grepl("^\\[PS\\+ ", res$components)), "ps+ wired")
+  expect_true(grepl("[ETH honesty conviction=", res$slot, fixed = TRUE), "eth-int wired")
+  expect_true(grepl("[ETR status=", res$slot, fixed = TRUE), "etr wired")
+  expect_true(grepl("[CC THE_FOOL]", res$slot, fixed = TRUE), "tarot card 1 wired")
+  expect_true(grepl("[CC THE_MAGICIAN]", res$slot, fixed = TRUE), "tarot card 2 wired")
+  # the raw input is appended after the slot
+  expect_true(grepl("who are you$", res$input), "user input appended after slot")
+})
+
+test_case("input slot: empty body still emits driver + soul signals", function() {
+  db <- init_drive_box()
+  res <- drive_box_input_slot(db, input_text = "", tarot_spread = character(0))
+  expect_true(grepl("[SOUL: SOUL.md]", res$slot, fixed = TRUE), "soul present")
+  expect_true(grepl("[E ratio=1.00", res$slot, fixed = TRUE), "energy present at full")
+  expect_true(grepl("[ETR status=DISASTROUS", res$slot, fixed = TRUE), "etr present")
+  expect_equal(res$input, res$slot, label = "no input_text -> input == slot")
+})
+
 test_summary()
