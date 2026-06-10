@@ -13,6 +13,6 @@ spark_lemmas = "^1.0.0"
 # Build modes wildcard "*". Restrictions are NOT a build-switch: see gnat.adc.
 [build-switches]
 "*".ada_version = "Ada2022"
-"*".style_checks = "Max"
+"*".style_checks = "Yes"
 "*".contracts = "Yes"
 "*".runtime_checks = "None"
