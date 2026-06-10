@@ -1,0 +1,69 @@
+name: Ada CI
+
+# Scheduled only — does NOT run on push or PR. Runs nightly and can be
+# triggered by hand from the Actions tab.
+on:
+  schedule:
+    - cron: "0 6 * * *"   # 06:00 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: alr build + run tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mafiabot_core
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Alire + GNAT/GPRbuild toolchain
+        uses: alire-project/setup-alire@v4
+        with:
+          toolchain: gnat_native^14 gprbuild
+
+      - name: Build (Ada2022 + SPARK + Jorvik)
+        run: alr --non-interactive build
+
+      - name: Run test executables
+        run: |
+          set -euo pipefail
+          fail=0
+          for t in soul_tests trust_tests cycle_tests config_tests engine_tests; do
+            if [ -x "bin/$t" ]; then
+              echo "=== $t ==="
+              if ! "bin/$t"; then
+                echo "::error::$t exited non-zero"
+                fail=1
+              fi
+            else
+              echo "::warning::bin/$t not found (skipped)"
+            fi
+          done
+          exit $fail
+
+  prove:
+    name: gnatprove (informational)
+    runs-on: ubuntu-latest
+    # Proofs are not yet expected to fully discharge; surface results without
+    # blocking. Flip continue-on-error to false once the proof base is green.
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: mafiabot_core
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Alire
+        uses: alire-project/setup-alire@v4
+        with:
+          toolchain: gnat_native^14 gprbuild
+
+      - name: Install gnatprove
+        run: alr --non-interactive toolchain --select gnatprove || alr --non-interactive with gnatprove || true
+
+      - name: Run gnatprove
+        run: alr --non-interactive exec -- gnatprove -P mafiabot_core.gpr --level=1 --report=fail || true
