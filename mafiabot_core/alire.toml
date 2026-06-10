@@ -4,7 +4,9 @@ description = "Sovereign cognitive architecture"
 authors = ["Shoggoth Sect 0.R"]
 maintainers = ["hahahaha <redacted@dev.null>"]
 maintainers-logins = ["sybad"]
-licenses = "Proprietary TBD"
+# licenses: omitted -- proprietary/TBD. Alire requires a valid SPDX expression
+# here, and neither "Proprietary TBD" nor a LicenseRef- custom id is accepted by
+# the pinned Alire, so the (optional) field is left out until a license is chosen.
 
 [[depends-on]]
 gnat_sockets = "^1.0.0"
