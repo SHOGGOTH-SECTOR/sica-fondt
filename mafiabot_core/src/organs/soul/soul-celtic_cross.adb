@@ -2,6 +2,8 @@ package body Soul.Celtic_Cross
   with SPARK_Mode => On
 is
 
+   use type Soul.Tarot.Slot_State;
+
    procedure Draw_Spread
      (D      : in out Soul.Tarot.Deck;
       Spread :    out CC_Spread;

@@ -4,6 +4,8 @@ with Soul.Tarot;
 with Soul.Celtic_Cross;
 with Mafiabot_Types; use Mafiabot_Types;
 
+use type Soul.Tarot.Slot_State;
+
 procedure Soul_Tests is
    Fails : Natural := 0;
 

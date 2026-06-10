@@ -38,6 +38,11 @@ is
    type Ratio_Value  is delta 0.001 range   0.0 ..   1.0;
    type Cost_Value   is delta 0.001 range   0.0 .. 1000.0;
    type Axis_Value   is delta 0.01  range  -1.0 ..   1.0;
+   --  Pin 'Small to 0.01 so the bounds are +/-100 units (fits a byte) rather
+   --  than GNAT's default 2**-7 small, which would place 1.0 at exactly 128 --
+   --  one past a signed-8-bit base range and rejected as "high bound outside
+   --  type range".
+   for Axis_Value'Small use 0.01;
 
    --  Provenance tags — trust boundary uses these to block reclassification
    type Provenance_Tag is (

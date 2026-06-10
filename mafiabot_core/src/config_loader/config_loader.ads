@@ -24,8 +24,10 @@ is
    type Entry_Index is range 1 .. Max_Keys;
    subtype Entry_Count is Natural range 0 .. Max_Keys;
 
+   type Entry_Array is array (Entry_Index) of Config_Entry;
+
    type Config_Store is record
-      Entries : array (Entry_Index) of Config_Entry :=
+      Entries : Entry_Array :=
         (others => (Key => (others => ' '), Key_Len => 0,
                     Val => (others => ' '), Val_Len => 0));
       Count : Entry_Count := 0;
