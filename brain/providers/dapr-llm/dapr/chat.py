@@ -1,0 +1,533 @@
+#
+# Copyright 2026 The Dapr Authors
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+import logging
+import os
+import time
+from pathlib import Path
+from typing import (
+    Any,
+    ClassVar,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Type,
+    Union,
+)
+
+from pydantic import BaseModel, Field
+from dapr_agents.llm.chat import ChatClientBase
+from dapr_agents.llm.dapr.client import DaprInferenceClientBase
+from dapr_agents.llm.utils import RequestHandler, ResponseHandler
+from dapr_agents.prompt.base import PromptTemplateBase
+from dapr_agents.prompt.prompty import Prompty
+from dapr_agents.tool import AgentTool
+from dapr_agents.types.exceptions import DaprRuntimeVersionNotSupportedError
+from dapr_agents.types.message import (
+    BaseMessage,
+    LLMChatResponse,
+)
+from dapr_agents.utils import is_version_supported
+
+
+# Lazy import to avoid import issues during test collection
+def _import_conversation_types():
+    from dapr.clients.grpc.conversation import (
+        ConversationInputAlpha2,
+        ConversationMessage,
+        ConversationMessageOfAssistant,
+        ConversationMessageContent,
+        ConversationToolCalls,
+        ConversationToolCallsOfFunction,
+        create_user_message,
+        create_system_message,
+        create_assistant_message,
+        create_tool_message,
+    )
+
+    return (
+        ConversationInputAlpha2,
+        ConversationMessage,
+        ConversationMessageOfAssistant,
+        ConversationMessageContent,
+        ConversationToolCalls,
+        ConversationToolCallsOfFunction,
+        create_user_message,
+        create_system_message,
+        create_assistant_message,
+        create_tool_message,
+    )
+
+
+logger = logging.getLogger(__name__)
+
+
+class DaprChatClient(DaprInferenceClientBase, ChatClientBase):
+    """
+    Chat client for Dapr's Inference API.
+
+    Integrates Prompty-driven prompt templates, tool injection,
+    PII scrubbing, and normalizes the Dapr output into our unified
+    LLMChatResponse schema.  **Streaming is not supported.**
+    """
+
+    prompty: Optional[Prompty] = Field(
+        default=None, description="Optional Prompty instance for templating."
+    )
+    prompt_template: Optional[PromptTemplateBase] = Field(
+        default=None, description="Optional prompt-template to format inputs."
+    )
+
+    component_name: Optional[str] = None
+
+    # Support both function_call and json structured output modes
+    SUPPORTED_STRUCTURED_MODES: ClassVar[set[str]] = {"function_call", "json"}
+
+    def model_post_init(self, __context: Any) -> None:
+        """
+        After Pydantic init, set up API/type and default LLM component from env.
+        """
+        self._api = "chat"
+        self._llm_component = self.component_name
+        if not self._llm_component:
+            self._llm_component = os.environ.get("DAPR_LLM_COMPONENT_DEFAULT")
+        if not self._llm_component:
+            logger.debug(
+                "No LLM component provided and no default component found in the environment. Will try to get it from the metadata at runtime."
+            )
+        super().model_post_init(__context)
+
+    @classmethod
+    def from_prompty(
+        cls,
+        prompty_source: Union[str, Path],
+        timeout: Union[int, float, Dict[str, Any]] = 1500,
+    ) -> "DaprChatClient":
+        """
+        Build a DaprChatClient from a Prompty spec.
+
+        Args:
+            prompty_source: Path or inline Prompty YAML/JSON.
+            timeout:       Request timeout in seconds or HTTPX-style dict.
+
+        Returns:
+            Configured DaprChatClient.
+        """
+        prompty_instance = Prompty.load(prompty_source)
+        prompt_template = Prompty.to_prompt_template(prompty_instance)
+        return cls.model_validate(
+            {
+                "timeout": timeout,
+                "prompty": prompty_instance,
+                "prompt_template": prompt_template,
+            }
+        )
+
+    def translate_response(self, response: dict, model: str) -> dict:
+        """
+        Convert Dapr Alpha2 response into OpenAI-style ChatCompletion dict.
+        """
+        if not isinstance(response, dict):
+            logger.error(f"Invalid response type: {type(response)}")
+            raise ValueError(f"Response must be a dictionary, got {type(response)}")
+
+        # Flatten all output choices from Alpha2 envelope
+        choices: List[Dict[str, Any]] = []
+        outputs = response.get("outputs", []) or []
+        if not isinstance(outputs, list):
+            logger.error(f"Invalid outputs type: {type(outputs)}")
+            raise ValueError(f"Outputs must be a list, got {type(outputs)}")
+
+        for output in outputs:
+            if not isinstance(output, dict):
+                logger.error(f"Invalid output type: {type(output)}")
+                continue
+            output_choices = output.get("choices", []) or []
+            if not isinstance(output_choices, list):
+                logger.error(f"Invalid choices type: {type(output_choices)}")
+                continue
+            for choice in output_choices:
+                if not isinstance(choice, dict):
+                    logger.error(f"Invalid choice type: {type(choice)}")
+                    continue
+                # Ensure message is present and has required fields
+                message = choice.get("message", {})
+                if not isinstance(message, dict):
+                    logger.error(f"Invalid message type: {type(message)}")
+                    continue
+                # Add required fields if missing
+                if "content" not in message:
+                    message["content"] = ""
+                if "role" not in message:
+                    message["role"] = "assistant"
+                choice["message"] = message
+                choices.append(choice)
+
+        return {
+            "choices": choices,
+            "created": int(time.time()),
+            "model": model,
+            "object": "chat.completion",
+            "usage": {"total_tokens": "-1"},
+        }
+
+    def convert_to_conversation_inputs(self, inputs: List[Dict[str, Any]]) -> List[Any]:
+        """
+        Map normalized messages into a single Alpha2 ConversationInput that preserves history.
+
+        Alpha2 expects a list of ConversationMessage entries inside one ConversationInputAlpha2
+        for a turn. If there are tool results, they must reference prior assistant tool_calls by id.
+        """
+        # Lazy import conversation types
+        (
+            ConversationInputAlpha2,
+            ConversationMessage,
+            ConversationMessageOfAssistant,
+            ConversationMessageContent,
+            ConversationToolCalls,
+            ConversationToolCallsOfFunction,
+            create_user_message,
+            create_system_message,
+            create_assistant_message,
+            create_tool_message,
+        ) = _import_conversation_types()
+
+        history_messages: List[ConversationMessage] = []
+        scrub_flags: List[bool] = []
+
+        for item in inputs:
+            role = item.get("role")
+            content = item.get("content", "")
+
+            if role == "user":
+                msg = create_user_message(content)
+            elif role == "system":
+                msg = create_system_message(content)
+            elif role == "assistant":
+                # Preserve assistant tool_calls if present (OpenAI-like schema)
+                tool_calls_data = item.get("tool_calls") or []
+                if tool_calls_data:
+                    converted_calls: List[ConversationToolCalls] = []
+                    for tc in tool_calls_data:
+                        fn = tc.get("function", {}) if isinstance(tc, dict) else {}
+                        name = fn.get("name", "")
+                        arguments = fn.get("arguments", "")
+                        # Ensure arguments is a string
+                        if not isinstance(arguments, str):
+                            try:
+                                import json as _json
+
+                                arguments = _json.dumps(arguments)
+                            except Exception:
+                                arguments = str(arguments)
+                        converted_calls.append(
+                            ConversationToolCalls(
+                                id=tc.get("id", None),
+                                function=ConversationToolCallsOfFunction(
+                                    name=name, arguments=arguments
+                                ),
+                            )
+                        )
+                    msg = ConversationMessage(
+                        of_assistant=ConversationMessageOfAssistant(
+                            content=[ConversationMessageContent(text=content)],
+                            tool_calls=converted_calls,
+                        )
+                    )
+                else:
+                    msg = create_assistant_message(content)
+            elif role == "tool":
+                tool_id = item.get("tool_call_id") or item.get("id") or ""
+                name = item.get("name", "")
+                msg = create_tool_message(tool_id, name, content)
+            else:
+                raise ValueError(f"Unsupported role for Alpha2 conversion: {role}")
+
+            history_messages.append(msg)
+            scrub_flags.append(bool(item.get("scrubPII")))
+
+        # Use scrub_pii if any message requested it
+        scrub_any = any(scrub_flags) if scrub_flags else None
+
+        return [ConversationInputAlpha2(messages=history_messages, scrub_pii=scrub_any)]
+
+    def generate(
+        self,
+        messages: Union[
+            str,
+            Dict[str, Any],
+            BaseMessage,
+            Iterable[Union[Dict[str, Any], BaseMessage]],
+        ] = None,
+        *,
+        input_data: Optional[Dict[str, Any]] = None,
+        llm_component: Optional[str] = None,
+        tools: Optional[List[Union[AgentTool, Dict[str, Any]]]] = None,
+        response_format: Optional[Type[BaseModel]] = None,
+        structured_mode: Literal["function_call", "json"] = "json",
+        scrubPII: bool = False,
+        temperature: Optional[float] = None,
+        **kwargs: Any,
+    ) -> Union[
+        LLMChatResponse,
+        BaseModel,
+        List[BaseModel],
+    ]:
+        """
+        Issue a non-streaming chat completion via Dapr.
+
+        - **Streaming is not supported** and setting `stream=True` will raise.
+        - Returns a unified `LLMChatResponse` (if no `response_format`), or
+          validated Pydantic model(s) when `response_format` is provided.
+
+        Args:
+            messages:        Prebuilt messages or None to use `input_data`.
+            input_data:      Variables for Prompty template rendering.
+            llm_component:   Dapr component name (defaults from env).
+            tools:           AgentTool or dict specifications.
+            response_format: Pydantic model for structured output.
+            structured_mode: "json" (default) or "function_call".
+            scrubPII:        Obfuscate sensitive output if True.
+            temperature:     Sampling temperature.
+            **kwargs:        Other Dapr API parameters.
+
+        Returns:
+            • `LLMChatResponse` if no `response_format`
+            • Pydantic model (or `List[...]`) when `response_format` is set
+
+        Raises:
+            ValueError: on invalid `structured_mode`, missing inputs, or if `stream=True`.
+        """
+        # 1) Validate structured_mode
+        if structured_mode not in self.SUPPORTED_STRUCTURED_MODES:
+            raise ValueError(
+                f"structured_mode must be one of {self.SUPPORTED_STRUCTURED_MODES}"
+            )
+        # 2) Disallow streaming
+        # Note: response_format is now supported for structured output
+        if kwargs.get("stream"):
+            raise ValueError("Streaming is not supported by DaprChatClient.")
+
+        # 3) Build messages via Prompty
+        if input_data:
+            if not self.prompt_template:
+                raise ValueError("input_data provided but no prompt_template is set.")
+            messages = self.prompt_template.format_prompt(**input_data)
+
+        if not messages:
+            raise ValueError("Either 'messages' or 'input_data' must be provided.")
+
+        # 4) Normalize + merge defaults
+        params: Dict[str, Any] = {
+            "inputs": RequestHandler.normalize_chat_messages(messages)
+        }
+        if self.prompty:
+            params = {**self.prompty.model.parameters.model_dump(), **params, **kwargs}
+        else:
+            params.update(kwargs)
+
+        # 5) Inject tools + structured directives
+        params = RequestHandler.process_params(
+            params,
+            llm_provider=self.provider,
+            tools=tools,
+            response_format=response_format,
+            structured_mode=structured_mode,
+        )
+
+        logger.debug(f"Processed parameters for Dapr: {params}")
+        if response_format:
+            logger.debug(f"Response format: {response_format}")
+            logger.debug(f"Structured mode: {structured_mode}")
+
+        # 6) Convert to Dapr inputs & call
+        conv_inputs = self.convert_to_conversation_inputs(params["inputs"])
+        try:
+            logger.debug("Invoking the Dapr Conversation API.")
+            # Log tools/tool_choice/parameters for debugging
+            if params.get("tools"):
+                try:
+                    logger.debug(
+                        f"Alpha2 tools payload: {[t.get('function', {}).get('name', '') for t in params['tools'] if isinstance(t, dict)]}"
+                    )
+                except Exception:
+                    logger.warning(
+                        "Alpha2 tools payload present (could not render names)."
+                    )
+            if params.get("tool_choice") is not None:
+                logger.debug(f"Alpha2 tool_choice: {params.get('tool_choice')}")
+            if params.get("parameters") is not None:
+                logger.debug(
+                    f"Alpha2 parameters keys: {list(params.get('parameters', {}).keys())}"
+                )
+            # get metadata information from the dapr client
+            metadata = self.client.get_metadata()
+            _check_dapr_runtime_support(metadata)
+
+            llm_component = llm_component or self._llm_component
+            if not llm_component:
+                llm_component = _get_llm_component(metadata)
+
+            # Extract additional API parameters (response_format is sent via the
+            # dedicated response_format field, not duplicated here)
+            api_params = {}
+            if "structured_mode" in params:
+                api_params["structured_mode"] = str(params["structured_mode"])
+
+            # Convert tool_choice from dict format to string of 'none', 'auto', or 'required'
+            tool_choice_param = params.get("tool_choice")
+            if isinstance(tool_choice_param, dict):
+                # When a specific function is requested (dict format), use 'required'
+                # to force tool calling, since Dapr doesn't support function-specific selection
+                tool_choice_param = "required"
+            elif isinstance(tool_choice_param, str) and tool_choice_param not in (
+                "none",
+                "auto",
+                "required",
+            ):
+                # If it's a string but not a valid Dapr value (e.g., a function name),
+                # default to 'required' to force tool calling
+                logger.warning(
+                    f"tool_choice value '{tool_choice_param}' is not supported by Dapr. "
+                    "Using 'required' instead."
+                )
+                tool_choice_param = "required"
+
+            raw = self.client.chat_completion_alpha2(
+                llm=llm_component or self._llm_component,
+                inputs=conv_inputs,
+                scrub_pii=scrubPII,
+                temperature=temperature,
+                tools=params.get("tools"),
+                tool_choice=tool_choice_param,
+                parameters=api_params or None,
+                response_format=_to_dapr_response_format(params.get("response_format")),
+            )
+            normalized = self.translate_response(
+                raw, llm_component or self._llm_component
+            )
+            logger.debug(f"Dapr Conversation API response: {raw}")
+            logger.debug(f"Normalized response: {normalized}")
+        except Exception as e:
+            logger.warning(f"Dapr Conversation API call failed: {e}")
+            raise
+
+        # 7) Hand off to our unified handler (always non‐stream)
+        return ResponseHandler.process_response(
+            response=normalized,
+            llm_provider=self.provider,
+            response_format=response_format,
+            structured_mode=structured_mode,
+            stream=False,
+        )
+
+
+def _simplify_anyof(schema: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Recursively collapse ``anyOf`` unions into a single ``type`` field.
+
+    The Dapr runtime's ``convertToStructuredOutputSchema`` (Go) requires every
+    sub-schema to have a ``"type"`` string.  Pydantic emits
+    ``anyOf: [{"type": "X"}, {"type": "null"}]`` for ``Optional[X]`` fields,
+    which has *no* top-level ``"type"`` and causes a conversion error that
+    crashes the sidecar (nil-logger panic on the error path).
+
+    This helper rewrites such patterns to ``{"type": "X"}`` (dropping the
+    null variant) so the Go code can process the schema safely.
+    """
+    result = dict(schema)
+
+    # Collapse anyOf: [{"type": T}, {"type": "null"}] → {"type": T}
+    if "anyOf" in result and "type" not in result:
+        variants = result.get("anyOf", [])
+        non_null = [
+            v for v in variants if isinstance(v, dict) and v.get("type") != "null"
+        ]
+        if len(non_null) == 1:
+            collapsed = dict(non_null[0])
+            # Preserve sibling keys (description, title, default, etc.)
+            for k, v in result.items():
+                if k != "anyOf" and k not in collapsed:
+                    collapsed[k] = v
+            result = collapsed
+
+    # Recurse into object properties
+    if result.get("type") == "object" and "properties" in result:
+        result["properties"] = {
+            k: _simplify_anyof(v) if isinstance(v, dict) else v
+            for k, v in result["properties"].items()
+        }
+
+    # Recurse into array items
+    if result.get("type") == "array" and isinstance(result.get("items"), dict):
+        result["items"] = _simplify_anyof(result["items"])
+
+    return result
+
+
+def _to_dapr_response_format(
+    oai_format: Optional[Dict[str, Any]],
+) -> Optional[Dict[str, Any]]:
+    """
+    Convert an OpenAI-style response_format dict to the flat JSON schema format
+    expected by the Dapr runtime's convertToStructuredOutputDefinition.
+
+    OAI format:  {"type": "json_schema", "json_schema": {"name": ..., "description": ..., "strict": ..., "schema": {<json-schema>}}}
+    Dapr format: {<json-schema fields>, "name": ..., "description": ..., "strict": ...}
+    """
+    if oai_format is None:
+        return None
+    if oai_format.get("type") == "json_schema":
+        inner = oai_format.get("json_schema", {})
+        schema = inner.get("schema", {})
+        simplified = _simplify_anyof(schema)
+        return {
+            **simplified,
+            "name": inner.get("name", "response"),
+            "description": inner.get("description", ""),
+            "strict": inner.get("strict", False),
+        }
+    return oai_format
+
+
+def _check_dapr_runtime_support(metadata: "GetMetadataResponse"):  # noqa: F821
+    """Check if the Dapr runtime version is supported for Alpha2 Chat Client."""
+    extended_metadata = metadata.extended_metadata
+    dapr_runtime_version = extended_metadata.get("daprRuntimeVersion", None)
+    if dapr_runtime_version is not None:
+        # Allow only versions >=1.16.0, edge, and <2.0.0 for Alpha2 Chat Client
+        if not is_version_supported(str(dapr_runtime_version), ">=1.16.0, <2.0.0"):
+            raise DaprRuntimeVersionNotSupportedError(
+                f"!!!!! Dapr Runtime Version {dapr_runtime_version} is not supported with Alpha2 Dapr Chat Client. Only Dapr runtime versions >=1.16.0 and <2.0.0 are supported."
+            )
+
+
+def _get_llm_component(metadata: "GetMetadataResponse") -> str:  # noqa: F821
+    """Get the LLM component from the metadata."""
+    conversation_components = [
+        component
+        for component in metadata.registered_components
+        if component.type.startswith("conversation.")
+    ]
+    if len(conversation_components) == 1:
+        return conversation_components[0].name
+    elif len(conversation_components) > 1:
+        raise ValueError(
+            "Multiple LLM components found in the metadata. Please provide the component name explicitly (e.g. llm = DaprChatClient(component_name='openai')) or environment variable DAPR_LLM_COMPONENT_DEFAULT."
+        )
+    else:
+        raise ValueError(
+            "No LLM component provided and no default component found in the metadata."
+        )

@@ -1,0 +1,216 @@
+#
+# Copyright 2026 The Dapr Authors
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+from dapr_agents.types.llm import DaprInferenceClientConfig
+from dapr_agents.llm.base import LLMClientBase
+from dapr.clients import DaprClient
+from dapr.clients.grpc import conversation as dapr_conversation
+from typing import Dict, Any, List, Optional
+from pydantic import model_validator
+from google.protobuf import json_format
+from google.protobuf.struct_pb2 import Struct as GrpcStruct
+
+import json
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class DaprInferenceClient:
+    def __init__(self):
+        pass  # No persistent client - use per-call context manager
+
+    def get_metadata(self):
+        """Fetch Dapr sidecar metadata using a fresh per-call client."""
+        with DaprClient() as client:
+            return client.get_metadata()
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Alpha2 (Tool Calling) support
+    # ──────────────────────────────────────────────────────────────────────────
+    def _convert_openai_tools_to_conversation_tools(
+        self, tools: Optional[List[Dict[str, Any]]]
+    ) -> Optional[List[dapr_conversation.ConversationTools]]:
+        """
+        Convert OpenAI-style tools (type=function, function={name, description, parameters})
+        into Dapr ConversationTools objects for Alpha2.
+        """
+        if not tools:
+            return None
+        converted: List[dapr_conversation.ConversationTools] = []
+        for tool in tools:
+            fn = tool.get("function", {}) if isinstance(tool, dict) else {}
+            name = fn.get("name")
+            description = fn.get("description")
+            parameters = fn.get("parameters")
+            function_spec = dapr_conversation.ConversationToolsFunction(
+                name=name or "",
+                description=description or "",
+                parameters=parameters or {},
+            )
+            conv_tool = dapr_conversation.ConversationTools(function=function_spec)
+            converted.append(conv_tool)
+        return converted
+
+    def chat_completion_alpha2(
+        self,
+        *,
+        llm: str,
+        inputs: List[dapr_conversation.ConversationInputAlpha2],
+        scrub_pii: Optional[bool] = None,
+        temperature: Optional[float] = None,
+        tools: Optional[List[Dict[str, Any]]] = None,
+        tool_choice: Optional[str] = None,
+        context_id: Optional[str] = None,
+        parameters: Optional[Dict[str, Any]] = None,
+        response_format: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Invoke Dapr Conversation API Alpha2 with optional tool-calling support and
+        convert the response into a simplified OpenAI-like JSON envelope.
+        """
+        conv_tools = self._convert_openai_tools_to_conversation_tools(tools)
+
+        # TODO: Remove when langchaningo is updated in contrib to latest version with a fix for openai-like temperature
+        if temperature is None:
+            temperature = 1
+
+        with DaprClient() as client:
+            kwargs: Dict[str, Any] = dict(
+                name=llm,
+                inputs=inputs,
+                context_id=context_id,
+                parameters=parameters,
+                scrub_pii=scrub_pii,
+                temperature=temperature,
+                tools=conv_tools,
+                tool_choice=tool_choice,
+            )
+            if response_format is not None:
+                kwargs["response_format"] = json_format.ParseDict(
+                    response_format, GrpcStruct()
+                )
+
+            response_alpha2 = client.converse_alpha2(**kwargs)
+
+            outputs: List[Dict[str, Any]] = []
+            for output in getattr(response_alpha2, "outputs", []) or []:
+                choices_list: List[Dict[str, Any]] = []
+                for choice in getattr(output, "choices", []) or []:
+                    msg = getattr(choice, "message", None)
+                    content = getattr(msg, "content", None) if msg else None
+
+                    # Convert tool calls if present
+                    tool_calls_json: Optional[List[Dict[str, Any]]] = None
+                    if msg and getattr(msg, "tool_calls", None):
+                        tool_calls_json = []
+                        for tc in msg.tool_calls:
+                            fn = getattr(tc, "function", None)
+                            arguments = getattr(fn, "arguments", None) if fn else None
+                            if isinstance(arguments, (dict, list)):
+                                try:
+                                    arguments = json.dumps(arguments)
+                                except Exception:
+                                    arguments = str(arguments)
+                            elif arguments is None:
+                                arguments = ""
+
+                            tool_calls_json.append(
+                                {
+                                    "id": getattr(tc, "id", ""),
+                                    "type": "function",
+                                    "function": {
+                                        "name": getattr(fn, "name", "") if fn else "",
+                                        "arguments": arguments,
+                                    },
+                                }
+                            )
+
+                    choices_list.append(
+                        {
+                            "message": {
+                                "role": "assistant",
+                                "content": content,
+                                **(
+                                    {"tool_calls": tool_calls_json}
+                                    if tool_calls_json
+                                    else {}
+                                ),
+                            },
+                            "finish_reason": getattr(choice, "finish_reason", "stop"),
+                        }
+                    )
+                outputs.append({"choices": choices_list})
+
+            return {
+                "context_id": getattr(response_alpha2, "context_id", None),
+                "outputs": outputs,
+            }
+
+
+class DaprInferenceClientBase(LLMClientBase):
+    """
+    Base class for managing Dapr Inference API clients.
+    Handles client initialization, configuration, and shared logic.
+    """
+
+    @model_validator(mode="before")
+    def validate_and_initialize(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        return values
+
+    def model_post_init(self, __context: Any) -> None:
+        """
+        Initializes private attributes after validation.
+        """
+        self._provider = "dapr"
+
+        # Set up the private config and client attributes
+        self._config = self.get_config()
+        self._client = self.get_client()
+        return super().model_post_init(__context)
+
+    def get_config(self) -> DaprInferenceClientConfig:
+        """
+        Returns the appropriate configuration for the Dapr Conversation API.
+        """
+        return DaprInferenceClientConfig()
+
+    def get_client(self) -> DaprInferenceClient:
+        """
+        Initializes and returns the Dapr Inference client.
+        """
+        return DaprInferenceClient()
+
+    @classmethod
+    def from_config(
+        cls, client_options: DaprInferenceClientConfig, timeout: float = 1500
+    ):
+        """
+        Initializes the DaprInferenceClientBase using DaprInferenceClientConfig.
+
+        Args:
+            client_options: The configuration options for the client.
+            timeout: Timeout for requests (default is 1500 seconds).
+
+        Returns:
+            DaprInferenceClientBase: The initialized client instance.
+        """
+        return cls()
+
+    @property
+    def config(self) -> Dict[str, Any]:
+        return self._config
+
+    @property
+    def client(self) -> DaprInferenceClient:
+        return self._client

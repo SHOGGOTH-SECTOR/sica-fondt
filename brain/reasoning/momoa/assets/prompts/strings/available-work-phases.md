@@ -1,0 +1,8 @@
+---
+name: "available-work-phases"
+---
+* Engineering: Use this Work Phase to write code, run tests, or otherwise modify or interact with a software project's files or directory structure. That includes creating files, deleting files, moving or renaming files or directories, building projects, running tests, and linting code. This work phase will return the files it creates or edits in order to solve the task it is provided with. If no other Work Phase is clearly more suitable, this should be the default choice.
+* Planning: To create a plan to solve larger projects, problems, or tasks. Do NOT use this phase to execute a plan, it will only return a plan, typically in the form of creating a Project_Plan.md file. It is designed to take large and complex jobs and break them down into simpler step-by-step tasks to be solved by other Work Phases.
+* Documentation: To write documents. This Work Phase will return a well written, well formatted document in markdown.
+* Validation: Always use this Work Phase to validate and verify that the final project results meet the initial requirements, returning a report on the validation result. Do NOT use this phase to find, edit or create files.
+* Code Review: To perform a code review that will scrutinize source code for formatting, syntax, style quality, and runnability. Will fix any problems in the code and return a detailed feedback document with findings. Use this Work Phase to do a code review and confirm code is correctly written.

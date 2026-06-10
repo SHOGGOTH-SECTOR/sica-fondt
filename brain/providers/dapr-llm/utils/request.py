@@ -1,0 +1,208 @@
+#
+# Copyright 2026 The Dapr Authors
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+import logging
+from datetime import date, datetime
+from typing import Any, Dict, Iterable, List, Literal, Optional, Type, Union
+
+from pydantic import BaseModel, ValidationError
+
+from dapr_agents.llm.utils.structure import StructureHandler
+from dapr_agents.prompt.prompty import Prompty, PromptyHelper
+from dapr_agents.tool.base import AgentTool
+from dapr_agents.tool.utils.tool import ToolHelper
+from dapr_agents.types.message import BaseMessage
+
+logger = logging.getLogger(__name__)
+
+
+def _make_json_serializable(obj: Any) -> Any:
+    """Recursively convert datetime/date to ISO strings for JSON serialization."""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    if isinstance(obj, date):
+        return obj.isoformat()
+    if isinstance(obj, dict):
+        return {k: _make_json_serializable(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_make_json_serializable(v) for v in obj]
+    return obj
+
+
+class RequestHandler:
+    """
+    Handles the preparation of requests for language models.
+    """
+
+    @staticmethod
+    def process_prompty_messages(
+        prompty: Prompty, inputs: Dict[str, Any] = {}
+    ) -> List[Dict[str, Any]]:
+        """
+        Process and format messages based on Prompty template and provided inputs.
+
+        Args:
+            prompty (Prompty): The Prompty instance containing the template and settings.
+            inputs (Dict[str, Any]): Input variables for the Prompty template (default is an empty dictionary).
+
+        Returns:
+            List[Dict[str, Any]]: Processed and prepared messages.
+        """
+        # Prepare inputs and generate messages from Prompty content
+        api_type = prompty.model.api
+        prepared_inputs = PromptyHelper.prepare_inputs(
+            inputs, prompty.inputs, prompty.sample
+        )
+        messages = PromptyHelper.to_prompt(
+            prompty.content, prepared_inputs, api_type=api_type
+        )
+
+        return messages
+
+    @staticmethod
+    def normalize_chat_messages(
+        messages: Union[
+            str,
+            Dict[str, Any],
+            BaseMessage,
+            Iterable[Union[Dict[str, Any], BaseMessage]],
+        ],
+    ) -> List[Dict[str, Any]]:
+        """
+        Normalize and validate the input messages into a list of dictionaries.
+
+        Args:
+            messages (Union[str, Dict[str, Any], BaseMessage, Iterable[Union[Dict[str, Any], BaseMessage]]]):
+                Input messages in various formats (string, dict, BaseMessage, or an iterable).
+
+        Returns:
+            List[Dict[str, Any]]: A list of normalized message dictionaries with keys 'role' and 'content'.
+
+        Raises:
+            ValueError: If the input format is unsupported or if required fields are missing in a dictionary.
+        """
+        # Initialize an empty list to store the normalized messages
+        normalized_messages = []
+
+        # Use a queue to process messages iteratively and handle nested structures
+        queue = [messages]
+
+        while queue:
+            msg = queue.pop(0)
+            if isinstance(msg, str):
+                normalized_messages.append({"role": "user", "content": msg})
+            elif isinstance(msg, BaseMessage):
+                normalized_messages.append(msg.model_dump())
+            elif isinstance(msg, dict):
+                role = msg.get("role")
+                if role not in {"user", "assistant", "tool", "system"}:
+                    raise ValueError(
+                        f"Unrecognized role '{role}'. Supported roles are 'user', 'assistant', 'tool', or 'system'."
+                    )
+                normalized_messages.append(msg)
+            elif isinstance(msg, Iterable) and not isinstance(msg, (str, dict)):
+                queue.extend(msg)
+            else:
+                raise ValueError(f"Unsupported message format: {type(msg)}")
+        return normalized_messages
+
+    @staticmethod
+    def process_params(
+        params: Dict[str, Any],
+        llm_provider: str,
+        tools: Optional[List[Union[AgentTool, Dict[str, Any]]]] = None,
+        response_format: Optional[Union[Type[BaseModel], Dict[str, Any]]] = None,
+        structured_mode: Literal["json", "function_call"] = "json",
+    ) -> Dict[str, Any]:
+        """
+        Prepare request parameters for the language model.
+
+        Args:
+            params: Raw request params (messages/inputs, model, etc.).
+            llm_provider: Provider key, e.g. "openai", "dapr".
+            tools: Tools to expose to the model (AgentTool or already-shaped dicts).
+            response_format:
+                - If structured_mode == "json": a JSON Schema dict or a Pydantic model
+                (we'll convert) to request raw JSON output.
+                - If structured_mode == "function_call": a Pydantic model describing
+                the function/tool signature for model-side function calling.
+            structured_mode: "json" for raw JSON structured output,
+                            "function_call" for tool/function calling.
+
+        Returns:
+            A params dict ready for the target provider.
+        """
+
+        # Tools
+        if tools:
+            logger.info("Tools are available in the request.")
+            params["tools"] = [
+                ToolHelper.format_tool(t, tool_format=llm_provider) for t in tools
+            ]
+
+        # Structured output
+        if response_format:
+            logger.info(f"Structured Mode Activated! mode={structured_mode}")
+
+            # If we're on Dapr, we cannot rely on OpenAI-style `response_format`.
+            # Add a small system nudge to enforce JSON-only output so we can parse reliably.
+            if llm_provider == "dapr":
+                params = StructureHandler.ensure_json_only_system_prompt(params)
+
+            # Generate provider-specific request params
+            params = StructureHandler.generate_request(
+                response_format=response_format,
+                llm_provider=llm_provider,
+                structured_mode=structured_mode,
+                **params,
+            )
+
+        return params
+
+    @staticmethod
+    def make_params_json_serializable(params: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Return a copy of params with datetime/date values converted to ISO strings
+        so the dict is safe for JSON serialization (e.g. OpenAI API request body).
+        """
+        return _make_json_serializable(params)
+
+    @staticmethod
+    def validate_request(
+        request: Union[BaseModel, Dict[str, Any]], request_class: Type[BaseModel]
+    ) -> BaseModel:
+        """
+        Validate and transform a dictionary into a Pydantic object.
+
+        Args:
+            request (Union[BaseModel, Dict[str, Any]]): The request data as a dictionary or a Pydantic object.
+            request_class (Type[BaseModel]): The Pydantic model class for validation.
+
+        Returns:
+            BaseModel: A validated Pydantic object.
+
+        Raises:
+            ValueError: If validation fails.
+        """
+        if isinstance(request, dict):
+            try:
+                request = request_class(**request)
+            except ValidationError as e:
+                raise ValueError(f"Validation error: {e}")
+
+        try:
+            validated_request = request_class.model_validate(request)
+        except ValidationError as e:
+            raise ValueError(f"Validation error: {e}")
+
+        return validated_request
