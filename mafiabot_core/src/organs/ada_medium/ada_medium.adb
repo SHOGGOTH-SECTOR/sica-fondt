@@ -168,7 +168,7 @@ is
       Msg    : Organ_Message;
       Ref    : Soul.State.Session_Ref := Soul.State.No_Session;
    begin
-      Output := (others => ' ', Length => 0);
+      Output := (Data => (others => ' '), Length => 0);
       Inference_Orchestrator.Reset;
 
       --  Resolve the session for this (uid, channel, server). The cross and
@@ -304,7 +304,10 @@ is
       --  Step 20: sendAda
       Inference_Orchestrator.Advance (Phase_Send_Ada, S);
       if S /= OK then Status := S; return; end if;
-      Msg := Make_Internal_Msg (Ada_Medium, Ada_Medium, Accum);
+      --  Qualify the Organ_Id literal: the simple name Ada_Medium binds to
+      --  this package, shadowing the enum value of the same name.
+      Msg := Make_Internal_Msg
+        (Mafiabot_Types.Ada_Medium, Mafiabot_Types.Ada_Medium, Accum);
 
       --  Step 21: Ada routes (trust boundary outbound screen)
       Inference_Orchestrator.Advance (Phase_Route, S);

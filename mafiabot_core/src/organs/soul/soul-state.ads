@@ -43,24 +43,50 @@ is
       Channel : String;
       Server  : String) return Bounded_Text;
 
+   --  Per-session storage types. These live in the visible part because the
+   --  Soul_State protected object (declared below) holds a Session_Table as a
+   --  private component, and a protected definition may only contain data
+   --  components — not type or constant declarations.
+   Max_Key : constant := 192;
+   subtype Key_Length is Natural range 0 .. Max_Key;
+   type Session_Key is record
+      Data   : String (1 .. Max_Key) := (others => ' ');
+      Length : Key_Length := 0;
+   end record;
+
+   type Layer_Flags is array (Soul.Celtic_Cross.CC_Layer) of Boolean;
+
+   type Session_Slot is record
+      In_Use         : Boolean := False;
+      Key            : Session_Key;
+      Deck           : Soul.Tarot.Deck := Soul.Tarot.Full_Deck;
+      Spread         : Soul.Celtic_Cross.CC_Spread :=
+        Soul.Celtic_Cross.Empty_Spread;
+      Layer_Done     : Layer_Flags := (others => False);
+      Output_Counter : Natural := 0;
+   end record;
+
+   type Session_Table is array (Valid_Session) of Session_Slot;
+
    protected Soul_State is
       pragma Priority (System.Priority'Last - 2);
 
       --  Set the three immutable personality anchors. Fails if called twice.
+      --  (A protected operation may not reference its own protected functions
+      --  in pre/postconditions, so the Is_Initialized guard lives in the body.)
       procedure Initialize_Big_Three
         (B3     : in  Soul.Tarot.Big_Three;
-         Status : out Operation_Status)
-      with Post => (if Status = OK then Is_Initialized);
+         Status : out Operation_Status);
 
       --  Resolve a session by key, allocating a fresh slot (with its own
       --  Big-3-pruned deck) on first sight. Returns No_Session +
-      --  Error_Overflow if the table is full.
+      --  Error_Overflow if the table is full. Callers must Initialize_Big_Three
+      --  first; Open_Session uses the global Big-3 to prune each new deck.
       procedure Open_Session
         (Key    : in  Bounded_Text;
          Ref    : out Session_Ref;
          Status : out Operation_Status)
-      with Pre  => Is_Initialized,
-           Post => (if Status = OK then Ref in Valid_Session);
+      with Post => (if Status = OK then Ref in Valid_Session);
 
       --  Accrete one cognitive layer of THIS session's cross from its pool.
       --  Idempotent per layer: re-forming an already-formed layer is a no-op
@@ -79,10 +105,10 @@ is
       procedure Note_Output (Ref : in Valid_Session);
 
       --  Serialise the global identity into Bounded_Text for SOUL.md.
+      --  Caller must Initialize_Big_Three first (guard lives in the body).
       procedure Generate_Soul_MD
         (Buffer : out Bounded_Text;
-         Status : out Operation_Status)
-      with Pre => Is_Initialized;
+         Status : out Operation_Status);
 
       function Is_Initialized return Boolean;
       function Get_Big_Three  return Soul.Tarot.Big_Three;
@@ -96,30 +122,7 @@ is
    private
       Big_3       : Soul.Tarot.Big_Three;
       Initialized : Boolean := False;
-
-      Max_Key : constant := 192;
-      subtype Key_Length is Natural range 0 .. Max_Key;
-      type Session_Key is record
-         Data   : String (1 .. Max_Key) := (others => ' ');
-         Length : Key_Length := 0;
-      end record;
-
-      type Layer_Flags is
-        array (Soul.Celtic_Cross.CC_Layer) of Boolean;
-
-      type Session_Slot is record
-         In_Use         : Boolean := False;
-         Key            : Session_Key;
-         Deck           : Soul.Tarot.Deck := Soul.Tarot.Full_Deck;
-         Spread         : Soul.Celtic_Cross.CC_Spread :=
-           Soul.Celtic_Cross.Empty_Spread;
-         Layer_Done     : Layer_Flags := (others => False);
-         Output_Counter : Natural := 0;
-      end record;
-
-      type Session_Table is array (Valid_Session) of Session_Slot;
-
-      Sessions : Session_Table;
+      Sessions    : Session_Table;
    end Soul_State;
 
 end Soul.State;

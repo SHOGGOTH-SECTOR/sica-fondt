@@ -39,7 +39,7 @@ is
             when ASCII.LF => Append (Buf, "\n");
             when ASCII.CR => Append (Buf, "\r");
             when ASCII.HT => Append (Buf, "\t");
-            when others   => Append (Buf, (1 => S (I)));
+            when others   => Append (Buf, String'(1 => S (I)));
          end case;
       end loop;
    end Append_Escaped;

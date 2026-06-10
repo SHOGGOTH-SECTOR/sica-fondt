@@ -157,7 +157,7 @@ is
          Sun_L  : constant String := "## Sun: ";
          Moon_L : constant String := ASCII.LF & "## Moon: ";
          Asc_L  : constant String := ASCII.LF & "## Ascendant: ";
-         Footer : constant String := ASCII.LF;
+         Footer : constant String := (1 => ASCII.LF);
 
          Total : constant Natural :=
            Header'Length
@@ -166,7 +166,7 @@ is
            + Asc_L'Length + Asc_T.Length
            + Footer'Length;
       begin
-         Buffer := (others => ' ', Length => 0);
+         Buffer := (Data => (others => ' '), Length => 0);
          if Total > Max_Text_Length then
             Status := Error_Overflow;
             return;
