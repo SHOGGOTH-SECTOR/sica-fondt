@@ -2,6 +2,9 @@
 AI Mafia Bot Gen.02.6
 
 
+
+# ** * DE LE TE T H I S BR AN CH * ** !!!!!!
+
 ```dir
 mafiabot_core/
 ├── alire.toml               # The package manifest (Alire). No pip, no cargo. Pure discipline.
