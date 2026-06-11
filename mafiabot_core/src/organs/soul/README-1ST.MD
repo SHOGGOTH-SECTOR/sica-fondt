@@ -1,0 +1,1 @@
+Claude really wanted a single language build, but thats not what we are doing. All Ada in this folder is defunct, and must be replaced.
