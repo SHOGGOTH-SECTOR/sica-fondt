@@ -53,10 +53,10 @@ driver numbers are refit.
 
 ## 10. Open items
 - R↔Ada/medium bridge transport (C1/C3/D2) — **consider Fortran or C** for it (Anja, L49).
-- The evaluate/commit rework (§7-L3) — the box describes/prices, agent decides → **§11 red-lined; only F2 (commit shape) open**.
+- The evaluate/commit rework (§7-L3) — the box describes/prices, agent decides → **§11 red-lined; all forks resolved (F2 closed)**.
 - Whether the input-slot text format is final (tarot lens injection shape depends on B1).
 
-## 11. Decision flow [red-lined — F2 open]
+## 11. Decision flow [red-lined — all forks resolved]
 The concrete replacement for the disowned `drive_box_evaluate`/`commit` gate (§5-L37, §7-L3).
 Sequence per cycle, consistent with A2 (per-tool cost), A3/A4 (raw sensates, agent decides):
 
@@ -76,11 +76,12 @@ Sequence per cycle, consistent with A2 (per-tool cost), A3/A4 (raw sensates, age
    `top_convictions`, *not* the whole array), context the agent weighs; **ETR rides as the L5 injection**
    (persuades, never gates).
 4. **The agent decides** — picks an action/tool (or none). This is the *only* decision point (§4, L3).
-5. **Commit the choice back into the body.** Energy consumes the chosen tool's cost (A2 `consume`);
-   restoration paths stay open (A2-L2); ETR coord/migration updates (A8). **Eth-Int conviction is
-   calibrated here by *which action was chosen* and (downstream) *which memories are kept*** (F3); under
-   existential stress conviction hardens — and that stress is delivered as the convincing injection of L5,
-   not a scalar. Next cycle's snapshot reflects it.
+5. **Commit the choice back into the body.** `drive_box_commit(state, chosen)` **applies consequences
+   only — there is nothing to approve** (the agent already decided in step 4; F2). Energy consumes the
+   chosen tool's cost (A2 `consume`); restoration paths stay open (A2-L2); ETR coord/migration updates
+   (A8). **Eth-Int conviction is calibrated here by *which action was chosen* and (downstream) *which
+   memories are kept*** (F3); under existential stress conviction hardens — and that stress is delivered
+   as the convincing injection of L5, not a scalar. Next cycle's snapshot reflects it.
 
 ### Invariants this flow adds
 - **L4 (Anja) — in-band rendering only.** No signal may rely on colour/styling; the agent reads text.
@@ -98,8 +99,10 @@ Sequence per cycle, consistent with A2 (per-tool cost), A3/A4 (raw sensates, age
 ### Open / cross-spec
 - **F1 — RESOLVED.** Keep a *pure* `price_action(state, tool) -> { cost, locked, eth_posture, etr_status }`
   (no `approved`/`reason`); valid tools also surface cost directly in the listing (step 3).
-- **F2 — OPEN ("idk", Anja).** Commit shape: does `drive_box_commit(state, chosen)` drop the `approved`
-  flag entirely (agent already decided), or keep a vestigial guard? Left open.
+- **F2 — RESOLVED.** Commit shape: `drive_box_commit(state, chosen)` **drops the `approved` flag
+  entirely**. A vestigial guard would reintroduce the gate L3 removed — and the agent already decided in
+  step 4, so commit has nothing to approve. It only *applies consequences* (consume cost, update ETR
+  coord/migration, calibrate conviction). No `{approved, reason}` return; commit returns the new `state`.
 - **F3 — RESOLVED (mechanism).** Eth-Int conviction is calibrated by *chosen actions* + *kept memories*,
   hardened by existential stress **handled by ETR and delivered as the L5 injection**. Reaches **A6**
   (Eth-Int calibration), **A8** (ETR carries/surfaces the stress), **E2/E3** (memory retention), **G1**
