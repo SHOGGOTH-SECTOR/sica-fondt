@@ -23,6 +23,10 @@ R · `src/endocrine/driver_energy.R` (+ `test_energy.R`).
   arbitrary function of cost `c`, e.g. one tool `c×2`, another `((c²³)×3)/π`. So:
   `tool_cost(e, tool) -> num` and `tool_locked(e, tool) -> bool`, **per tool** — *not* one global
   `tool_lock_threshold`.
+- **Per-tool minimum + locked rendering (Anja; A1-L4).** Each tool also has a **minimum energy** to run;
+  `tool_min(tool) -> num`. A valid tool shows its cost; a **locked** tool's name is **replaced in-band**
+  (the agent can't see colour) by `[====L⍉¢K€D ϟ ∅ΩΤ====] 《E≠<minimumfortool>》`, the predicate reading
+  "energy below this tool's `tool_min`". Lockout is a **breaker, not a sentence** (L3).
 - `consume(e, amt) -> e'` · `recharge(e, amt) -> e'`.
 
 ## 6. Dependencies & stubs
@@ -47,4 +51,5 @@ Restoration hooks tie to ETR-Z migration (A8) + tarot reshuffle (B3) — *stub:*
 `Rscript src/endocrine/test_energy.R` (from repo root) — encodes L1–L3 + per-tool economy; fails on unfitted constants.
 
 ## 10. Open items
-- The per-tool cost/lockout **functions per tool** (C1). Restoration *rates* (C1).
+- The per-tool cost/lockout **functions per tool** (C1), incl. each tool's **minimum** (`tool_min`, C1).
+  Restoration *rates* (C1).

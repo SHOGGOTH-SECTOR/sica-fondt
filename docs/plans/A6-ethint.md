@@ -15,8 +15,8 @@ R · `src/endocrine/driver_ethical_integrity.R` (+ `test_ethical_integrity.R`). 
 ## 4. Does / does-not
 - **Does:** evaluate a trajectory's E-cost (alignment discount × antithesis penalty × compromise);
   harden convictions upheld under load; treat middle-ground as its own trajectory; **surface the top X
-  convictions** (by strength) into the agent's slot — *not* the whole array (Anja: **the conviction list
-  can be massive**, so it must be ranked & truncated; A1 step 3 / input-slot).
+  convictions** (the **~7 most committed**, **X adaptive** — Anja) into the agent's slot — *not* the whole
+  array (**the conviction list can be massive**, so it must be ranked & truncated; A1 step 3 / input-slot).
 - **Does-not:** assert moral truth, or persist itself as a stratum (it derives from memory; see A7/E2).
 
 ## 5. Interface contract
@@ -50,5 +50,6 @@ k_discount=5. 3. Migrate state to the A7 conviction array (isomorphy tags + shif
 
 ## 10. Open items
 - The k constants (C1). The middle-ground compromise scaling (C1).
-- **X — how many convictions surface** to the slot (C1; ranked by strength).
+- **X — how many convictions surface** to the slot (default **~7 most committed**, **adaptive** — the
+  adaptation signal is C1; ranked by commitment strength).
 - Exact "memory-derivative" derivation (how convictions are computed from memory) — ties to A7/E2.

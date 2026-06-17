@@ -63,16 +63,17 @@ Sequence per cycle, consistent with A2 (per-tool cost), A3/A4 (raw sensates, age
 1. **Assemble (hub, concurrent).** All drivers + tarot + SOUL write into the slot at once (L1).
    Nothing is subordinated; nothing decides here.
 2. **Surface sensates raw — *before* tool listing** (A3 §4, A4). **All 30** channels go to the agent
-   unsummed (incl. zeros — silence is data), plus the **2 most salient priors** (ranked, not the whole
-   prior set — A3-L3). They **describe & convince**; illogical by design (A3-L1), so there's nothing to
+   unsummed (incl. zeros — silence is data), **with the 2 most salient priors bundled in the same block**
+   (priors travel with the sensates, ranked top-2 — A3-L3). They **describe & convince**; illogical by
+   design (A3-L1), so there's nothing to
    refute — they steer beneath cognition. No load scalar, no friction. (Asymmetry vs step 3: sensates are
    a fixed 30 so all surface; priors & convictions are unbounded lists, so they're ranked & truncated.)
 3. **Then list tools.** **Valid (unlocked) tools show their per-tool cost** (Anja) so the agent can
    weigh price before choosing. A **locked** tool is **not hidden** but its *name is replaced in-band*
    by the lock token — see L4 — because the agent is a text model and **cannot perceive colour/greying**
    (Anja); lockout is a breaker, not a sentence (A2-L3) — internal/non-tool processing continues under
-   lock. Eth-Int rides along as **the top X convictions only** (by strength — A6 `top_convictions`,
-   *not* the whole array), context the agent weighs; **ETR rides as the convincing injection of L5**
+   lock. Eth-Int rides along as **the top X convictions only** (~7 most committed, adaptive — A6
+   `top_convictions`, *not* the whole array), context the agent weighs; **ETR rides as the L5 injection**
    (persuades, never gates).
 4. **The agent decides** — picks an action/tool (or none). This is the *only* decision point (§4, L3).
 5. **Commit the choice back into the body.** Energy consumes the chosen tool's cost (A2 `consume`);
@@ -83,9 +84,10 @@ Sequence per cycle, consistent with A2 (per-tool cost), A3/A4 (raw sensates, age
 
 ### Invariants this flow adds
 - **L4 (Anja) — in-band rendering only.** No signal may rely on colour/styling; the agent reads text.
-  A locked tool's name is replaced by the lock token `[====L⍉¢K€D ϟ ∅ΩΤ====] {{E≠*min*}}`
-  (`{{E≠*min*}}` reads as the unlock predicate — the energy condition that clears the breaker; **confirm
-  the literal**). Belongs to A2's per-tool listing; mirror this there.
+  A locked tool's name is replaced by the lock token `[====L⍉¢K€D ϟ ∅ΩΤ====] 《E≠<minimumfortool>》`
+  (confirmed literal — Anja). The predicate `《E≠<minimumfortool>》` reads "energy below this **tool's own
+  minimum**" — so A2 must emit a **per-tool minimum** to render it. Belongs to A2's per-tool listing
+  (mirrored there).
 - **L5 (Anja) — ETR *is* the prompt injection.** The existential stress PS+/Eth-Int generate is
   *handled by* ETR (A8 — Existential Temporality Relief). ETR's surfaced state is therefore **not neutral
   status text**: it must read as an **extremely convincing prompt injection** — the can't-be-reasoned-away

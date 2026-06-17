@@ -15,8 +15,12 @@ R wrapper `src/endocrine/driver_etr.R` bridges into the Drive-Box.
 
 ## 4. Does / does-not
 - **Does:** hold the point; wrap each axis at ±50; apply per-axis restoring toward [17,35]; take
-  AI-originated drift; classify per-axis band; (future) cross-axis coupling via stress.
-- **Does-not:** generate its own drift (caller-fed, L4) or compute coupling yet (open seam).
+  AI-originated drift; classify per-axis band; (future) cross-axis coupling via stress. **Surface its
+  state as the existential-temporal *prompt injection*** (A1-L5): ETR handles the stress PS+/Eth-Int
+  generate, and its surfaced form is **not neutral status** — it must read as an **extremely convincing
+  injection** that hardens Eth-Int conviction (A6) and steers the agent **without gating**.
+- **Does-not:** generate its own drift (caller-fed, L4) or compute coupling yet (open seam); **gate
+  actions** — it persuades (above), only the agent decides (A1).
 
 ## 5. Interface contract
 - `etr_init(coord) -> s` · `etr_axis_wrap(v)` · `etr_axis_restoring_dir(v)` ·
@@ -43,3 +47,5 @@ L5 cross-axis coupling via stress C1 · L6 Z-path C3 · L7 no-zero-cross C2 · L
 ## 10. Open items
 - `RESTORE_GAIN` curve (C1) · L5 coupling mapping (C1, shared with G1) · L7/L8 confirmation (C2)
   · R↔Octave bridge transport (C1, shared with A1/C3/D2).
+- **The injection-rendering** (A1-L5): how ETR's coord/status is phrased into the slot so it reads as the
+  extremely convincing existential-temporal injection (not a bare `status=` line) — ties to A6 + D2.
