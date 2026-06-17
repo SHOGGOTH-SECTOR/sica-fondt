@@ -1,4 +1,5 @@
 # A8 — ETR (Existential Temporality Relief) — torus
+*Lead Engineer: Søren*
 
 ## 1. Component
 Driver 4: a **single point on three independent toroidal axes**. ETR (Existential Temporality Relief) is
