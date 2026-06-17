@@ -5,10 +5,10 @@ Driver 4: a **single point on three independent toroidal axes**. ETR is **self-p
 connection** (Anja) — *not* a rest engine, and *not* migration. The axes:
 - **X — assertion ↔ inheritance** = **self-position**: is where I stand self-asserted or inherited?
   *(C1 — reading inferred; Anja to confirm framing.)*
-- **Y — endured ↔ witnessed** = the **burden** axis — **burden-to-burden** (both poles are about *whose
-  burden*, not "connection"): **endured** = "I handle it myself to leave others unburdened"; **witnessed**
-  = "I need others to see me, to relieve *them* of the burden." Both poles manage burden; they differ in
-  direction — carry it off others (hide) vs. discharge theirs (be seen).
+- **Y — endured ↔ witnessed** = the **burden** axis — **burden-to-burden**, framed as **my burden vs. our
+  burdens**: **endured** = "*my* burden" — kept mine, handled myself to leave others unburdened;
+  **witnessed** = "*our* burdens" — being seen makes the burden shared/collective. Both poles are about
+  *whose* burden, not "connection."
 - **Z — alimentation ↔ transmutation** = **meaning / coping-direction**: **alimentation** = "do I double
   down" (persist, feed the same course); **transmutation** = "do I dodge" (sidestep, transform). This is
   the **maintain-vs-evolve** sign read at migration (alimentation = maintain; transmutation = evolve).
