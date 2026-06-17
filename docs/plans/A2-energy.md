@@ -19,15 +19,18 @@ R · `src/endocrine/driver_energy.R` (+ `test_energy.R`).
 
 ## 5. Interface contract
 - `init_energy_state(current=100, max=100) -> e`.
-- **Per-tool economy (Anja):** each tool carries **its own energy cost AND its own lockout scale** — an
-  arbitrary function of cost `c`, e.g. one tool `c×2`, another `((c²³)×3)/π`. So:
-  `tool_cost(e, tool) -> num` and `tool_locked(e, tool) -> bool`, **per tool** — *not* one global
-  `tool_lock_threshold`.
+- **Per-tool economy (Anja):** each tool carries **its own energy cost** — an arbitrary per-tool function,
+  e.g. one tool `c×2`, another `((c²³)×3)/π`. So `tool_cost(e, tool) -> num` and
+  `tool_locked(e, tool) -> bool`, **per tool** — *not* one global `tool_lock_threshold`. **Lockout trips at
+  the tool's `tool_min`** (next bullet), so `tool_locked := E < tool_min(tool)`.
 - **Per-tool minimum + locked rendering (Anja; A1-L4).** Each tool has a **minimum to consider it**,
-  **derived from its actual cost** (Anja) — *not* an independent parameter: `tool_min(tool)` is a function
-  of that tool's `tool_cost`. A valid tool shows its cost; a **locked** tool's name is **replaced in-band**
-  (the agent can't see colour) by `[====L⍉¢K€D ϟ ∅ΩΤ====] 《E≠<minimumfortool>》`, the predicate reading
-  "energy below this tool's `tool_min`". Lockout is a **breaker, not a sentence** (L3).
+  `tool_min(tool)` — **per-tool, a skill/capability threshold, NOT a pure function of cost** (Anja). Two
+  tools of ~equal *cost* can have different minimums: the **better skill demands the higher minimum**
+  (e.g. Playwright vs a manual site-fetch cost about the same to run, but Playwright needs more minimum
+  energy). So under depletion the refined tool **locks out first** and the agent falls back to the cruder
+  equal-cost one. A valid tool shows its cost; a **locked** tool's name is **replaced in-band** (the agent
+  can't see colour) by `[====L⍉¢K€D ϟ ∅ΩΤ====] 《E≠<minimumfortool>》` ("energy below this tool's
+  `tool_min`"). Lockout is a **breaker, not a sentence** (L3).
 - `consume(e, amt) -> e'` · `recharge(e, amt) -> e'`.
 
 ## 6. Dependencies & stubs
@@ -52,5 +55,6 @@ Restoration hooks tie to ETR-Z migration (A8) + tarot reshuffle (B3) — *stub:*
 `Rscript src/endocrine/test_energy.R` (from repo root) — encodes L1–L3 + per-tool economy; fails on unfitted constants.
 
 ## 10. Open items
-- The per-tool cost/lockout **functions per tool** (C1). `tool_min` is **not** separate — it's **derived
-  from the tool's cost** (so it falls out of the cost fn, nothing extra to fit). Restoration *rates* (C1).
+- The per-tool cost/lockout **functions per tool** (C1), **and `tool_min` per tool** — its own
+  skill/capability threshold (C1), independent of cost (better skill → higher minimum). Restoration
+  *rates* (C1).
