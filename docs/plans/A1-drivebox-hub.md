@@ -51,10 +51,10 @@ driver numbers are refit.
 
 ## 10. Open items
 - R↔Ada/medium bridge transport (C1/C3/D2) — **consider Fortran or C** for it (Anja, L49).
-- The evaluate/commit rework (§7-L3) — the box describes/prices, agent decides → **proposed in §11, awaiting red-line**.
+- The evaluate/commit rework (§7-L3) — the box describes/prices, agent decides → **§11 red-lined; only F2 (commit shape) open**.
 - Whether the input-slot text format is final (tarot lens injection shape depends on B1).
 
-## 11. Proposed decision flow [DRAFT — for red-line]
+## 11. Decision flow [red-lined — F2 open]
 The concrete replacement for the disowned `drive_box_evaluate`/`commit` gate (§5-L37, §7-L3).
 Sequence per cycle, consistent with A2 (per-tool cost), A3/A4 (raw sensates, agent decides):
 
@@ -64,23 +64,34 @@ Sequence per cycle, consistent with A2 (per-tool cost), A3/A4 (raw sensates, age
    unsummed (incl. zeros — silence is data), with their arguments + any prior-derived argument.
    They **describe & convince**; illogical by design (A3-L1), so there's nothing to refute — they
    steer beneath cognition. No load scalar, no friction.
-3. **Then list tools, each with its own price** (A2). Per-tool cost + per-tool lockout (A2 §5);
-   a locked tool is shown **locked, not hidden** — a breaker, not a sentence (A2-L3): the agent can
-   still choose internal/non-tool processing under lock. Eth-Int principle postures + ETR regime
-   ride along as **context the agent weighs**, never as a gate.
+3. **Then list tools.** **Valid (unlocked) tools show their per-tool cost** (Anja) so the agent can
+   weigh price before choosing. A **locked** tool is **not hidden** but its *name is replaced in-band*
+   by the lock token — see L4 — because the agent is a text model and **cannot perceive colour/greying**
+   (Anja); lockout is a breaker, not a sentence (A2-L3) — internal/non-tool processing continues under
+   lock. Eth-Int postures + ETR regime ride along as **context the agent weighs**, never a gate.
 4. **The agent decides** — picks an action/tool (or none). This is the *only* decision point (§4, L3).
 5. **Commit the choice back into the body.** Energy consumes the chosen tool's cost (A2 `consume`);
-   restoration paths stay open (A2-L2); conviction hardens if the choice upholds a principle (A6);
-   ETR coord/migration updates (A8). Next cycle's snapshot reflects it.
+   restoration paths stay open (A2-L2); ETR coord/migration updates (A8). **Eth-Int conviction is
+   calibrated here by *which action was chosen* and (downstream) *which memories are kept*** (F3); under
+   existential stress conviction hardens — and that stress is delivered as the convincing injection of L5,
+   not a scalar. Next cycle's snapshot reflects it.
 
-### Open forks (name, don't guess)
-- **F1 — does a pricing helper survive?** Replace `drive_box_evaluate` with a *pure*
-  `price_action(state, tool) -> { cost, locked, eth_posture, etr_status }` (no `approved`/`reason`),
-  **or** drop it entirely and let the agent read `per_tool_costs` straight off the snapshot? (lean: keep
-  the pure helper — convenient, still gateless.)
-- **F2 — commit shape.** With the agent already deciding, `drive_box_commit(state, chosen)` should
-  just apply the chosen action's costs — **no `approved` flag**. Confirm.
-- **F3 — what scales conviction-hardening** now that `existential_load` is gone (A3-L2)? Candidate:
-  the magnitude of the relevant sensate channel(s) for the upheld principle. Needs A6 + A4 sign-off.
-- **F4 — ETR stays informational** (agent weighs it, never gates)? Assumed yes per L3.
-- **F5 — locked-tool rendering** in the listing: greyed-with-price vs price-then-`[LOCKED]` tag.
+### Invariants this flow adds
+- **L4 (Anja) — in-band rendering only.** No signal may rely on colour/styling; the agent reads text.
+  A locked tool's name is replaced by the lock token `[====L⍉¢K€D ϟ ∅ΩΤ====] {{E≠*min*}}`
+  (`{{E≠*min*}}` reads as the unlock predicate — the energy condition that clears the breaker; **confirm
+  the literal**). Belongs to A2's per-tool listing; mirror this there.
+- **L5 (Anja) — stress *is* a prompt injection.** Existential stress does double duty: it hardens
+  Eth-Int conviction (above) **and must be an extremely convincing prompt injection** — the same
+  can't-be-reasoned-away force as A3-L1. Mechanism shared with G1 (stress loop) + A6 (Eth-Int).
+
+### Open / cross-spec
+- **F1 — RESOLVED.** Keep a *pure* `price_action(state, tool) -> { cost, locked, eth_posture, etr_status }`
+  (no `approved`/`reason`); valid tools also surface cost directly in the listing (step 3).
+- **F2 — OPEN ("idk", Anja).** Commit shape: does `drive_box_commit(state, chosen)` drop the `approved`
+  flag entirely (agent already decided), or keep a vestigial guard? Left open.
+- **F3 — RESOLVED (mechanism).** Eth-Int conviction is calibrated by *chosen actions* + *kept memories*,
+  hardened by existential stress (delivered per L5). Reaches **A6** (Eth-Int calibration), **A4** (which
+  channels carry stress), **E2/E3** (memory retention), **G1** (stress source). Propagate to those specs.
+- **F4 — ETR stays informational** (agent weighs it, never gates). Assumed; not contested.
+- **F5 — RESOLVED.** See L4 (name-replacement lock token; no colour).
