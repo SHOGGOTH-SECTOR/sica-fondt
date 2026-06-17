@@ -7,44 +7,47 @@ snapshot the inference cycle pulls at step 2.
 
 ## 2. Status / certainty
 Structure WORKING (`drive_box.R`, 158 L). Aggregation logic C3; the numbers inside the drivers
-are disowned (see each driver spec).
+are disowned (see each driver spec). **The evaluate/commit model below is flagged inaccurate — §7.**
 
 ## 3. Language & location
 R · `src/endocrine/drive_box.R` (sources the drivers + `endocrine_array.R` + `priors.R`).
+**[TO REASSESS — Anja]:** the hub's language/location is *not settled*; R is current but under review.
 
 ## 4. Does / does-not
-- **Does:** init the whole box; produce `drive_snapshot()` (affect + cost terrain, read-only);
-  run a proposed action through all drivers (`drive_box_evaluate`); apply feedback (`drive_box_commit`);
-  assemble the `drive_box_input_slot()` injection block.
-- **Does-not:** decide (PS+ emits arguments, not verdicts); route or police (Ada D1); persist (storage E*).
+- **Does:** init the whole box; produce `drive_snapshot()` (raw sensate field + per-tool cost terrain,
+  read-only); assemble the `drive_box_input_slot()` injection block surfaced to the agent.
+- **Does-not:** **decide** — the drivers *describe, convince, and price*; only the **agent** decides.
+  It does not route or police (Ada D1) or persist (storage E*).
 
 ## 5. Interface contract
 - `init_drive_box() -> state{ energy, ps_plus, principles, etr }`.
-- `drive_snapshot(state) -> { e_level, tool_locked, existential_load, arguments[], etr_coord, etr_status }`
-  — this is exactly what Ada (D1) admits to the Brain at cycle step 2 (content #1).
-- `drive_box_evaluate(state, action{tags,alignment,base_cost,is_tool_call}) -> { approved, costs, reasons }`.
-- `drive_box_commit(state, action, approved) -> state'` (consumes E, hardens conviction).
+- `drive_snapshot(state) -> { e_level, raw_sensates[30], arguments[], per_tool_costs, etr_coord, etr_status }`
+  — surfaced to the agent (sensates passed **before tool listing**, A3); raw, **never summed**.
+- `drive_box_commit(state, chosen_action) -> state'` — applies the chosen tool's energy cost + conviction effects.
 - `drive_box_input_slot(state) -> text block` (drivers + tarot lenses + SOUL.md, assembled concurrently).
+- **[FLAGGED inaccurate — Anja]:** the old `drive_box_evaluate(action) -> {approved,…}` approve-gate is
+  **wrong** — the box doesn't approve actions. To be reworked into "surface terrain → agent decides → commit."
 
 ## 6. Dependencies & stubs
-A2/A3/A6/A8 drivers — *stub:* each `init_*` + its evaluator returning canned values; A1 wiring
-testable with stub drivers. Tarot (B1) for the input-slot lenses — *stub:* identity (no lens).
+A2/A3/A6/A8 drivers — *stub:* each `init_*` returning canned values; A1 wiring testable with stubs.
+Tarot (B1) for the input-slot lenses — *stub:* identity (no lens).
 
 ## 7. Invariants / laws
-- **L1 (C4):** the slot is a **hub** — all drivers + tarot + SOUL write concurrently, no driver
-  subordinated to another.
+- **L1 (C4):** the slot is a **hub** — all drivers + tarot + SOUL write concurrently, none subordinated.
 - **L2 (C4):** `drive_snapshot` is **read-only** (no driver state mutates on a snapshot).
-- **L3 (C3):** evaluate order is PS+ → Eth-Int → Energy → ETR; commit only on approval.
+- **L3 (FLAGGED — inaccurate per Anja):** there is **no serial PS+→Eth-Int→Energy→ETR evaluate/approve
+  pipeline**. Only the **agent decides**; drivers describe/convince + price. The evaluate/commit model
+  is to be reworked.
 
 ## 8. Build steps
-1. Freeze the snapshot + slot contracts (§5) as tests in `test_drive_box.R` (already ~117 L — extend).
-2. Keep wiring; replace each driver's disowned constants as those specs land (A2/A3/A6/A8).
-3. Add the R↔Ada bridge later (how `drive_snapshot` reaches `ada_medium` step 2) — see C3 / D2.
+1. **Rework the decision model** (drivers surface terrain → agent decides → commit) before freezing contracts.
+2. Freeze the corrected snapshot/slot contracts (§5) as tests in `test_drive_box.R`.
+3. Add the R↔Ada bridge later — see C3 / D2 and §10.
 
 ## 9. Tests
-`bash src/endocrine/run_tests.sh` (runs `test_drive_box.R` + driver tests). All must stay green as
-driver numbers are refit.
+`bash src/endocrine/run_tests.sh` (runs `test_drive_box.R` + driver tests). Update once the decision model is reworked.
 
 ## 10. Open items
-- R↔Ada/medium bridge transport (C1/C3/D2).
-- Whether the input-slot text format is final (tarot lens injection shape depends on B1).
+- **Decision-model rework** (agent-decides, not box-approves).
+- R↔Ada/medium bridge transport — **consider Fortran or C** for it (Anja) (C1/C3/D2).
+- Hub language/location reassessment (Anja). Input-slot text format depends on B1.

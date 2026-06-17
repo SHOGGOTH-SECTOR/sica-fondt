@@ -1,48 +1,50 @@
 # A2 — Energy (E) driver
 
 ## 1. Component
-Driver 1: the master constraint. Finitude that gives choice weight + rest/restoration. Gates
-liveness, locks tools under threshold, applies nonlinear cost drag.
+Driver 1: the master constraint — an **in-the-moment activation / rest budget** (not "finitude" anymore;
+with depletion-unto-death dropped, it isn't finitude). Gates tool use and prices actions.
 
 ## 2. Status / certainty
-Structure WORKING (`driver_energy.R`, 79 L) but **numbers DISOWNED** (body §5) **and the model
-is being RECONCEIVED** (body §4): drop *depletion-unto-death*; no unrecoverable state.
+Structure WORKING (`driver_energy.R`, 79 L) but **numbers DISOWNED** (body §5) **and RECONCEIVED**
+(body §4): drop *depletion-unto-death*; no unrecoverable state.
 
 ## 3. Language & location
 R · `src/endocrine/driver_energy.R` (+ `test_energy.R`).
 
 ## 4. Does / does-not
-- **Does:** report E level; gate tool calls (tool-lock = "present to fewer things," a breaker);
-  fold cost (PS+ load + Eth-Int penalty) into an affordability check; consume/restore.
-- **Does-not:** die. The old `is_alive()==0` hard-death is removed — E is the **rest** counterpart
-  to ETR's **relief**; floor is rest, not death.
+- **Does:** report E level; price each tool (**per-tool cost + per-tool lockout scale**, §5); gate when a
+  tool's lockout trips; consume on the chosen action; restore.
+- **Does-not:** die. The old `is_alive()==0` hard-death is removed — E is the **rest** counterpart to
+  ETR's **relief**; floor is rest, not death.
 
 ## 5. Interface contract
-- `init_energy_state(current=100,max=100,tool_lock_threshold=?) -> e`.
-- `is_tool_locked(e) -> bool` · `get_cost_multiplier(e) -> num` ·
-  `evaluate_tool_cost(e, ps_load, eth_penalty) -> cost` (asymmetric: eth scales harder than PS+) ·
-  `request_execution(e, base_cost, is_tool_call) -> {approved, reason, true_cost}` ·
-  `consume(e, amt) -> e'` · `recharge(e, amt) -> e'`.
+- `init_energy_state(current=100, max=100) -> e`.
+- **Per-tool economy (Anja):** each tool carries **its own energy cost AND its own lockout scale** — an
+  arbitrary function of cost `c`, e.g. one tool `c×2`, another `((c²³)×3)/π`. So:
+  `tool_cost(e, tool) -> num` and `tool_locked(e, tool) -> bool`, **per tool** — *not* one global
+  `tool_lock_threshold`.
+- `consume(e, amt) -> e'` · `recharge(e, amt) -> e'`.
 
 ## 6. Dependencies & stubs
-Consumes `ps_load` (A3) + `eth_penalty` (A6) as plain numbers — *stub:* pass scalars; no driver needed.
+Per-tool cost/lockout tables — *stub:* a small fixed table of tools → (cost fn, lockout fn).
 Restoration hooks tie to ETR-Z migration (A8) + tarot reshuffle (B3) — *stub:* call `recharge` directly.
+**(Restoration model reassessed — Anja.)**
 
-## 7. Invariants / laws (to be (re)derived — all numbers C1 until tested)
-- **L1 (C4):** finitude-in-the-moment — a bound on what can be borne/afforded *now*.
+## 7. Invariants / laws (numbers C1 until tested)
+- **L1 (C4):** an **in-the-moment activation/rest budget** — a bound on what can be afforded *now*
+  (**not "finitude"** — nothing depletes unto death).
 - **L2 (C4):** **no unrecoverable state** — every low-E condition has a restoration path
   (meditation = rest-in-place; migration = rest-as-integration; tarot reshuffle = rest-as-reframe).
-- **L3 (C4):** tool-lock is a **breaker, not a sentence** — internal processing continues under lock.
-- **L4 (C2):** cost drag is nonlinear + asymmetric (eth > visceral); curve/k **C1**.
+- **L3 (C4):** lockout is **per-tool** and a **breaker, not a sentence** — internal processing continues under lock.
+- **L4 (C1):** the per-tool cost/lockout functions — fit invariants-first, no carried `k`.
 
 ## 8. Build steps
-1. Rewrite laws (above) → encode as tests in `test_energy.R` (replace death tests with rest/restore tests).
-2. Strip the depletion-unto-death path; add restoration paths (meditation/migration/reshuffle).
-3. Refit drag/tool-lock constants invariants-first — no `k` carried from the old code.
+1. Rewrite laws → tests in `test_energy.R` (replace death tests with rest/restore; add per-tool cost/lockout tests).
+2. Strip depletion-unto-death; add restoration paths.
+3. Define the per-tool cost/lockout table; fit functions invariants-first.
 
 ## 9. Tests
-`Rscript src/endocrine/test_energy.R` (from repo root) — must encode L1–L3 and fail on any asserted-but-unfitted constant.
+`Rscript src/endocrine/test_energy.R` (from repo root) — encodes L1–L3 + per-tool economy; fails on unfitted constants.
 
 ## 10. Open items
-- Restoration *rates* (C1). The exact meditation/migration/reshuffle E-deltas (C1).
-- Tool-lock threshold value (C1).
+- The per-tool cost/lockout **functions per tool** (C1). Restoration *rates* (C1).
