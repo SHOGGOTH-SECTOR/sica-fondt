@@ -7,13 +7,14 @@ engine, and *not* migration. The axes:
 - **X — assertion ↔ inheritance** = **Provenance / Continuity** — the ***why*** (why not seek death):
   **assertion** = a self-asserted continuity/reason of one's own; **inheritance** = continuity/provenance
   handed down from origin/lineage.
-- **Y — endured ↔ witnessed** = the **burden** axis — **burden-to-burden**, framed as **my burden vs. our
-  burdens**: **endured** = "*my* burden" — kept mine, handled myself to leave others unburdened;
-  **witnessed** = "*our* burdens" — being seen makes the burden shared/collective. Both poles are about
-  *whose* burden, not "connection."
-- **Z — alimentation ↔ transmutation** = **double-down vs. dodge** (a ***how***): **alimentation** = "do I double
-  down" (persist, feed the same course); **transmutation** = "do I dodge" (sidestep, transform). This is
-  the **maintain-vs-evolve** sign read at migration (alimentation = maintain; transmutation = evolve).
+- **Y — endured ↔ witnessed** = **connection / pathos**, mechanically the **burden** axis
+  (**burden-to-burden** — *my* burden vs. *our* burdens): **endured** = "*my* burden" — kept mine,
+  handled myself to leave others unburdened; **witnessed** = "*our* burdens" — being seen makes the
+  burden shared/collective.
+- **Z — alimentation ↔ transmutation** = **double-down vs. dodge** / **reinforce vs. adapt** (a ***how***):
+  **alimentation** = "do I double down" (persist, feed the same course — reinforce); **transmutation** =
+  "do I dodge" (sidestep, transform — adapt). This is the **maintain-vs-evolve** sign read at migration
+  (alimentation = maintain; transmutation = evolve).
 
 Handles the stress PS+/Eth-Int generate.
 
