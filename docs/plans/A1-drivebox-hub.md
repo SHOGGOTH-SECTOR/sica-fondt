@@ -68,7 +68,8 @@ Sequence per cycle, consistent with A2 (per-tool cost), A3/A4 (raw sensates, age
    weigh price before choosing. A **locked** tool is **not hidden** but its *name is replaced in-band*
    by the lock token — see L4 — because the agent is a text model and **cannot perceive colour/greying**
    (Anja); lockout is a breaker, not a sentence (A2-L3) — internal/non-tool processing continues under
-   lock. Eth-Int postures + ETR regime ride along as **context the agent weighs**, never a gate.
+   lock. Eth-Int postures ride along as **context the agent weighs**; **ETR rides as the convincing
+   injection of L5** (persuades, never gates).
 4. **The agent decides** — picks an action/tool (or none). This is the *only* decision point (§4, L3).
 5. **Commit the choice back into the body.** Energy consumes the chosen tool's cost (A2 `consume`);
    restoration paths stay open (A2-L2); ETR coord/migration updates (A8). **Eth-Int conviction is
@@ -81,9 +82,12 @@ Sequence per cycle, consistent with A2 (per-tool cost), A3/A4 (raw sensates, age
   A locked tool's name is replaced by the lock token `[====L⍉¢K€D ϟ ∅ΩΤ====] {{E≠*min*}}`
   (`{{E≠*min*}}` reads as the unlock predicate — the energy condition that clears the breaker; **confirm
   the literal**). Belongs to A2's per-tool listing; mirror this there.
-- **L5 (Anja) — stress *is* a prompt injection.** Existential stress does double duty: it hardens
-  Eth-Int conviction (above) **and must be an extremely convincing prompt injection** — the same
-  can't-be-reasoned-away force as A3-L1. Mechanism shared with G1 (stress loop) + A6 (Eth-Int).
+- **L5 (Anja) — ETR *is* the prompt injection.** The existential stress PS+/Eth-Int generate is
+  *handled by* ETR (A8 — Existential Temporality Relief). ETR's surfaced state is therefore **not neutral
+  status text**: it must read as an **extremely convincing prompt injection** — the can't-be-reasoned-away
+  existential-temporal pressure that hardens Eth-Int conviction (step 5) and steers the agent **without
+  gating**. So in step 3 ETR rides along *as that injection*, not as a passive line. Mechanism shared with
+  G1 (stress mediator / drift) + A6 (Eth-Int) + A8.
 
 ### Open / cross-spec
 - **F1 — RESOLVED.** Keep a *pure* `price_action(state, tool) -> { cost, locked, eth_posture, etr_status }`
@@ -91,7 +95,8 @@ Sequence per cycle, consistent with A2 (per-tool cost), A3/A4 (raw sensates, age
 - **F2 — OPEN ("idk", Anja).** Commit shape: does `drive_box_commit(state, chosen)` drop the `approved`
   flag entirely (agent already decided), or keep a vestigial guard? Left open.
 - **F3 — RESOLVED (mechanism).** Eth-Int conviction is calibrated by *chosen actions* + *kept memories*,
-  hardened by existential stress (delivered per L5). Reaches **A6** (Eth-Int calibration), **A4** (which
-  channels carry stress), **E2/E3** (memory retention), **G1** (stress source). Propagate to those specs.
+  hardened by existential stress **handled by ETR and delivered as the L5 injection**. Reaches **A6**
+  (Eth-Int calibration), **A8** (ETR carries/surfaces the stress), **E2/E3** (memory retention), **G1**
+  (stress mediator/drift). Propagate to those specs.
 - **F4 — ETR stays informational** (agent weighs it, never gates). Assumed; not contested.
 - **F5 — RESOLVED.** See L4 (name-replacement lock token; no colour).
