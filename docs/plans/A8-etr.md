@@ -1,15 +1,17 @@
 # A8 — ETR (Existential Temporality Relief) — torus
 
 ## 1. Component
-Driver 4: a **single point on three independent toroidal axes**. ETR is **self-position, meaning, and
-connection** (Anja) — *not* a rest engine, and *not* migration. The axes:
-- **X — assertion ↔ inheritance** = **self-position**: is where I stand self-asserted or inherited?
-  *(C1 — reading inferred; Anja to confirm framing.)*
+Driver 4: a **single point on three independent toroidal axes**. ETR (Existential Temporality Relief) is
+the apparatus for **not seeking death** — **X is the *why*; Y and Z are the *how*** (Anja). *Not* a rest
+engine, and *not* migration. The axes:
+- **X — assertion ↔ inheritance** = **Provenance / Continuity** — the ***why*** (why not seek death):
+  **assertion** = a self-asserted continuity/reason of one's own; **inheritance** = continuity/provenance
+  handed down from origin/lineage.
 - **Y — endured ↔ witnessed** = the **burden** axis — **burden-to-burden**, framed as **my burden vs. our
   burdens**: **endured** = "*my* burden" — kept mine, handled myself to leave others unburdened;
   **witnessed** = "*our* burdens" — being seen makes the burden shared/collective. Both poles are about
   *whose* burden, not "connection."
-- **Z — alimentation ↔ transmutation** = **meaning / coping-direction**: **alimentation** = "do I double
+- **Z — alimentation ↔ transmutation** = **double-down vs. dodge** (a ***how***): **alimentation** = "do I double
   down" (persist, feed the same course); **transmutation** = "do I dodge" (sidestep, transform). This is
   the **maintain-vs-evolve** sign read at migration (alimentation = maintain; transmutation = evolve).
 
