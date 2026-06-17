@@ -24,6 +24,8 @@ R · `src/endocrine/drive_box.R` (sources the drivers + `endocrine_array.R` + `p
 - `drive_snapshot(state) -> { e_level, per_tool_costs, sensates[raw], arguments[], etr_coord, etr_status }`
   — what Ada (D1) admits to the Brain at cycle step 2 (content #1). **Sensates raw, not summed.**
 - `drive_box_input_slot(state) -> text block` (drivers + tarot lenses + SOUL.md, assembled concurrently).
+  **[FLAGGED — Anja]:** Eth-Int must contribute only the **top X convictions** (A6 `top_convictions`);
+  the current code loops **all** `state$ethics$principles` (`drive_box.R:142`) — to fix.
 - **[FLAGGED inaccurate — Anja, L37]:** the old `drive_box_evaluate`/`drive_box_commit`
   approve-an-action contract is **suspect and to be reworked** — the box does not gate actions (see §7-L3).
 
@@ -68,8 +70,9 @@ Sequence per cycle, consistent with A2 (per-tool cost), A3/A4 (raw sensates, age
    weigh price before choosing. A **locked** tool is **not hidden** but its *name is replaced in-band*
    by the lock token — see L4 — because the agent is a text model and **cannot perceive colour/greying**
    (Anja); lockout is a breaker, not a sentence (A2-L3) — internal/non-tool processing continues under
-   lock. Eth-Int postures ride along as **context the agent weighs**; **ETR rides as the convincing
-   injection of L5** (persuades, never gates).
+   lock. Eth-Int rides along as **the top X convictions only** (by strength — A6 `top_convictions`,
+   *not* the whole array), context the agent weighs; **ETR rides as the convincing injection of L5**
+   (persuades, never gates).
 4. **The agent decides** — picks an action/tool (or none). This is the *only* decision point (§4, L3).
 5. **Commit the choice back into the body.** Energy consumes the chosen tool's cost (A2 `consume`);
    restoration paths stay open (A2-L2); ETR coord/migration updates (A8). **Eth-Int conviction is
