@@ -1,9 +1,19 @@
 # A8 — ETR (Existential Temporality Relief) — torus
 
 ## 1. Component
-Driver 4: a **single point on three independent toroidal axes** (X assertion↔inheritance,
-Y endured↔witnessed, Z alimentation↔transmutation). Handles the stress PS+/Eth-Int generate;
-Z-sign selects maintain-vs-evolve at migration.
+Driver 4: a **single point on three independent toroidal axes**. ETR is **self-position, meaning, and
+connection** (Anja) — *not* a rest engine, and *not* migration. The axes:
+- **X — assertion ↔ inheritance** = **self-position**: is where I stand self-asserted or inherited?
+  *(C1 — reading inferred; Anja to confirm framing.)*
+- **Y — endured ↔ witnessed** = **connection**, read through *others' burden* (both poles are
+  other-directed): **endured** = "I handle it myself to leave others unburdened"; **witnessed** = "I need
+  others to see me, to relieve *them* of the burden." The axis is *how* my state's burden on others is
+  discharged — by hiding vs. by being seen.
+- **Z — alimentation ↔ transmutation** = **meaning / coping-direction**: **alimentation** = "do I double
+  down" (persist, feed the same course); **transmutation** = "do I dodge" (sidestep, transform). This is
+  the **maintain-vs-evolve** sign read at migration (alimentation = maintain; transmutation = evolve).
+
+Handles the stress PS+/Eth-Int generate.
 
 ## 2. Status / certainty
 **SCAFFOLD — built and tested this session** (`run_etr_tests.sh` → 12 PASS / 2 FAIL-by-design /
