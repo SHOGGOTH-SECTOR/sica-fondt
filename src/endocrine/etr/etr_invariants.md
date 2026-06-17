@@ -12,34 +12,50 @@ Each axis is a standalone scalar carrying one of ETR's three tensions:
 | **Y** | Endured (solitary feat) | Witnessed (shared survival) |
 | **Z** | Alimentation (maintain self) | Transmutation (evolve self) |
 
+Each axis is **bistable** with five zones per pass (radial map by `|v|`), with unstable
+watersheds at **7** and **45**:
+
+```
+ 0 ─SNAP_IN─ 7 ─SOFT→─ 17 ═══BAND═══ 35 ─INCOH→─ 45 ─SNAP_OUT─ 50(≡−50)
+  flip(thru 0)  weak pull    slack      firm pull   flip(over wrap)
+```
+(mirrored on the negative pole; the whole axis wraps at ±50)
+
 ## Laws (certainty per arch-doc legend)
 | ID | Tag | Law |
 |----|-----|-----|
 | L1 wrap | **C5** | Each axis is toroidal, wrapping at **±50** (period 100); +50 and −50 are identified. |
-| L2 bands | **C5** | An axis is stable when `17 ≤ |v| ≤ 35`, i.e. `v ∈ [−35,−17] ∪ [+17,+35]`. |
-| L3 oppose | **C5** | `|v| < 17` → opposition pushes **outward** (off 0); `|v| > 35` → pushes **inward** (off the ±50 edge); in-band is slack. |
+| L2 bands | **C5** | An axis is stable when `17 ≤ |v| ≤ 35`, i.e. `v ∈ [−35,−17] ∪ [+17,+35]` (two bands). |
+| L3 zones | **C5** | Five zones per pole by `|v|`: **SNAP_IN** <7 · **SOFT** 7–17 · **BAND** 17–35 · **INCOH** 35–45 · **SNAP_OUT** >45. In the basin (7–45) a restoring force points toward the band — SOFT pulls up (**weak**), INCOH pulls down (**firmer**); band is slack. Watersheds **7** and **45** are unstable. |
 | L4 drift | **C4** | Per-step motion is **AI-originated** — supplied by the agent's own cognition/affect. ETR never generates it (no RNG). |
 | L5 couple | **C1** | The three axes **couple via a stress metric** (hypothesis: PS+/Eth-Int existential load). Exact mapping **undefined** — open seam, not to be invented. |
 | L6 z-path | **C3** | `z < 0` → alimentation / lattice-reinforcement; `z ≥ 0` → transmutation / prior-evolution. (Structure kept; sign to re-verify.) |
-| L7 no-zero-cross | **C2** | Bands wall off 0; a pole/sign flip happens **only** by riding over the ±50 wrap, never through neutrality. *(emergent — unconfirmed)* |
-| L8 mechanism | **C2** | "Opposition" = a restoring force on the drift, **not** an out-of-band cost. *(unconfirmed)* |
+| L7 snap/flip | **C3** | A pole-flip happens **only** through a snap zone — **inner snap across 0** (`|v|<7`) or **outer snap over the ±50 wrap** (`|v|>45`); the basin (7–45) never flips. A snap lands **just past the opposite watershed** (inner→opposite SOFT, outer→opposite INCOH), sign flipped, then that zone recovers it. *(implemented & tested)* |
+| L8 mechanism | **C3** | "Opposition" = a restoring force on the drift, **not** an out-of-band cost. *(realised by construction — the force is added alongside drift)* |
 
 ## Constants
-`BAND_LO = 17`, `BAND_HI = 35`, `WRAP = 50` are **law** (L1–L3), not fitted.
-`RESTORE_GAIN = 0.5` is **FITTED** — the spring stiffness of the out-of-band restoring force: active
-only out of band (in band is slack, L3), pulling toward the band **centre (26)** so a step crosses
-*into* `[17,35]` and stops there (an edge target would asymptote onto 17 from below and fail L2).
-Below-band pushes away from 0, so the force alone never crosses zero (L7). Lands e.g. `[5 5 5] → 20.75`
-in 2 steps; `[45 −45 40] → [30.75 −30.75 33]`. Valid range `0 < GAIN < ~2` (above ~2 a cross-in step can
-overshoot the far edge).
+`BAND_LO = 17`, `BAND_HI = 35`, `WRAP = 50`, and the watersheds `SNAP_INNER = 7`, `SNAP_OUTER = 45`
+are **law** (L1–L3, L7), not fitted.
+**Fitted** (so tests pass — never asserted ahead of a test):
+- `GAIN_SOFT = 0.25`, `GAIN_INCOH = 0.5` — the basin restoring is a spring toward the band **centre
+  (26)**; SOFT is deliberately **weaker** than INCOH (Anja). A centre target makes a step cross *into*
+  `[17,35]` and stop (an edge target would asymptote onto 17 and fail L2). Valid range `0 < GAIN < ~2`.
+- `SNAP_MARGIN = 2` — how far past the opposite watershed a snap deposits the point (inner → opposite
+  SOFT at `±9`; outer → opposite INCOH at `±43`).
+Behaviour: `[10 10 10] → +band` (same pole); `[5 5 5] → −band` (inner snap flips); `[47 47 47] → −band`
+(outer snap flips).
 `COUPLING` (L5 strength/mapping) remains **TBD** — open seam, not to be invented.
 
 ## Testable predicates (see `test_etr.m`)
 - **L1**: `wrap(50) = −50`; `wrap(60) = −40`; `wrap(v)=v` for `v∈(−50,50)`; `wrap(49.9) = wrap(−50.1)`.
-- **L2/L3**: direction is `+sign(v)` for `|v|<17`, `−sign(v)` for `|v|>35`, `0` in band; a zero-drift point started out-of-band **settles into** `[17,35]∪[−35,−17]`.
+- **zones**: `etr_axis_zone` returns SNAP_IN/SOFT/IN_BAND/INCOH/SNAP_OUT at 5/10/25/40/47.
+- **L3**: basin direction `+sign(v)` in SOFT, `−sign(v)` in INCOH, `0` in band; force nonzero in SOFT &
+  INCOH, **zero in snap zones**; `|restoring(SOFT)| < |restoring(INCOH)|` (weak soft-pull).
+- **L2**: a SOFT-zone zero-drift start **settles into** the band **without flipping** sign.
+- **L7**: a SNAP_IN start lands in the opposite SOFT then settles in the opposite band; a SNAP_OUT start
+  lands in the opposite INCOH then settles in the opposite band (both flip the pole).
 - **L4**: `etr_step` with no `drift` argument **errors** (it refuses to invent motion).
 - **L5**: `coupling(coord, 0)` is identity; `coupling(coord, stress>0)` alters coord — *pending until defined*.
-- **L7**: pending until confirmed.
 
 ## Drift & stress provenance — cross-organ loop (where L4 drift & L5 stress originate)
 *Exploratory (C2/C3) — thinking aloud; "yet undecided" parts stay open. ETR receives drift
@@ -63,9 +79,9 @@ scaffold seam is correct). What's fixed is their **provenance** (upstream in SAE
 endocrines) and two side-effects (reshuffle, shift-rate) that belong to *those* organs.
 Still open: which stress endomotiv; the "too strong" reshuffle threshold; the shift-rate function.
 
-## Status (RESTORE_GAIN fitted — 14 PASS / 0 FAIL / 2 PEND)
-Green: L1 wrap, L3 direction + **restoring magnitude (fitted)**, **L2 band-convergence**,
-L4 drift-must-be-fed, L5 coupling-off identity. L8 (opposition = a restoring force on the drift, not an
-out-of-band cost) is now **realised by construction** — the force is added alongside drift, never charged
-as a cost — though still tagged C2 until a dedicated test pins it.
-Pending: L5 active coupling (C1, open seam), L7 no-zero-crossing (C2).
+## Status (five-zone axis fitted — 26 PASS / 0 FAIL / 1 PEND)
+Green: L1 wrap; zone classification; L3 basin direction + restoring magnitudes (SOFT/INCOH, fitted) +
+snap-zones-carry-no-force + weak-soft-pull; L2 same-pole convergence; **L7 snap/flip** (inner across 0,
+outer over the wrap — both land just past the opposite watershed and settle in the opposite band);
+L4 drift-must-be-fed; L5 coupling-off identity; L8 realised by construction.
+Pending: **L5 active coupling** (C1, open seam) — the only remaining stub.
