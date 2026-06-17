@@ -20,8 +20,9 @@ engine, and *not* migration. The axes:
 Handles the stress PS+/Eth-Int generate.
 
 ## 2. Status / certainty
-**SCAFFOLD — built and tested this session** (`run_etr_tests.sh` → 12 PASS / 2 FAIL-by-design /
-2 PEND). Full law + status in `../../src/endocrine/etr/etr_invariants.md` (this spec defers to it).
+**SCAFFOLD — `RESTORE_GAIN` fitted** (`run_etr_tests.sh` → **14 PASS / 0 FAIL / 2 PEND**; the 2 PEND
+are L5 active coupling and L7). Full law + status in `../../src/endocrine/etr/etr_invariants.md`
+(this spec defers to it).
 
 ## 3. Language & location
 GNU Octave · `src/endocrine/etr/` (`etr.m`, `test_etr.m`, `run_etr_tests.sh`, `etr_invariants.md`).

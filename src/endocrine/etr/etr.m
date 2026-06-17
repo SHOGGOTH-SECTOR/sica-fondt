@@ -22,6 +22,12 @@ function v = ETR_BAND_LO();  v = 17; endfunction
 function v = ETR_BAND_HI();  v = 35; endfunction
 function v = ETR_WRAP();     v = 50; endfunction
 
+% ---- fitted constant (NOT law) ----
+% RESTORE_GAIN: spring stiffness of the out-of-band restoring force (etr_axis_restoring).
+% Fitted to satisfy L3-magnitude (force nonzero out of band) and L2 (zero-drift
+% convergence into the band) without overshoot past the far edge. 0 < GAIN < ~2.
+function v = ETR_RESTORE_GAIN(); v = 0.5; endfunction
+
 % ---- state: one point, three scalars ----
 function s = etr_init(coord)
   if nargin < 1, coord = [25 25 25]; endif   % default: a valid in-band point
@@ -50,11 +56,22 @@ function d = etr_axis_restoring_dir(v)
   endif
 endfunction
 
-% ---- L3: per-axis restoring FORCE (STUB: magnitude UNFITTED -> RED) ----
-% Direction above is law; the magnitude/curve (RESTORE_GAIN) is C1 TBD.
-% Returns 0 for now so the magnitude + convergence tests stay red.
+% ---- L3: per-axis restoring FORCE (FITTED) ----
+% Direction is law (etr_axis_restoring_dir); the magnitude is a spring fitted
+% via RESTORE_GAIN. The force is active ONLY out of band (in band = slack, L3),
+% and pulls toward the band CENTRE (not the near edge): a centre target makes the
+% step cross INTO [17,35] and stop there, whereas an edge target would asymptote
+% onto 17 from below and never reach |v|>=17 (failing L2). Below-band pushes away
+% from 0, so the restoring force alone never crosses zero (L7).
 function r = etr_axis_restoring(v)
-  r = 0;  % STUB — TODO: RESTORE_GAIN * shape(v) along etr_axis_restoring_dir(v)
+  GAIN = ETR_RESTORE_GAIN();
+  a = abs(v);
+  if a < ETR_BAND_LO() || a > ETR_BAND_HI()
+    centre = (ETR_BAND_LO() + ETR_BAND_HI()) / 2;   % 26
+    r = GAIN * (centre * sign(v) - v);              % spring toward signed centre
+  else
+    r = 0;                                          % in band: slack (L3)
+  endif
 endfunction
 
 % ---- L5: cross-axis coupling (OPEN SEAM) ----

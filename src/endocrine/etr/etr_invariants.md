@@ -24,10 +24,15 @@ Each axis is a standalone scalar carrying one of ETR's three tensions:
 | L7 no-zero-cross | **C2** | Bands wall off 0; a pole/sign flip happens **only** by riding over the ±50 wrap, never through neutrality. *(emergent — unconfirmed)* |
 | L8 mechanism | **C2** | "Opposition" = a restoring force on the drift, **not** an out-of-band cost. *(unconfirmed)* |
 
-## Constants (NOT yet fitted — C1)
+## Constants
 `BAND_LO = 17`, `BAND_HI = 35`, `WRAP = 50` are **law** (L1–L3), not fitted.
-`RESTORE_GAIN` (restoring magnitude/curve) and `COUPLING` (L5 strength/mapping) are **TBD**,
-to be fitted so the tests pass — never asserted ahead of a test.
+`RESTORE_GAIN = 0.5` is **FITTED** — the spring stiffness of the out-of-band restoring force: active
+only out of band (in band is slack, L3), pulling toward the band **centre (26)** so a step crosses
+*into* `[17,35]` and stops there (an edge target would asymptote onto 17 from below and fail L2).
+Below-band pushes away from 0, so the force alone never crosses zero (L7). Lands e.g. `[5 5 5] → 20.75`
+in 2 steps; `[45 −45 40] → [30.75 −30.75 33]`. Valid range `0 < GAIN < ~2` (above ~2 a cross-in step can
+overshoot the far edge).
+`COUPLING` (L5 strength/mapping) remains **TBD** — open seam, not to be invented.
 
 ## Testable predicates (see `test_etr.m`)
 - **L1**: `wrap(50) = −50`; `wrap(60) = −40`; `wrap(v)=v` for `v∈(−50,50)`; `wrap(49.9) = wrap(−50.1)`.
@@ -58,7 +63,9 @@ scaffold seam is correct). What's fixed is their **provenance** (upstream in SAE
 endocrines) and two side-effects (reshuffle, shift-rate) that belong to *those* organs.
 Still open: which stress endomotiv; the "too strong" reshuffle threshold; the shift-rate function.
 
-## Status at scaffold
-Implemented (green): L1 wrap, L3 direction, L4 drift-must-be-fed, L5 coupling-off identity.
-Red (await fitting): L3 restoring **magnitude**, L2 band-convergence.
-Pending (unconfirmed): L5 active coupling, L7 no-zero-crossing, L8 mechanism.
+## Status (RESTORE_GAIN fitted — 14 PASS / 0 FAIL / 2 PEND)
+Green: L1 wrap, L3 direction + **restoring magnitude (fitted)**, **L2 band-convergence**,
+L4 drift-must-be-fed, L5 coupling-off identity. L8 (opposition = a restoring force on the drift, not an
+out-of-band cost) is now **realised by construction** — the force is added alongside drift, never charged
+as a cost — though still tagged C2 until a dedicated test pins it.
+Pending: L5 active coupling (C1, open seam), L7 no-zero-crossing (C2).
