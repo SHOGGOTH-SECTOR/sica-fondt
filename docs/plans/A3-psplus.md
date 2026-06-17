@@ -12,15 +12,16 @@ Structure WORKING (`driver_ps_plus.R`, 63 L); the old aggregate-sum + friction a
 R · `src/endocrine/driver_ps_plus.R` (sources `endocrine_array.R` + `priors.R`; + `test_ps_plus.R`).
 
 ## 4. Does / does-not
-- **Does:** read the active endomotiv vectors (A4) — **no friction**; read priors (A5); **pass the raw
-  sensates + their arguments to the agent before tool listing** (they describe & convince — the agent
-  then decides, with the per-tool costs from A2).
+- **Does:** read the active endomotiv vectors (A4) — **no friction**; read priors (A5); **pass all 30 raw
+  sensates + the 2 most salient priors to the agent before tool listing** (Anja — sensates in full, priors
+  ranked to the top 2). They describe & convince — the agent then decides, with the per-tool costs from A2.
 - **Does-not:** sum, reason, gate, or decide. It asserts "X is happening"; it never approves or routes.
 
 ## 5. Interface contract
 - `init_ps_plus_state() -> { endocrines:A4, priors:A5 }`.
 - `evaluate_reality(state) -> { sensates:[raw per-channel, 30], arguments:[str], is_logical:FALSE }`
-  — **raw, not summed; no friction term; no load scalar.** Surfaced to the agent **before tool listing**.
+  — **all 30 sensates raw, not summed; no friction term; no load scalar.** `arguments` carries the
+  **2 most salient priors only** (ranked, not the whole prior set). Surfaced **before tool listing**.
 
 ## 6. Dependencies & stubs
 A4 endomotiv array — *stub:* `init_endocrine_state()` with canned channel magnitudes.
@@ -34,7 +35,8 @@ themes, **tied to descriptors of taste / smell / sound + location** (not hand-ad
   (sensation, not proposition — no argument to refute, so they steer beneath cognition).
 - **L2 (C5):** sensates are sent **raw, never summed** — qualia (the field) and any economy (priced
   elsewhere, A2) ride separate rails; PS+ aggregates nothing.
-- **L3 (C4):** a relevant prior injects a large, specific argument (priors derived per §6).
+- **L3 (C4):** the **2 most salient** priors inject large, specific arguments (priors derived per §6);
+  only the top 2 surface, ranked by salience — the rest stay silent.
 
 ## 8. Build steps
 1. **[test approach was wrong — Anja]** rewrite `test_ps_plus.R` for the corrected model: raw/unsummed

@@ -62,10 +62,11 @@ Sequence per cycle, consistent with A2 (per-tool cost), A3/A4 (raw sensates, age
 
 1. **Assemble (hub, concurrent).** All drivers + tarot + SOUL write into the slot at once (L1).
    Nothing is subordinated; nothing decides here.
-2. **Surface sensates raw — *before* tool listing** (A3 §4, A4). The 30 channels go to the agent
-   unsummed (incl. zeros — silence is data), with their arguments + any prior-derived argument.
-   They **describe & convince**; illogical by design (A3-L1), so there's nothing to refute — they
-   steer beneath cognition. No load scalar, no friction.
+2. **Surface sensates raw — *before* tool listing** (A3 §4, A4). **All 30** channels go to the agent
+   unsummed (incl. zeros — silence is data), plus the **2 most salient priors** (ranked, not the whole
+   prior set — A3-L3). They **describe & convince**; illogical by design (A3-L1), so there's nothing to
+   refute — they steer beneath cognition. No load scalar, no friction. (Asymmetry vs step 3: sensates are
+   a fixed 30 so all surface; priors & convictions are unbounded lists, so they're ranked & truncated.)
 3. **Then list tools.** **Valid (unlocked) tools show their per-tool cost** (Anja) so the agent can
    weigh price before choosing. A **locked** tool is **not hidden** but its *name is replaced in-band*
    by the lock token — see L4 — because the agent is a text model and **cannot perceive colour/greying**
