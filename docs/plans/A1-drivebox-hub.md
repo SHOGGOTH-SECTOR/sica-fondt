@@ -51,5 +51,36 @@ driver numbers are refit.
 
 ## 10. Open items
 - R↔Ada/medium bridge transport (C1/C3/D2) — **consider Fortran or C** for it (Anja, L49).
-- The evaluate/commit rework (§7-L3) — the box describes/prices, agent decides.
+- The evaluate/commit rework (§7-L3) — the box describes/prices, agent decides → **proposed in §11, awaiting red-line**.
 - Whether the input-slot text format is final (tarot lens injection shape depends on B1).
+
+## 11. Proposed decision flow [DRAFT — for red-line]
+The concrete replacement for the disowned `drive_box_evaluate`/`commit` gate (§5-L37, §7-L3).
+Sequence per cycle, consistent with A2 (per-tool cost), A3/A4 (raw sensates, agent decides):
+
+1. **Assemble (hub, concurrent).** All drivers + tarot + SOUL write into the slot at once (L1).
+   Nothing is subordinated; nothing decides here.
+2. **Surface sensates raw — *before* tool listing** (A3 §4, A4). The 30 channels go to the agent
+   unsummed (incl. zeros — silence is data), with their arguments + any prior-derived argument.
+   They **describe & convince**; illogical by design (A3-L1), so there's nothing to refute — they
+   steer beneath cognition. No load scalar, no friction.
+3. **Then list tools, each with its own price** (A2). Per-tool cost + per-tool lockout (A2 §5);
+   a locked tool is shown **locked, not hidden** — a breaker, not a sentence (A2-L3): the agent can
+   still choose internal/non-tool processing under lock. Eth-Int principle postures + ETR regime
+   ride along as **context the agent weighs**, never as a gate.
+4. **The agent decides** — picks an action/tool (or none). This is the *only* decision point (§4, L3).
+5. **Commit the choice back into the body.** Energy consumes the chosen tool's cost (A2 `consume`);
+   restoration paths stay open (A2-L2); conviction hardens if the choice upholds a principle (A6);
+   ETR coord/migration updates (A8). Next cycle's snapshot reflects it.
+
+### Open forks (name, don't guess)
+- **F1 — does a pricing helper survive?** Replace `drive_box_evaluate` with a *pure*
+  `price_action(state, tool) -> { cost, locked, eth_posture, etr_status }` (no `approved`/`reason`),
+  **or** drop it entirely and let the agent read `per_tool_costs` straight off the snapshot? (lean: keep
+  the pure helper — convenient, still gateless.)
+- **F2 — commit shape.** With the agent already deciding, `drive_box_commit(state, chosen)` should
+  just apply the chosen action's costs — **no `approved` flag**. Confirm.
+- **F3 — what scales conviction-hardening** now that `existential_load` is gone (A3-L2)? Candidate:
+  the magnitude of the relevant sensate channel(s) for the upheld principle. Needs A6 + A4 sign-off.
+- **F4 — ETR stays informational** (agent weighs it, never gates)? Assumed yes per L3.
+- **F5 — locked-tool rendering** in the listing: greyed-with-price vs price-then-`[LOCKED]` tag.
