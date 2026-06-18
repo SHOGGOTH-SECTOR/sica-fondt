@@ -27,7 +27,9 @@ implemented and tested, incl. L7 snap-flips. Full law + status in
 
 ## 3. Language & location
 GNU Octave · `src/endocrine/etr/` (`etr.m`, `test_etr.m`, `run_etr_tests.sh`, `etr_invariants.md`).
-R wrapper `src/endocrine/driver_etr.R` bridges into the Drive-Box.
+R port `src/endocrine/driver_etr.R` (+ `test_etr.R`) feeds the Drive-Box — a **faithful native port**
+of `etr.m` (five-zone torus, per-axis), pinned to the same invariants doc. The disowned Euclidean-
+magnitude port is gone. A single-source R↔Octave IPC bridge is still optional/future (transport C1).
 
 ## 4. Does / does-not
 - **Does:** hold the point; wrap each axis at ±50; apply per-axis restoring toward [17,35]; take
@@ -54,8 +56,11 @@ L4 AI-drift C4 · L5 cross-axis coupling via stress C1 · L6 Z-path C3 · L7 sna
 
 ## 8. Build steps (remaining)
 1. ~~Fit the restoring force~~ **DONE** — five-zone law (SOFT/INCOH gains + snap landings) green; L7 + L8 realised.
-2. Define **L5** coupling (the stress→cross-axis mapping; G1) → replace the identity stub (the lone PEND).
-3. Wire R↔Octave (driver_etr.R ↔ etr.m) for the Drive-Box (A1) — and the larger medium (D2).
+2. ~~Reconcile the R port~~ **DONE** — `driver_etr.R` is now a faithful native port of `etr.m`
+   (five-zone, per-axis, L6 Z-path corrected); R suite + drive-box green.
+3. Define **L5** coupling (the stress→cross-axis mapping; G1) → replace the identity stub (the lone PEND).
+4. *(optional/future)* collapse the dual R+Octave implementations via an R↔Octave IPC bridge once the
+   transport (C1, shared with A1/C3/D2) is decided.
 
 ## 9. Tests
 `bash src/endocrine/etr/run_etr_tests.sh` (now **26/0/1** — the lone PEND is L5 active coupling).

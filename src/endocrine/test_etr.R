@@ -1,95 +1,98 @@
-# --- Tests for Driver 4: Existential Temporality Relief (ETR) ---
-# Run from repo root: Rscript src/endocrine/test_etr.R
-# Exit 0 => all pass.
+# test_etr.R — invariants tests for the R port of the ETR five-zone torus.
+# Mirrors src/endocrine/etr/test_etr.m (same laws, same source of truth). Run
+# from the repo root via run_tests.sh.
 
 source("src/endocrine/test_framework.R")
 source("src/endocrine/driver_etr.R")
 
-# --- init_etr_state constructor ---
-test_case("init_etr_state builds state with default origin coordinate", function() {
-  s <- init_etr_state()
-  expect_equal(s$coordinate, c(0, 0, 0))
+# --- L1 wrap ----------------------------------------------------------
+test_case("etr_axis_wrap: +50 wraps to -50", function() {
+  expect_equal(etr_axis_wrap(50), -50, tol = 1e-9)
+})
+test_case("etr_axis_wrap: 60 -> -40, -60 -> 40", function() {
+  expect_equal(etr_axis_wrap(60), -40, tol = 1e-9)
+  expect_equal(etr_axis_wrap(-60), 40, tol = 1e-9)
+})
+test_case("etr_axis_wrap: in-range unchanged; edge continuity", function() {
+  expect_equal(etr_axis_wrap(25), 25, tol = 1e-9)
+  expect_equal(etr_axis_wrap(49.9), etr_axis_wrap(-50.1), tol = 1e-9)
 })
 
-test_case("init_etr_state honors a custom coordinate", function() {
-  s <- init_etr_state(c(1, 2, 3))
-  expect_equal(s$coordinate, c(1, 2, 3))
+# --- zones ------------------------------------------------------------
+test_case("etr_axis_zone: five zones at 5/10/25/40/47", function() {
+  expect_equal(etr_axis_zone(5),  "SNAP_IN")
+  expect_equal(etr_axis_zone(10), "SOFT")
+  expect_equal(etr_axis_zone(25), "IN_BAND")
+  expect_equal(etr_axis_zone(40), "INCOH")
+  expect_equal(etr_axis_zone(47), "SNAP_OUT")
 })
 
-# --- get_magnitude ---
-test_case("get_magnitude of c(3,4,0) is 5.0", function() {
-  expect_equal(get_magnitude(init_etr_state(c(3, 4, 0))), 5.0, tol = 1e-9)
+# --- L3 restoring -----------------------------------------------------
+test_case("etr_axis_restoring: SOFT pulls up, INCOH pulls down, band slack", function() {
+  expect_true(etr_axis_restoring(10) > 0,  "SOFT (+v) pulls toward band")
+  expect_true(etr_axis_restoring(-10) < 0, "SOFT (-v) pulls toward band")
+  expect_true(etr_axis_restoring(40) < 0,  "INCOH (+v) pulls toward band")
+  expect_true(etr_axis_restoring(-40) > 0, "INCOH (-v) pulls toward band")
+  expect_equal(etr_axis_restoring(25), 0)
+})
+test_case("etr_axis_restoring: zero in snap zones", function() {
+  expect_equal(etr_axis_restoring(5), 0)
+  expect_equal(etr_axis_restoring(47), 0)
+})
+test_case("etr_axis_restoring: soft-pull weaker than incoherency", function() {
+  expect_true(abs(etr_axis_restoring(8)) < abs(etr_axis_restoring(44)),
+              "weak soft-pull")
 })
 
-test_case("get_magnitude of origin is 0.0", function() {
-  expect_equal(get_magnitude(init_etr_state(c(0, 0, 0))), 0.0, tol = 1e-9)
+# --- L2 convergence (same pole) ---------------------------------------
+test_case("L2: SOFT start settles into band without flipping sign", function() {
+  s <- init_etr_state(c(10, 10, 10))
+  for (k in 1:200) s <- etr_step(s, c(0, 0, 0), 0)
+  a <- abs(s$coordinate)
+  expect_true(all(a >= ETR_BAND_LO & a <= ETR_BAND_HI), "in band")
+  expect_true(all(s$coordinate > 0), "no flip")
 })
 
-# --- evaluate_status: exact boundary bands ---
-test_case("evaluate_status magnitude 0 -> DISASTROUS", function() {
-  expect_equal(evaluate_status(init_etr_state(c(0, 0, 0))), "DISASTROUS")
+# --- L7 snap-across flips ---------------------------------------------
+test_case("L7: inner snap lands in opposite SOFT, settles in opposite band", function() {
+  s <- init_etr_state(c(5, 5, 5))
+  s1 <- etr_step(s, c(0, 0, 0), 0)
+  a1 <- abs(s1$coordinate)
+  expect_true(all(s1$coordinate < 0), "flipped sign")
+  expect_true(all(a1 > ETR_SNAP_INNER & a1 < ETR_BAND_LO), "lands in SOFT")
+  for (k in 1:200) s <- etr_step(s, c(0, 0, 0), 0)
+  a <- abs(s$coordinate)
+  expect_true(all(s$coordinate < 0) && all(a >= ETR_BAND_LO & a <= ETR_BAND_HI),
+              "settles in opposite band")
+})
+test_case("L7: outer snap lands in opposite INCOH, settles in opposite band", function() {
+  s <- init_etr_state(c(47, 47, 47))
+  s1 <- etr_step(s, c(0, 0, 0), 0)
+  a1 <- abs(s1$coordinate)
+  expect_true(all(s1$coordinate < 0), "flipped sign")
+  expect_true(all(a1 > ETR_BAND_HI & a1 <= ETR_SNAP_OUTER), "lands in INCOH")
+  for (k in 1:200) s <- etr_step(s, c(0, 0, 0), 0)
+  a <- abs(s$coordinate)
+  expect_true(all(s$coordinate < 0) && all(a >= ETR_BAND_LO & a <= ETR_BAND_HI),
+              "settles in opposite band")
 })
 
-test_case("evaluate_status magnitude exactly 5.0 -> DREAD", function() {
-  expect_equal(evaluate_status(init_etr_state(c(5, 0, 0))), "DREAD")
+# --- L4 drift required ------------------------------------------------
+test_case("L4: etr_step refuses to invent drift", function() {
+  expect_error(etr_step(init_etr_state()), "drift must be supplied")
 })
 
-test_case("evaluate_status magnitude exactly 15.0 -> FUNCTIONAL", function() {
-  expect_equal(evaluate_status(init_etr_state(c(15, 0, 0))), "FUNCTIONAL")
+# --- L6 Z-path --------------------------------------------------------
+test_case("L6: z<0 -> alimentation (lattice); z>=0 -> transmutation (evolution)", function() {
+  expect_equal(determine_system_update_path(init_etr_state(c(0, 0, -3))), "LATTICE_REINFORCEMENT")
+  expect_equal(determine_system_update_path(init_etr_state(c(0, 0, 0))),  "EXPERIMENTAL_EVOLUTION")
+  expect_equal(determine_system_update_path(init_etr_state(c(0, 0, 7))),  "EXPERIMENTAL_EVOLUTION")
 })
 
-test_case("evaluate_status magnitude exactly 35.0 -> BLUR", function() {
-  expect_equal(evaluate_status(init_etr_state(c(35, 0, 0))), "BLUR")
-})
-
-test_case("evaluate_status magnitude exactly 50.0 -> INCOHERENT", function() {
-  expect_equal(evaluate_status(init_etr_state(c(50, 0, 0))), "INCOHERENT")
-})
-
-# --- evaluate_status: mid-band values ---
-test_case("evaluate_status magnitude 10 -> DREAD", function() {
-  expect_equal(evaluate_status(init_etr_state(c(10, 0, 0))), "DREAD")
-})
-
-test_case("evaluate_status magnitude 25 -> FUNCTIONAL", function() {
-  expect_equal(evaluate_status(init_etr_state(c(25, 0, 0))), "FUNCTIONAL")
-})
-
-test_case("evaluate_status magnitude 40 -> BLUR", function() {
-  expect_equal(evaluate_status(init_etr_state(c(40, 0, 0))), "BLUR")
-})
-
-test_case("evaluate_status magnitude 60 -> INCOHERENT", function() {
-  expect_equal(evaluate_status(init_etr_state(c(60, 0, 0))), "INCOHERENT")
-})
-
-# --- determine_system_update_path: Z-axis governs the generative path ---
-test_case("determine_system_update_path z > 0 -> LATTICE_REINFORCEMENT", function() {
-  expect_equal(determine_system_update_path(init_etr_state(c(0, 0, 7))), "LATTICE_REINFORCEMENT")
-})
-
-test_case("determine_system_update_path z exactly 0 -> LATTICE_REINFORCEMENT", function() {
-  expect_equal(determine_system_update_path(init_etr_state(c(0, 0, 0))), "LATTICE_REINFORCEMENT")
-})
-
-test_case("determine_system_update_path z < 0 -> EXPERIMENTAL_EVOLUTION", function() {
-  expect_equal(determine_system_update_path(init_etr_state(c(0, 0, -3))), "EXPERIMENTAL_EVOLUTION")
-})
-
-# --- shift_coordinate: toroidal wrap-around within [-bound, bound] ---
-test_case("shift_coordinate wraps positive overflow on X (45 + 10 -> -45)", function() {
-  s <- shift_coordinate(init_etr_state(c(45, 0, 0)), c(10, 0, 0))
-  expect_equal(s$coordinate, c(-45, 0, 0))
-})
-
-test_case("shift_coordinate wraps negative overflow on X (-45 + -10 -> 45)", function() {
-  s <- shift_coordinate(init_etr_state(c(-45, 0, 0)), c(-10, 0, 0))
-  expect_equal(s$coordinate, c(45, 0, 0))
-})
-
-test_case("shift_coordinate does not wrap an in-bounds shift", function() {
-  s <- shift_coordinate(init_etr_state(c(10, 5, -5)), c(5, 5, 5))
-  expect_equal(s$coordinate, c(15, 10, 0))
+# --- status -----------------------------------------------------------
+test_case("etr_status: per-axis zone vector", function() {
+  st <- etr_status(init_etr_state(c(25, 10, 40)))
+  expect_equal(st, c("IN_BAND", "SOFT", "INCOH"))
 })
 
 test_summary()
