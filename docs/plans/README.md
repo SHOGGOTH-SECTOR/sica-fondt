@@ -30,7 +30,7 @@ Every `NN-<organ>.md` has the same 10 sections:
 | A5 | Priors database | Drive-Box | structure WORKING | R | [A5](A5-priors.md) |
 | A6 | Eth-Int driver | Drive-Box | structure WORKING · numbers DISOWNED | R | [A6](A6-ethint.md) |
 | A7 | Conviction array | Drive-Box / Eth-Int | DESIGN-FIRST | R | [A7](A7-conviction-array.md) |
-| A8 | ETR (torus) | Drive-Box | SCAFFOLD | Octave | [A8](A8-etr.md) |
+| A8 | ETR (torus) | Drive-Box | five-zone law fitted · 26/0/1 (+ R port) | Octave · R | [A8](A8-etr.md) |
 | B1 | Tarot deck hi-fi emulator | Identity | exists (defunct-flagged) | TBD | _wave 1_ |
 | B2 | SOUL.md identity + Big-3 | Identity | exists (defunct-flagged) | TBD | _wave 1_ |
 | B3 | Celtic Cross spread | Identity | exists (defunct-flagged) | TBD | _wave 1_ |

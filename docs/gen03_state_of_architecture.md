@@ -77,7 +77,7 @@ Four drivers, independent, not where the self lives. Outputs reach the Brain (co
 | **Energy (E)** | finitude that gives choice weight + rest/restoration | **reconceived** — keep finitude-in-the-moment, drop depletion-unto-death; no unrecoverable state. Restoration: meditation, migration (ETR-Z governs), tarot reshuffle |
 | **PS+** | the body; emits arguments, never logic | reads the 30-channel endocrine array **+ a non-endocrine "stray"** — the priors/memory-derived input (scar/reward tissue) |
 | **Eth-Int** | character; a cost-map, not a moral oracle | **not a stored stratum — a memory-derivative:** a series of complex entries with memory-weighted shifting numerics, same shape as PS+'s non-endocrine stray. Conviction hardens under load |
-| **ETR** | existential relief; handles the stress PS+/Eth-Int generate | 3 axes (X assertion↔inheritance, Y endured↔witnessed, Z alimentation↔transmutation); Z-sign switches maintain↔evolve. **Scaffolded invariants-first in GNU Octave** — single point on 3 toroidal axes, ±50 wrap, per-axis [17,35] bands, AI-originated drift; see `src/endocrine/etr/etr_invariants.md` |
+| **ETR** | the Relief of Existential Temporality — apparatus for *not seeking death*; handles the stress PS+/Eth-Int generate | 3 toroidal axes — X assertion↔inheritance = provenance/continuity (**why**); Y endured↔witnessed = burden, my↔our (**how**); Z alimentation↔transmutation = double-down↔dodge / maintain↔evolve (**how**; Z-sign at migration). **Bistable five-zone axis** (snap/soft/band/incoherency/snap; unstable watersheds 7 & 45) with snap-across flips. **Implemented & tested** — Octave (`etr.m`, 26/0/1) + R port (`driver_etr.R`, 31); only L5 coupling open. See `src/endocrine/etr/etr_invariants.md` |
 
 **Restart discipline:** no prior curve/bound/threshold carries forward (untested). Rebuild invariants-first: laws → tests → fit constants. Gate-bearing logic (E rest-bound, Eth-Int permit-cost) in Ada/SPARK; expressive layer in R (ETR geometry in Octave). E/ETR numbers → **C1**.
 
@@ -154,7 +154,7 @@ Surfaced by red-lining a flowchart of my model of the polity. Parked intact-but-
 2. **Ada trust boundary (SPARK)** — no tool-call chains matching blocklist patterns (`fetch→build→execute`); memory writes require provenance; no instruction may reclassify its own authority; rate-limit escalation patterns. Threat specimens kept only as a study corpus.
 
 ## 13. OPEN / STUB register · C1
-**Body:** the medium/"blood" · Level1 · idle-drift mechanism (*ETR drift provenance now defined — SAE→EthInt→stress endomotiv; which endomotiv + reshuffle threshold still open*) · E/ETR invariants & numbers (*ETR scaffolded invariants-first in Octave; RESTORE_GAIN + coupling unfitted*).
+**Body:** the medium/"blood" · Level1 · idle-drift mechanism (*ETR drift provenance now defined — SAE→EthInt→stress endomotiv; which endomotiv + reshuffle threshold still open*) · E/ETR invariants & numbers (*ETR five-zone law implemented & tested in Octave + R port; only L5 coupling unfitted*).
 **Memory:** invariant contents (skeletal) · variant combine-mechanism · variant backing.
 **Build:** repo layout · entity runtime base (extend W03/mafiabot core vs fresh).
 **Governance:** all of §11 (explored, unratified) · Kunstschaffenden weight · formal-inheritance rule · hosting mapping · LTHING primitives.
