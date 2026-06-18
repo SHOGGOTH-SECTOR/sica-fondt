@@ -6,11 +6,13 @@ explicit that organs communicate by **perfusion, not direct wiring**; this is th
 **unnamed and unimplemented**.
 
 ## 2. Status / certainty
-DESIGN-FIRST · **C1** (named structurally only; no backing, no name).
+SCAFFOLD · named **Ichor**, Pony starting scaffold at `src/ichor/` (envelope + broker + D1 barrier +
+C seam). Not yet compiled here (no `ponyc` in-env). Backing/transport now C3.
 
 ## 3. Language & location
-TBD. Likely a message/IPC substrate (the R↔Octave↔Ada↔Guile organs must interoperate across languages),
-so a language-neutral transport (e.g. line-delimited JSON, or a small broker) is the leading shape.
+**Pony** (`src/ichor/`) — actor-model broker; capabilities give data-race-free sends. Transport split:
+Pony actors = the broker (hosted on the D1 barrier) + **C/Fortran** for the Ada-side binding
+(`ichor_ada_shim.c`). Cross-language organs (R/Octave/Ada/Guile) connect to the broker.
 
 ## 4. Does / does-not
 - **Does:** carry organ secretions/injections between organs, always *through* Ada (D1) before reaching the Brain.
@@ -38,4 +40,6 @@ Everything rides it; nothing it depends on. *Stub today:* in-process function ca
 Round-trip an envelope between two stub organs; assert it passes through a D1 `admit` check; provenance preserved.
 
 ## 10. Open items
-- **The name.** The transport choice. Whether RDE drives idle-perfusion. (All C1.)
+- ~~The name~~ (**Ichor**). ~~Transport choice~~ (**Pony broker + C/Fortran Ada seam**).
+- Build `ichor_ada_shim.c` into `libichor_ada` + wire `Barrier.admit` to Ada `Trust_Guard` (needs ponyc).
+- Socket layer for out-of-process organs (in-process routing works today). Whether RDE drives idle-perfusion (C1).
