@@ -1,11 +1,8 @@
-"""
-Ichor smoke wiring (D2 §9 test): round-trip an envelope between two stub organs
-through the D1 admit check, and confirm an unscreened external payload is rejected
-at the barrier.
-
-Build (where ponyc exists):   ponyc src/ichor -o build
-Run:                          ./build/ichor
-"""
+// Ichor smoke wiring (D2 §9 test): round-trip an envelope between two stub organs
+// through the D1 admit check, and confirm an unscreened external payload is
+// rejected at the barrier.
+//
+// Build:  ponyc src/ichor -o build      Run:  ./build/ichor
 
 actor Main
   new create(env: Env) =>

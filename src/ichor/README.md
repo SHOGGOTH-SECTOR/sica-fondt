@@ -22,15 +22,19 @@ seam (`ichor_ada_shim.c`) is where it crosses into the Ada border.
   reject an unscreened external payload, perfuse organ→organ.
 - `ichor_ada_shim.c` — the C/Fortran binding seam to the Ada D1 border (stub).
 
-## Build / run (needs ponyc — NOT installed in this env)
+## Build / run
 ```
-ponyc src/ichor -o build      # compile the package
+ponyc src/ichor -o build      # compile the package (built clean on ponyc 0.64.0)
 ./build/ichor                  # run the smoke wiring
 ```
+Expected output: internal secretion soul→brain perfused, external→brain rejected
+at D1, brain→soul cross-perfused. Install ponyc via `ponyup` if absent (the env
+is ephemeral, so the toolchain is per-session).
 To wire the real Ada border: build `ichor_ada_shim.c` into `libichor_ada`, enable
 `use "lib:ichor_ada"` + the `admit_via_ada` body in `barrier.pony`, and point the
 shim at an Ada `Trust_Guard.Screen_Inbound` export.
 
 ## Status
-Starting scaffold. Pony + Fortran toolchains are absent in this environment, so
-this is design-complete source to build where Pony exists — not yet compiled here.
+Starting scaffold — **compiles and runs** (ponyc 0.64.0). The Ada-side shim
+(`ichor_ada_shim.c`) is still a stub; wiring `Barrier.admit` to the real Ada
+`Trust_Guard` is the next step.

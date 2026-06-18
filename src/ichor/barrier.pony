@@ -1,15 +1,13 @@
-"""
-The blood-brain barrier (D1). `Barrier.admit` is the screening decision every
-Brain-bound envelope must pass — perfusion law L2: everything reaching the Brain
-crosses Ada (D1) first.
-
-Real wiring crosses into Ada's `Trust_Guard` (provenance + blocklist + rate) via
-the C/Fortran seam (`ichor_ada_shim.c`). Until that binding is built, this mirrors
-the provenance law in pure Pony so the broker is testable standalone.
-
-To switch to the Ada border, add `use "lib:ichor_ada"` and replace the body of
-`admit` with the FFI call sketched below.
-"""
+// The blood-brain barrier (D1). `Barrier.admit` is the screening decision every
+// Brain-bound envelope must pass — perfusion law L2: everything reaching the
+// Brain crosses Ada (D1) first.
+//
+// Real wiring crosses into Ada's `Trust_Guard` (provenance + blocklist + rate)
+// via the C/Fortran seam (`ichor_ada_shim.c`). Until that binding is built, this
+// mirrors the provenance law in pure Pony so the broker is testable standalone.
+//
+// To switch to the Ada border, add `use "lib:ichor_ada"` and replace the body of
+// `admit` with the FFI call sketched below.
 
 primitive Barrier
   fun admit(envl: Envelope): Bool =>

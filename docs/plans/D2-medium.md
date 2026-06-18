@@ -6,8 +6,8 @@ explicit that organs communicate by **perfusion, not direct wiring**; this is th
 **unnamed and unimplemented**.
 
 ## 2. Status / certainty
-SCAFFOLD · named **Ichor**, Pony starting scaffold at `src/ichor/` (envelope + broker + D1 barrier +
-C seam). Not yet compiled here (no `ponyc` in-env). Backing/transport now C3.
+SCAFFOLD · named **Ichor**, Pony scaffold at `src/ichor/` (envelope + broker + D1 barrier + C seam).
+**Compiles & runs** on ponyc 0.64.0 (smoke wiring green). Backing/transport now C3.
 
 ## 3. Language & location
 **Pony** (`src/ichor/`) — actor-model broker; capabilities give data-race-free sends. Transport split:
