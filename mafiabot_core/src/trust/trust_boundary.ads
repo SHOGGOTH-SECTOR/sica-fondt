@@ -7,12 +7,12 @@ package Trust_Boundary
   with SPARK_Mode => On
 is
 
-   --  Inter-organ message (same type used by Ada_Medium routing)
-   type Organ_Message is record
-      Source      : Organ_Id         := Ada_Medium;
-      Destination : Organ_Id         := Ada_Medium;
-      Provenance  : Provenance_Tag   := System_Internal;
-      Payload     : Bounded_Text;
+   --  A message crossing the border (D1). Ada does not route by organ -- that
+   --  is Ichor's job -- so this carries only the source/trust tag the gate
+   --  screens by, plus the (pre-digested) payload to scan.
+   type Border_Message is record
+      Provenance : Provenance_Tag := System_Internal;
+      Payload    : Bounded_Text;
    end record;
 
    --  -----------------------------------------------------------------------
@@ -68,7 +68,7 @@ is
    --  Message check (combines provenance + blocklist)
 
    procedure Check_Message
-     (Msg    : in  Organ_Message;
+     (Msg    : in  Border_Message;
       Result : out Operation_Status)
    with Post => (if Msg.Provenance = System_Internal then Result = OK);
 
@@ -79,11 +79,11 @@ is
       pragma Priority (System.Priority'Last);
 
       procedure Screen_Inbound
-        (Msg    : in  Organ_Message;
+        (Msg    : in  Border_Message;
          Status : out Operation_Status);
 
       procedure Screen_Outbound
-        (Msg    : in  Organ_Message;
+        (Msg    : in  Border_Message;
          Status : out Operation_Status);
 
    private
