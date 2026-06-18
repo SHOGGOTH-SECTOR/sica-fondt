@@ -3,6 +3,7 @@
 --  screening happens in proven code (Ada_Medium / Trust_Boundary) before any
 --  procedure here is called. The global No_Exceptions restriction still applies,
 --  so I/O is written to avoid raising (End_Of_File guards, bounded Get_Line).
+-- [we should probly reconsider this as the first layer then]
 with Ada.Text_IO;
 with Ada.Environment_Variables;
 
