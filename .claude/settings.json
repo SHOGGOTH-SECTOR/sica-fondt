@@ -1,4 +1,14 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(command -v *)",
+      "Bash(ponyc --version)",
+      "Bash(alr --version)",
+      "Bash(cobc --version)",
+      "Bash(gnatmake --version)",
+      "Bash(gprbuild --version)"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {

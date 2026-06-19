@@ -24,3 +24,13 @@ actor Main
     // Organ-to-organ perfusion (not Brain-bound): delivered directly.
     broker.route(Envelope(Brain, Soul, OrganSecretion,
       "reshuffle: cross-only"))
+
+    // --- cerebellum harness plugged into the bus (C1 / OpenHermes) ---
+    // Swap StubLLM for a real OpenHermes client and nothing else changes.
+    let cerebellum = CerebellumHarness(env.out, broker, StubLLM, 2)
+    broker.register(Cerebellum, cerebellum)
+
+    // A user turn enters the bus addressed to the cerebellum; it sequences the
+    // passes and emits the synthesis back toward the Brain (crossing D1).
+    broker.route(Envelope(AdaBorder, Cerebellum, UserInput,
+      "user turn: what is my ascendant?"))

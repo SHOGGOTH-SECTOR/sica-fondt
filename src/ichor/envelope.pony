@@ -9,7 +9,7 @@ Envelope is `class val`: immutable and sendable between actors.
 """
 
 type OrganId is
-  ( DriveBox | EnergyTorus | Soul | Metacog | Brain
+  ( DriveBox | EnergyTorus | Soul | Metacog | Brain | Cerebellum
   | AdaBorder | Storage | MiniRag | UnknownOrgan )
 
 primitive DriveBox
@@ -22,6 +22,8 @@ primitive Metacog
   fun string(): String => "metacog"
 primitive Brain
   fun string(): String => "brain"
+primitive Cerebellum
+  fun string(): String => "cerebellum"
 primitive AdaBorder
   fun string(): String => "ada_border"
 primitive Storage
