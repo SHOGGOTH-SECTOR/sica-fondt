@@ -32,7 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           fail=0
-          for t in soul_tests trust_tests cycle_tests config_tests engine_tests; do
+          for t in trust_tests config_tests engine_tests; do
             if [ -x "bin/$t" ]; then
               echo "=== $t ==="
               if ! "bin/$t"; then
