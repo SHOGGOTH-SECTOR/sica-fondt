@@ -39,7 +39,7 @@ drive_snapshot <- function(state) {
     alive            = is_alive(state$energy),
     existential_load = reality$existential_load,
     arguments        = reality$arguments,
-    etr_status       = evaluate_status(state$etr),
+    etr_status       = paste(etr_status(state$etr), collapse = "/"),
     update_path      = determine_system_update_path(state$etr)
   )
 }
@@ -89,7 +89,7 @@ drive_box_evaluate <- function(state, action_tags = character(0),
     true_cost        = true_cost,
     existential_load = ps_load,
     eth_penalty      = eth_penalty,
-    etr_status       = evaluate_status(state$etr),
+    etr_status       = paste(etr_status(state$etr), collapse = "/"),
     update_path      = determine_system_update_path(state$etr),
     arguments        = reality$arguments
   )

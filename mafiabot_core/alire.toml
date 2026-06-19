@@ -8,9 +8,9 @@ maintainers-logins = ["sybad"]
 # here, and neither "Proprietary TBD" nor a LicenseRef- custom id is accepted by
 # the pinned Alire, so the (optional) field is left out until a license is chosen.
 
-[[depends-on]]
-gnat_sockets = "^1.0.0"
-spark_lemmas = "^1.0.0"
+# No external crate deps: nothing here `with`s GNAT.Sockets or SPARK.Lemmas.
+# (They were declared for the deleted sockets stub and never used.) Re-add as
+# real needs appear.
 
 # Build modes wildcard "*". Restrictions are NOT a build-switch: see gnat.adc.
 [build-switches]

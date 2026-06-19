@@ -37,11 +37,9 @@ begin
 
    --  System-internal messages always pass Check_Message (proven invariant).
    declare
-      M : constant Trust_Boundary.Organ_Message :=
-        (Source      => Ada_Medium,
-         Destination => Soul_Organ,
-         Provenance  => System_Internal,
-         Payload     => Make_Text ("execute"));
+      M : constant Trust_Boundary.Border_Message :=
+        (Provenance => System_Internal,
+         Payload    => Make_Text ("execute"));
       R : Operation_Status;
    begin
       Trust_Boundary.Check_Message (M, R);

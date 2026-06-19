@@ -1,50 +1,15 @@
---  Shared type definitions for the Gen.03 organ-systems body.
---  All downstream packages with Mafiabot_Types.
+--  Border (D1) shared types. Ada here is the GATE only: it screens messages
+--  crossing toward the Brain. It deliberately does NOT model organs (those are
+--  R / Octave / Pony / Guile), the inference cycle (cognition), or drive/affect
+--  math (the organs' domain, done in floats). The gate needs exactly three
+--  things: a source/trust tag, a status code, and a bounded payload to scan.
 package Mafiabot_Types
   with SPARK_Mode => On
 is
 
-   --  Organ identification
-   type Organ_Id is (Ada_Medium, Drive_Box, Soul_Organ, Mini_Rag, LLM_Cycle,
-                     Trust_Layer, Protocol_Layer);
-
-   --  Inference cycle steps: 23-step flow from INPUT to Coherence_Check
-   type Cycle_Step is range 1 .. 23;
-
-   --  Bounded string (stack-allocated; no heap, no finalization)
-   Max_Text_Length : constant := 4096;
-   subtype Text_Length is Natural range 0 .. Max_Text_Length;
-
-   type Bounded_Text is record
-      Data   : String (1 .. Max_Text_Length) := (others => ' ');
-      Length : Text_Length := 0;
-   end record;
-
-   --  Return status (replaces exceptions under No_Exceptions profile)
-   type Operation_Status is (
-      OK,
-      Error_Invalid_State,
-      Error_Overflow,
-      Error_Underflow,
-      Error_Blocked,          --  tool-locked (energy below threshold)
-      Error_Trust_Violation,
-      Error_Config,
-      Error_Already_Init,     --  Big-3 already set
-      Error_Deck_Empty
-   );
-
-   --  Fixed-point numerics (SPARK-provable; no Float)
-   type Drive_Value  is delta 0.001 range -100.0 .. 100.0;
-   type Ratio_Value  is delta 0.001 range   0.0 ..   1.0;
-   type Cost_Value   is delta 0.001 range   0.0 .. 1000.0;
-   type Axis_Value   is delta 0.01  range  -1.0 ..   1.0;
-   --  Pin 'Small to 0.01 so the bounds are +/-100 units (fits a byte) rather
-   --  than GNAT's default 2**-7 small, which would place 1.0 at exactly 128 --
-   --  one past a signed-8-bit base range and rejected as "high bound outside
-   --  type range".
-   for Axis_Value'Small use 0.01;
-
-   --  Provenance tags — trust boundary uses these to block reclassification
+   --  Source / trust tag. The border screens by this: external-origin content
+   --  is never trusted; System_Internal bypasses the blocklist. A message may
+   --  not reclassify its own provenance (see Trust_Boundary.Validate_Provenance).
    type Provenance_Tag is (
       User_Input,
       System_Internal,
@@ -54,8 +19,30 @@ is
       Config_Static
    );
 
-   --  Helpers
+   --  Return status (replaces exceptions under the No_Exceptions profile).
+   type Operation_Status is (
+      OK,
+      Error_Invalid_State,
+      Error_Overflow,
+      Error_Underflow,
+      Error_Blocked,          --  screened out: injection pattern hit
+      Error_Trust_Violation,  --  provenance reclassification attempt
+      Error_Config
+   );
 
+   --  Payload buffer. By the time content reaches the border it has already
+   --  been pre-digested upstream into bounded RAG context, so a stack-bounded
+   --  buffer is the right shape: the gate scans it for prompt-injection
+   --  patterns, it does not stream raw input. No heap, no finalization.
+   Max_Text_Length : constant := 4096;
+   subtype Text_Length is Natural range 0 .. Max_Text_Length;
+
+   type Bounded_Text is record
+      Data   : String (1 .. Max_Text_Length) := (others => ' ');
+      Length : Text_Length := 0;
+   end record;
+
+   --  Helpers
    function Make_Text (S : String) return Bounded_Text
      with Pre => S'Length <= Max_Text_Length;
 

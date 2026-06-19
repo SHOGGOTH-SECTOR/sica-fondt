@@ -29,8 +29,8 @@ test_case("drive_snapshot reports a coherent read-only aggregate", function() {
   expect_false(snap$tool_locked, "not tool-locked at full energy")
   expect_true(snap$existential_load > 0, "primed body has positive load")
   expect_true(length(snap$arguments) > 0, "arguments emitted")
-  expect_equal(snap$etr_status, "DISASTROUS", label = "origin coordinate -> DISASTROUS")
-  expect_equal(snap$update_path, "LATTICE_REINFORCEMENT", label = "z=0 -> lattice")
+  expect_equal(snap$etr_status, "IN_BAND/IN_BAND/IN_BAND", label = "default coord -> all axes in band")
+  expect_equal(snap$update_path, "EXPERIMENTAL_EVOLUTION", label = "z=25 (>=0) -> transmutation/evolution")
 })
 
 test_case("aligned action is far cheaper than its antithetical mirror", function() {
@@ -110,7 +110,7 @@ test_case("input slot: empty body still emits driver + soul signals", function()
   res <- drive_box_input_slot(db, input_text = "", tarot_spread = character(0))
   expect_true(grepl("[SOUL: SOUL.md]", res$slot, fixed = TRUE), "soul present")
   expect_true(grepl("[E ratio=1.00", res$slot, fixed = TRUE), "energy present at full")
-  expect_true(grepl("[ETR status=DISASTROUS", res$slot, fixed = TRUE), "etr present")
+  expect_true(grepl("[ETR status=IN_BAND", res$slot, fixed = TRUE), "etr present")
   expect_equal(res$input, res$slot, label = "no input_text -> input == slot")
 })
 

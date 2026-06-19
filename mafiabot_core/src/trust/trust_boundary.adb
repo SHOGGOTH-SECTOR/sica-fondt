@@ -1,6 +1,12 @@
+--  SPARK trust boundary body — defense model §8.2.
+--  No heap, no regex, no exceptions: naive substring search, tick-based rate
+--  limiting, provenance equality. Matches the contracts in the spec.
 package body Trust_Boundary
   with SPARK_Mode => On
 is
+
+   --  --------------------------------------------------------------------
+   --  Naive substring search — O(n*m), no heap, no regex.
 
    function Matches_Blocklist
      (Text : Bounded_Text;
@@ -8,28 +14,26 @@ is
    is
    begin
       for I in Blocklist_Index loop
-         declare
-            P : constant Pattern_Entry := List (I);
-         begin
-            if not P.Active or else P.Pattern_Len = 0 then
-               goto Next_Pattern;
-            end if;
-            --  Naive substring search
-            if Text.Length >= P.Pattern_Len then
-               for J in 1 .. Text.Length - P.Pattern_Len + 1 loop
-                  if Text.Data (J .. J + P.Pattern_Len - 1) =
-                    P.Pattern (1 .. P.Pattern_Len)
-                  then
+         if List (I).Active and then List (I).Pattern_Len > 0
+           and then List (I).Pattern_Len <= Text.Length
+         then
+            declare
+               P_Len : constant Pattern_Length := List (I).Pattern_Len;
+               Pat   : constant String := List (I).Pattern (1 .. P_Len);
+            begin
+               for Start in 1 .. (Text.Length - P_Len + 1) loop
+                  if Text.Data (Start .. Start + P_Len - 1) = Pat then
                      return True;
                   end if;
                end loop;
-            end if;
-         end;
-         <<Next_Pattern>>
-         null;
+            end;
+         end if;
       end loop;
       return False;
    end Matches_Blocklist;
+
+   --  --------------------------------------------------------------------
+   --  Provenance enforcement: a message may not reclassify its authority.
 
    procedure Validate_Provenance
      (Source  : in  Provenance_Tag;
@@ -37,12 +41,15 @@ is
       Result  : out Operation_Status)
    is
    begin
-      if Source /= Claimed then
-         Result := Error_Trust_Violation;
-      else
+      if Source = Claimed then
          Result := OK;
+      else
+         Result := Error_Trust_Violation;
       end if;
    end Validate_Provenance;
+
+   --  --------------------------------------------------------------------
+   --  Tick-based rate limiting (no wall-clock).
 
    procedure Check_Rate
      (Limit  : in out Rate_Limit;
@@ -50,74 +57,73 @@ is
       Result :    out Operation_Status)
    is
    begin
-      --  Roll window if we've passed the window boundary
-      if Tick - Limit.Window_Start >= Limit.Window_Size then
+      --  Open a fresh window if the clock reset or the window has elapsed.
+      if Tick < Limit.Window_Start
+        or else (Tick - Limit.Window_Start) >= Limit.Window_Size
+      then
          Limit.Window_Start  := Tick;
          Limit.Current_Count := 0;
       end if;
 
-      if Limit.Current_Count >= Limit.Max_Per_Window then
-         Result := Error_Blocked;
-      else
+      if Limit.Current_Count < Limit.Max_Per_Window then
          Limit.Current_Count := Limit.Current_Count + 1;
          Result := OK;
+      else
+         Result := Error_Blocked;
       end if;
    end Check_Rate;
 
+   --  --------------------------------------------------------------------
+   --  Combined message check: system-internal always passes (proven
+   --  invariant); everything else is screened against the blocklist.
+
    procedure Check_Message
-     (Msg    : in  Organ_Message;
+     (Msg    : in  Border_Message;
       Result : out Operation_Status)
    is
    begin
-      --  System_Internal always passes (SPARK Post condition)
       if Msg.Provenance = System_Internal then
          Result := OK;
-         return;
+      elsif Matches_Blocklist (Msg.Payload, Default_Blocklist) then
+         Result := Error_Blocked;
+      else
+         Result := OK;
       end if;
-
-      --  Check blocklist
-      if Matches_Blocklist (Msg.Payload, Default_Blocklist) then
-         Result := Error_Trust_Violation;
-         return;
-      end if;
-
-      Result := OK;
    end Check_Message;
+
+   --  --------------------------------------------------------------------
+   --  The guard: rate-limit then screen, on a shared tick.
 
    protected body Trust_Guard is
 
       procedure Screen_Inbound
-        (Msg    : in  Organ_Message;
+        (Msg    : in  Border_Message;
          Status : out Operation_Status)
       is
          Rate_Status : Operation_Status;
-         Msg_Status  : Operation_Status;
       begin
          Tick := Tick + 1;
          Check_Rate (Inbound_Rate, Tick, Rate_Status);
          if Rate_Status /= OK then
             Status := Rate_Status;
-            return;
+         else
+            Check_Message (Msg, Status);
          end if;
-         Check_Message (Msg, Msg_Status);
-         Status := Msg_Status;
       end Screen_Inbound;
 
       procedure Screen_Outbound
-        (Msg    : in  Organ_Message;
+        (Msg    : in  Border_Message;
          Status : out Operation_Status)
       is
          Rate_Status : Operation_Status;
-         Msg_Status  : Operation_Status;
       begin
          Tick := Tick + 1;
          Check_Rate (Outbound_Rate, Tick, Rate_Status);
          if Rate_Status /= OK then
             Status := Rate_Status;
-            return;
+         else
+            Check_Message (Msg, Status);
          end if;
-         Check_Message (Msg, Msg_Status);
-         Status := Msg_Status;
       end Screen_Outbound;
 
    end Trust_Guard;
