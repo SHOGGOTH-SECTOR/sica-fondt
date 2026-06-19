@@ -50,6 +50,37 @@ actor OpenHermesClient is LLM
     // than perform an untested network call.
     respond("[openhermes " + _cfg.model + " @ " + _cfg.url + "] " + prompt)
 
+// --- config plumbing ------------------------------------------------------
+primitive EnvLookup
+  """Find KEY in an Env.vars array ("KEY=value" entries); None if absent."""
+  fun apply(vars: Array[String] val, key: String): (String | None) =>
+    for v in vars.values() do
+      let parts: Array[String] val = v.split_by("=", 2)
+      try
+        if parts(0)? == key then
+          return parts(1)?
+        end
+      end
+    end
+    None
+
+primitive PickLLM
+  """Plug-and-play model selection: OPENHERMES_URL picks the real client."""
+  fun apply(out: OutStream, vars: Array[String] val): LLM =>
+    match EnvLookup(vars, "OPENHERMES_URL")
+    | let url: String =>
+      let model =
+        match EnvLookup(vars, "OPENHERMES_MODEL")
+        | let m: String => m
+        else "openhermes"
+        end
+      out.print("[cerebellum] model: OpenHermes " + model + " @ " + url)
+      OpenHermesClient(OpenHermesConfig(url, model))
+    else
+      out.print("[cerebellum] model: StubLLM (set OPENHERMES_URL for a real model)")
+      StubLLM
+    end
+
 // --- the harness ----------------------------------------------------------
 actor CerebellumHarness is OrganReceiver
   let _out: OutStream

@@ -26,8 +26,10 @@ actor Main
       "reshuffle: cross-only"))
 
     // --- cerebellum harness plugged into the bus (C1 / OpenHermes) ---
-    // Swap StubLLM for a real OpenHermes client and nothing else changes.
-    let cerebellum = CerebellumHarness(env.out, broker, StubLLM, 2)
+    // Plug-and-play: PickLLM chooses the model from the environment
+    // (OPENHERMES_URL/MODEL -> real client, else StubLLM); nothing else changes.
+    let cerebellum =
+      CerebellumHarness(env.out, broker, PickLLM(env.out, env.vars), 2)
     broker.register(Cerebellum, cerebellum)
 
     // A user turn enters the bus addressed to the cerebellum; it sequences the
