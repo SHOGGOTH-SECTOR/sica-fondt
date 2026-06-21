@@ -26,7 +26,7 @@ External (world: user / network)
 │   • Hermes   (the OpenHermes agent — a peer here)        │
 │   • drive-box (A1)                                       │
 │   • mini-rag  (MUSCLE MEMORY — tool-shape recall, D3)    │
-│   • COBOL ontological structures (E1)                    │
+│   • COBOL invariant laws (E1 — the law vault)           │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -37,7 +37,8 @@ External (world: user / network)
   shape** for it — the tool schema (D3). HD associative recall of the learned
   form, like a hand pre-shaping its grip. It is **tool lookup**, not
   world-retrieval and not self-knowledge.
-- **E1 ontology** — INNER. What the brain **is** (the invariant COBOL structures).
+- **E1 invariant laws** — INNER. The immutable laws the system must obey, held
+  in COBOL vaults (the constitution). Not "ontology" — that was a bad paraphrase.
 
 ## The deck (B1) — integers + a table
 - **Shuffle kernel:** 169 × 2 = **338 integers**, shuffled + randomized → pure
@@ -56,7 +57,7 @@ not shared modules.
 | mini-rag (muscle memory / tool-shape recall) — *Fortran script #2* | Fortran | decided |
 | deck lookup table — *COBOL store #1* | COBOL | decided |
 | tool-schema store (mini-rag reads this) — *COBOL store #2* | COBOL | decided |
-| COBOL ontology / E1 (invariant structures, separate) | COBOL | given |
+| COBOL invariant laws / E1 (the law vault, separate) | COBOL | given |
 | drive-box (A1) | R | existing |
 | MoRAG / GoDAGRAG (outer) | Haskell or Crystal | open |
 | Hermes | OpenHermes agent (external model) | given |
@@ -70,10 +71,17 @@ not shared modules.
 - MoRAG/GoDAGRAG (outer) ≠ mini-rag (inner).
 - The deck is integers + a table; no fancy ADT language needed.
 
+## Inner-bus Ada — Jorvik
+The inner-bus Ada runs the **Jorvik** profile (same `gnat.adc` hardening as the
+border: `No_Exceptions`, `SPARK_Mode`, `No_Implicit_Dynamic_Code`). Shape:
+**protected object = mailbox/sync** (short, non-blocking — Jorvik forbids
+blocking in a protected action), **tasks = workers** that call into the organs
+(Fortran/COBOL/R/model via native interop) and may block.
+
 ## Open / to place
-- **COBOL store inventory:** confirmed two stores (deck table + tool-schema). Is
-  the **E1 ontology** a third COBOL store, or a different kind of COBOL structure
-  (vault) that isn't a "store"?
+- **COBOL inventory:** two lookup stores (deck table + tool-schema). Is the **E1
+  invariant-law vault** a third COBOL store, or a different kind of COBOL
+  structure that isn't a lookup "store"?
 - **MoRAG / GoDAGRAG language** (Haskell vs Crystal vs other).
 - Each outer organ's hand-off shape to Ada.
 - The stomach/economy organ's exact placement + which small model runs it.
