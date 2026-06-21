@@ -1,8 +1,8 @@
 # Gen.03 — concentric bus topology  *(DRAFT — captured live, correct freely)*
 
 Two rings around a membrane. Outer organs ride Ichor up to Ada; Ada is the
-gate; behind it the inner-brain bus carries the inner organs (Hermes among
-them). The world is outside; nothing reaches the inner ring without crossing Ada.
+gate and routes the inner bus; behind it the inner organs (Hermes among them).
+The world is outside; nothing reaches the inner ring without crossing Ada.
 
 ```
 External (world: user / network)
@@ -11,7 +11,7 @@ External (world: user / network)
 ┌─────────────────────────────────────────────────────────┐
 │ OUTER ORGANS                                             │
 │   • stomach / economy organ  (small-model operated;      │
-│       digests external input → RAG context)              │
+│       digests external input → context)                  │
 │   • microagents                                          │
 │   • SAE  (sparse autoencoder)                            │
 │   • MoRAG = GoDAGRAG                                     │
@@ -25,58 +25,55 @@ External (world: user / network)
 │   • metacog (C2)                                         │
 │   • Hermes   (the OpenHermes agent — a peer here)        │
 │   • drive-box (A1)                                       │
+│   • mini-rag  (MUSCLE MEMORY — tool-shape recall, D3)    │
 │   • COBOL ontological structures (E1)                    │
-│   • mini-rag   (the brain-side RAG — inner, NOT MoRAG)   │
 └─────────────────────────────────────────────────────────┘
 ```
 
-## Layers
-1. **External** — the world (user / network). Reaches in only via the outer ring.
-2. **Outer organs** — stomach/economy (small model), microagents, SAE,
-   **MoRAG / GoDAGRAG**.
-3. **Ichor (Pony)** — the **outer** bus; carries the outer organs up to Ada.
-   (Already scaffolded in `src/ichor/`.)
-4. **Ada (D1)** — the membrane between outer and inner; also routes the inner
-   bus. Screens everything crossing (blocklist / provenance / rate —
-   `Trust_Boundary`). Native COBOL (`Interfaces.COBOL`) + C interop.
-5. **Inner-brain bus** — **Ada-routed** (decided; not Pony). Native path to the
-   COBOL organs.
-6. **Inner organs** — soul, metacog, **Hermes**, drive-box, COBOL ontology,
-   **mini-rag**. Hermes is a peer here, not a separate core.
+## Three different "memories" — do NOT conflate
+- **MoRAG = GoDAGRAG** — OUTER. Reads the **world** (the graph of DAGs of RAGs).
+- **mini-rag** — INNER. **Muscle memory.** Pre-motor: before an action reaches
+  the actual hands (the real tools / effectors), mini-rag recalls the **right
+  shape** for it — the tool schema (D3). HD associative recall of the learned
+  form, like a hand pre-shaping its grip. It is **tool lookup**, not
+  world-retrieval and not self-knowledge.
+- **E1 ontology** — INNER. What the brain **is** (the invariant COBOL structures).
 
-## The two RAGs (do not conflate)
-- **mini-rag** — INNER, brain-side RAG.
-- **MoRAG = GoDAGRAG** — OUTER, the Graph of Directed Acyclic Graphs of RAGs.
+## The deck (B1) — integers + a table
+- **Shuffle kernel:** 169 × 2 = **338 integers**, shuffled + randomized → pure
+  RNG/permutation → **Fortran** (native to the Ada inner bus).
+- **Lookup table:** card meaning keyed by integer → **COBOL** indexed records.
 
-## The deck (B1) — it's just integers + a table
-- **Shuffle kernel:** 169 × 2 = **338 integers**, shuffled + randomized. Pure
-  RNG/permutation → **Fortran** (native to the Ada inner bus; integer arrays are
-  its home turf).
-- **Lookup table:** the card meaning (names, phases, synestries) is **static data
-  keyed by the integer** → **COBOL** indexed records (fits the COBOL ontology,
-  native to Ada) — not JSON.
-- So the deck is a Fortran shuffler + a COBOL table, both native on the Ada bus.
+## Language map
+Two **distinct Fortran scripts** and (at least) two **distinct COBOL stores** —
+not shared modules.
 
-## Language map (settled / proposed)
 | Component | Language | Status |
 |---|---|---|
 | Ichor (outer bus) | Pony | built |
-| Ada (membrane + inner bus router) | Ada/SPARK | decided |
-| deck shuffle | Fortran | proposed |
-| deck lookup table | COBOL | proposed |
-| COBOL ontology (E1) | COBOL | given |
+| Ada (membrane + inner-bus router) | Ada/SPARK | decided |
+| deck shuffle — *Fortran script #1* | Fortran | decided |
+| mini-rag (muscle memory / tool-shape recall) — *Fortran script #2* | Fortran | decided |
+| deck lookup table — *COBOL store #1* | COBOL | decided |
+| tool-schema store (mini-rag reads this) — *COBOL store #2* | COBOL | decided |
+| COBOL ontology / E1 (invariant structures, separate) | COBOL | given |
 | drive-box (A1) | R | existing |
-| MoRAG / GoDAGRAG | Haskell or Crystal | open |
+| MoRAG / GoDAGRAG (outer) | Haskell or Crystal | open |
 | Hermes | OpenHermes agent (external model) | given |
 
 ## Corrections baked in (vs earlier wrong models)
 - Hermes is an inner organ on the inner bus — not external, not a separate core.
 - Ichor is the OUTER bus (organs → Ada), not the brain bus.
 - Inner bus is **Ada-routed**, not Pony.
-- **mini-rag (inner) ≠ MoRAG/GoDAGRAG (outer).**
+- **mini-rag = muscle memory / tool-shape recall (D3)** — it reads the
+  **tool-schema** COBOL store, NOT the ontology, and is NOT the MoRAG.
+- MoRAG/GoDAGRAG (outer) ≠ mini-rag (inner).
 - The deck is integers + a table; no fancy ADT language needed.
 
 ## Open / to place
+- **COBOL store inventory:** confirmed two stores (deck table + tool-schema). Is
+  the **E1 ontology** a third COBOL store, or a different kind of COBOL structure
+  (vault) that isn't a "store"?
 - **MoRAG / GoDAGRAG language** (Haskell vs Crystal vs other).
 - Each outer organ's hand-off shape to Ada.
-- Where the stomach/economy organ sits exactly and what its small model is.
+- The stomach/economy organ's exact placement + which small model runs it.
