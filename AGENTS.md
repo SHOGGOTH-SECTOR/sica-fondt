@@ -1,28 +1,21 @@
 # AGENTS.md
 
-How to use the documents in this repo — the prose signpost. The full
-directory/document index lives in [`docmap.yaml`](docmap.yaml) (machine-readable;
-start there to find which file covers what, the newcomer read-order, and the
-organ list). Working agreements and invariant text: [`CLAUDE.md`](CLAUDE.md).
-Keep this file lean (≤100 lines) — depth lives in the docs it points to.
+**Instructions** for agents (any tool) working in this repo. The **map** — where
+everything lives: read-order, doc routing, the organ list, build commands — is
+[`docmap.yaml`](docmap.yaml). Claude-specific guidance: [`CLAUDE.md`](CLAUDE.md).
 
-## Scope & nesting
+## How these files work
+- AGENTS.md files are **instructions, and they nest**: an agent reads the
+  *nearest* one walking up from the file it's editing. Each organ has its own
+  (listed in `docmap.yaml` → `organs`).
+- Keep each file to **instructions for its scope**, non-overlapping. Locations
+  belong in `docmap.yaml`, not in prose here — don't duplicate the map.
 
-`AGENTS.md` is **hierarchical** — an agent reads the *nearest* one walking up
-from the file it's editing. So this root file is the **map**; each organ owns a
-scoped `AGENTS.md` with its *local* build/run/invariants (see `docmap.yaml` →
-`organs` for the list and paths).
-
-Keep scopes **non-overlapping**: the root signposts, the organs detail. Don't
-restate the root in an organ file (that's how the two drift) — link up instead.
-
-## Rules of the road
-
+## Rules
 - **Design before code.** The design docs are the source of truth; code follows.
-- **Honor the invariants** (S1/S2/S3 in `CLAUDE.md`) — the Ada border and the
-  COBOL vault are not optional.
-- **Verify, then commit.** Run the smoke driver (`docmap.yaml` → `smoke`); commit
-  + push before leaving (the container is ephemeral).
-- **Keep the docs honest.** If you change behavior, update the doc — and the
-  `docmap.yaml` entry — that describes it. Keep `CLAUDE.md` ≤200 lines and this
-  file ≤100.
+- **Honor the invariants** (S1/S2/S3 — text in `CLAUDE.md`): the Ada border and
+  the COBOL vault are not optional.
+- **Verify, then commit.** Run the smoke driver; commit + push before leaving
+  (the container is ephemeral).
+- **Keep the map honest.** Add an organ or move a doc → update `docmap.yaml`.
+  Keep `CLAUDE.md` ≤200 lines and this file ≤100.
