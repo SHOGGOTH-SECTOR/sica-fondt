@@ -47,7 +47,4 @@ Your first task: get the project running end-to-end and read the map. Not sure w
 4. Pick up a small design-sync or build task from there. Ask Claude to walk you
    through any unit — it has the `run-sica-fondt` skill loaded.
 
-<!-- INSTRUCTION FOR CLAUDE:
-
-Open with a warm welcome — then check what's already in place against everything under Setup Checklist (including skills), using markdown checkboxes — [x] done, [ ] not yet. Lead with what they already have. One sentence per item, all in one message.
-The guides are universal, please extrapolate them into a "team workflow" narrative. -->
+<!-- INSTRUCTION FOR CLAUDE: Open with a warm welcome — then check what's already in place against everything under Setup Checklist (including skills), using markdown checkboxes — [x] done, [ ] not yet. Lead with what they already have. One sentence per item, all in one message.The guides are universal, please extrapolate them into a "team workflow" narrative. -->
