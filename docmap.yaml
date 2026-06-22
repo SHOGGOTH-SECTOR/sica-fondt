@@ -1,0 +1,56 @@
+# docmap.yaml — directory & document index for sica-fondt.
+#
+# The independent, machine-readable map referenced by AGENTS.md. AGENTS.md stays
+# prose (scope + rules); this stays data (where things are). Keep in sync with
+# the tree. Invariant text is authoritative in CLAUDE.md — mirrored here as a
+# pointer only.
+
+docs:
+  read_order:                       # newcomer reading path
+    - README.md                     # what sica-fondt is
+    - SOUL.md                       # intent and principles — the "why"
+    - docs/                         # architecture in detail
+    - CLAUDE.md                     # working agreements, build/run, invariants
+    - ONBOARDING.md                 # newcomer setup + first task
+
+  routing:                          # which doc for which task
+    high_level_overview: [README.md, SOUL.md]
+    architecture: [docs/bus-topology.md, docs/gen03_state_of_architecture.md]
+    build_run_test: .claude/skills/run-sica-fondt/   # smoke.sh
+    rules_before_editing: CLAUDE.md
+    onboard_teammate: ONBOARDING.md
+    find_which_doc: AGENTS.md       # the prose signpost; this file is its index
+
+  design_docs:
+    docs/bus-topology.md: Ichor bus and organ wiring
+    docs/gen03_state_of_architecture.md: current architectural state
+    docs/gen03_body.md: body model
+    docs/gen03_self.md: self model
+    docs/plans/: forward-looking plans
+
+# Organs — deployable units, each with its own scoped AGENTS.md (nearest-wins).
+organs:
+  - path: src/ichor
+    agents_md: src/ichor/AGENTS.md
+    lang: pony
+    role: Ichor perfusion bus (outer transport); S1 membrane screens external traffic
+    build: "ponyc src/ichor -o build && ./build/ichor"   # from repo root
+  - path: src/endocrine
+    agents_md: src/endocrine/AGENTS.md
+    lang: [r, octave]
+    role: endocrine array — R Drive-Box + Octave ETR
+    build: "src/endocrine/run_tests.sh ; src/endocrine/etr/run_etr_tests.sh"
+  - path: mafiabot_core
+    agents_md: mafiabot_core/AGENTS.md
+    lang: [ada, cobol]
+    role: Ada border (D1) — all traffic crosses here first; COBOL invariant vault in src/trust
+    build: "cd mafiabot_core && alr -n build"            # not bare gprbuild
+
+# Repo-wide invariants — authoritative text in CLAUDE.md.
+invariants:
+  S1: all external traffic crosses the Ada border (D1) first
+  S2: never reclassify a message's provenance
+  S3: the COBOL invariant-law vault is immutable at runtime
+
+# One harness builds and runs every executable unit; want "smoke: ALL GREEN".
+smoke: .claude/skills/run-sica-fondt/smoke.sh

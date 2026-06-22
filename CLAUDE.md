@@ -50,4 +50,5 @@ Per-unit commands and gotchas live in that skill's `SKILL.md`. Toolchains
 - `README.md`, `SOUL.md` — the project and its intent.
 - `docs/` — architecture (`bus-topology.md`, `gen03_state_of_architecture.md`, …).
 - `ONBOARDING.md` — new-teammate setup and walkthrough.
-- `AGENTS.md` — which document to read for what.
+- `AGENTS.md` — prose signpost for how the docs fit together.
+- `docmap.yaml` — machine-readable index: read-order, doc routing, organ list.
