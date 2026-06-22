@@ -61,7 +61,9 @@ Top MCP Servers:
 
 ## Get Started
 
-Your first task: get the project running end-to-end and read the map.
+Your first task: get the project running end-to-end and read the map. Not sure
+which doc to read for what? Start with [`AGENTS.md`](AGENTS.md) — it's the
+signpost to every other document here.
 
 1. Open the repo and let the SessionStart hook finish installing toolchains.
 2. Run the smoke driver to confirm everything builds and runs:
