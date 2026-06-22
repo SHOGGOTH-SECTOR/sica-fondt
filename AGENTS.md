@@ -29,6 +29,20 @@ to.
 | Onboard a new teammate | `ONBOARDING.md` |
 | Find which doc covers a topic | this file |
 
+## Scope & nesting
+
+`AGENTS.md` is **hierarchical** — an agent reads the *nearest* one walking up
+from the file it's editing. So this root file is the **map**; each organ owns a
+scoped `AGENTS.md` with its *local* build/run/invariants:
+
+- `src/ichor/AGENTS.md` — the Ichor bus (Pony).
+- `src/endocrine/AGENTS.md` — the endocrine organs (R / Octave).
+- `mafiabot_core/AGENTS.md` — the Ada border (D1) + the COBOL vault under
+  `src/trust`.
+
+Keep scopes **non-overlapping**: the root maps, the organs detail. Don't restate
+the root in an organ file (that's how the two drift) — link up instead.
+
 ## Rules of the road
 
 - **Design before code.** The design docs are the source of truth; code follows.
