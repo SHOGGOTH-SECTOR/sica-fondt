@@ -1,10 +1,12 @@
-// The blood-brain barrier (D1). `Barrier.admit` is the screening decision every
-// Brain-bound envelope must pass — perfusion law L2: everything reaching the
-// Brain crosses Ada (D1) first.
+// The membrane (D1). `Barrier.admit` is the screening decision every envelope
+// crossing INTO Ada (inbound toward the inner brain) must pass — perfusion law
+// L2: nothing reaches the inner brain without crossing Ada first.
 //
-// Real wiring crosses into Ada's `Trust_Guard` (provenance + blocklist + rate)
-// via the C/Fortran seam (`ichor_ada_shim.c`). Until that binding is built, this
-// mirrors the provenance law in pure Pony so the broker is testable standalone.
+// STUB NOTE: this `admit` is a pure-Pony STAND-IN that only mirrors the
+// provenance law. The real decision lives in Ada's `Trust_Guard` (blocklist +
+// provenance + rate) and, above that, the E1 invariant laws. This stand-in must
+// be replaced by the real Ada call — see the Ada seam below — before anything
+// ships. Do not mistake this for the actual safety screen.
 //
 // To switch to the Ada border, add `use "lib:ichor_ada"` and replace the body of
 // `admit` with the FFI call sketched below.

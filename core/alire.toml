@@ -1,4 +1,4 @@
-name = "mafiabot_core"
+name = "core"
 version = "0.1.0"
 description = "Sovereign cognitive architecture"
 authors = ["Shoggoth Sect 0.R"]

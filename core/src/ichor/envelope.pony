@@ -8,26 +8,32 @@ and the Ada border (Trust_Boundary) speak the same shape across the seam.
 Envelope is `class val`: immutable and sendable between actors.
 """
 
+// OUTER organs only. Ichor is the OUTER bus (the "skin") -- it carries the outer
+// organs up to Ada (D1). The INNER organs -- soul, metacog, drive-box, mini-rag,
+// Hermes, the E1 invariant laws -- do NOT belong here; they ride the Ada-routed
+// (Jorvik) inner bus. NEVER add a brain/inner organ to this enum: that is
+// "plugging the brain onto the skin". See docs/bus-topology.md.
 type OrganId is
-  ( DriveBox | EnergyTorus | Soul | Metacog | Brain
-  | AdaBorder | Storage | MiniRag | UnknownOrgan )
+  ( Stomach | Microagents | SAE | MoRAG
+  | AdaBorder | World | UnknownOrgan )
 
-primitive DriveBox
-  fun string(): String => "drive_box"
-primitive EnergyTorus
-  fun string(): String => "etr"
-primitive Soul
-  fun string(): String => "soul"
-primitive Metacog
-  fun string(): String => "metacog"
-primitive Brain
-  fun string(): String => "brain"
+primitive Stomach
+  // economy organ (small-model): digests external input into context
+  fun string(): String => "stomach"
+primitive Microagents
+  fun string(): String => "microagents"
+primitive SAE
+  // sparse autoencoder
+  fun string(): String => "sae"
+primitive MoRAG
+  // = GoDAGRAG: graph of DAGs of RAGs; reads the world
+  fun string(): String => "morag"
 primitive AdaBorder
+  // the membrane (D1): the outer bus delivers inbound traffic here to be screened
   fun string(): String => "ada_border"
-primitive Storage
-  fun string(): String => "storage"
-primitive MiniRag
-  fun string(): String => "mini_rag"
+primitive World
+  // the external world (user / network)
+  fun string(): String => "world"
 primitive UnknownOrgan
   fun string(): String => "unknown"
 

@@ -4,8 +4,8 @@
 # weighted, embodied claims about reality -- never logical propositions.
 #
 # Foundation modules are sourced as-is (repo-root-relative paths).
-source("src/endocrine/endocrine_array.R")
-source("src/endocrine/priors.R")
+source("core/src/endocrine/endocrine_array.R")
+source("core/src/endocrine/priors.R")
 
 # Initialize a fresh PS+ state: a clean endocrine array and an empty priors store.
 init_ps_plus_state <- function() {

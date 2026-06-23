@@ -2,8 +2,8 @@
 # Run from repo root: Rscript src/endocrine/test_ethical_integrity.R
 # Exit 0 => all pass.
 
-source("src/endocrine/test_framework.R")
-source("src/endocrine/driver_ethical_integrity.R")
+source("core/src/endocrine/test_framework.R")
+source("core/src/endocrine/driver_ethical_integrity.R")
 
 # --- init_principles_state constructor ---
 test_case("init_principles_state builds an empty state", function() {

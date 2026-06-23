@@ -1,6 +1,6 @@
-with "config/mafiabot_core_config.gpr";
+with "config/core_config.gpr";
 
-project Mafiabot_Core is
+project Core is
 
    --  Only directories that actually hold Ada sources. The old organ/network
    --  stubs (soul tarot, ada_medium, sockets) are gone — that cognition is
@@ -27,4 +27,4 @@ project Mafiabot_Core is
       for Global_Configuration_Pragmas use "gnat.adc";
    end Builder;
 
-end Mafiabot_Core;
+end Core;

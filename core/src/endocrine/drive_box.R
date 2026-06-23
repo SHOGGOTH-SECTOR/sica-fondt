@@ -16,10 +16,10 @@
 # drive_box_evaluate()  -- run a proposed action through all four drivers.
 # drive_box_commit()    -- write an approved action's consequences back into the body.
 
-source("src/endocrine/driver_energy.R")
-source("src/endocrine/driver_ps_plus.R")            # also sources endocrine_array + priors
-source("src/endocrine/driver_ethical_integrity.R")
-source("src/endocrine/driver_etr.R")
+source("core/src/endocrine/driver_energy.R")
+source("core/src/endocrine/driver_ps_plus.R")            # also sources endocrine_array + priors
+source("core/src/endocrine/driver_ethical_integrity.R")
+source("core/src/endocrine/driver_etr.R")
 
 init_drive_box <- function() {
   list(

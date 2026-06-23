@@ -1,6 +1,6 @@
 # Tests for the Drive-Box "nervous system" integration (drive_box.R).
-source("src/endocrine/test_framework.R")
-source("src/endocrine/drive_box.R")
+source("core/src/endocrine/test_framework.R")
+source("core/src/endocrine/drive_box.R")
 
 # Helper: build a drive-box with a primed body.
 prime <- function() {
