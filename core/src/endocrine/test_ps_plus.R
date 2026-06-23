@@ -2,8 +2,8 @@
 # Run from repo root:
 #   cd /home/user/sica-fondt && Rscript src/endocrine/test_ps_plus.R
 
-source("src/endocrine/test_framework.R")
-source("src/endocrine/driver_ps_plus.R")
+source("core/src/endocrine/test_framework.R")
+source("core/src/endocrine/driver_ps_plus.R")
 
 # Helper: does any string in a list contain the given substring?
 .any_contains <- function(arguments, needle) {

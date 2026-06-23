@@ -2,8 +2,8 @@
 # Run from repo root: Rscript src/endocrine/test_energy.R
 # Exit 0 => all pass.
 
-source("src/endocrine/test_framework.R")
-source("src/endocrine/driver_energy.R")
+source("core/src/endocrine/test_framework.R")
+source("core/src/endocrine/driver_energy.R")
 
 # --- init_energy_state constructor ---
 test_case("init_energy_state builds state with defaults", function() {

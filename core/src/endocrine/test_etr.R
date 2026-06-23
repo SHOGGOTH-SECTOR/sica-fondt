@@ -2,8 +2,8 @@
 # Mirrors src/endocrine/etr/test_etr.m (same laws, same source of truth). Run
 # from the repo root via run_tests.sh.
 
-source("src/endocrine/test_framework.R")
-source("src/endocrine/driver_etr.R")
+source("core/src/endocrine/test_framework.R")
+source("core/src/endocrine/driver_etr.R")
 
 # --- L1 wrap ----------------------------------------------------------
 test_case("etr_axis_wrap: +50 wraps to -50", function() {
