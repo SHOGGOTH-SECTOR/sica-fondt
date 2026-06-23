@@ -19,3 +19,4 @@ everything lives: read-order, doc routing, the organ list, build commands — is
   (the container is ephemeral).
 - **Keep the map honest.** Add an organ or move a doc → update `docmap.yaml`.
   Keep `CLAUDE.md` ≤200 lines and this file ≤100.
+- Install toolchains as needed.
