@@ -43,7 +43,7 @@ Your first task: get the project running end-to-end and read the map. Not sure w
 
 1. Open the repo and let the SessionStart hook finish installing toolchains.
 2. Run the smoke driver to confirm everything builds and runs: `.claude/skills/run-sica-fondt/smoke.sh` — you want `smoke: ALL GREEN`.
-3. Read `README.md`, and `docs/` (start with `docs/bus-topology.md` and `docs/gen03_state_of_architecture.md`) to understand the organ/border model (Ichor bus → Ada D1 border → inner brain; the COBOL invariant vault).
+3. Read `README.md`, and `core/docs/` (start with `core/docs/bus-topology.md` and `core/docs/gen03_state_of_architecture.md`) to understand the organ/border model (Ichor bus → Ada D1 border → inner brain; the COBOL invariant vault).
 4. Pick up a small design-sync or build task from there. Ask Claude to walk you
    through any unit — it has the `run-sica-fondt` skill loaded.
 
