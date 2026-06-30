@@ -68,31 +68,7 @@ get_active_vectors <- function(endo_state, threshold = 0.1) {
   active <- endo_state$channels[endo_state$channels > threshold]
   return(active)
 }
-
-# Calculate Visceral Friction
-# Friction arises from simultaneous active vectors, especially contradictory ones.
-calculate_visceral_friction <- function(endo_state) {
-  active <- get_active_vectors(endo_state)
-
-  # Base friction: proportional to number of active channels and their total magnitude
-  base_friction <- sum(active) * (length(active) / 30.0)
-
-  # Contradiction heat: disproportionate increase when contradictory pairs are co-active
-  contradiction_heat <- 0.0
-  for (pair in CONTRADICTORY_PAIRS) {
-    if (pair[1] %in% names(active) && pair[2] %in% names(active)) {
-      # Heat is the product of the two magnitudes, scaled up significantly
-      heat <- active[[pair[1]]] * active[[pair[2]]] * 5.0
-      contradiction_heat <- contradiction_heat + heat
-    }
-  }
-
-  return(base_friction + contradiction_heat)
-}
-
-# Get channel definition by id
-get_channel_def <- function(channel_id) {
-  for (ch in ENDOCRINE_CHANNELS) {
+{
     if (ch$id == channel_id) return(ch)
   }
   return(NULL)
