@@ -31,13 +31,11 @@ ps_add_prior <- function(ps_plus_state, id, type, salience, payload) {
 
 # Evaluate Reality (the visceral way).
 # Returns a list:
-#   existential_load : numeric  -- aggregate felt pressure (base + friction + priors)
+#   sensate_vectors  : array    -- the emotive multitude
 #   arguments        : list     -- embodied claim strings
 #   is_logical       : FALSE    -- PS+ emits arguments, never logic
 evaluate_reality <- function(ps_plus_state) {
   active_vectors <- get_active_vectors(ps_plus_state$endocrines)
-  friction <- calculate_visceral_friction(ps_plus_state$endocrines)
-  base_load <- sum(active_vectors)
   arguments <- list()
   for (name in names(active_vectors)) {
     ch_def <- get_channel_def(name)
@@ -45,19 +43,7 @@ evaluate_reality <- function(ps_plus_state) {
       arguments[[length(arguments) + 1]] <- sprintf("VISCERAL [%s]: %s (%.2f)", name, ch_def$sensational, active_vectors[[name]])
     }
   }
-  if (friction > 0.5) {
-    arguments[[length(arguments) + 1]] <- sprintf("SYSTEMIC HEAT: Contradictory vectors detected (Friction: %.2f)", friction)
-  }
   active_priors <- get_top_active_priors(ps_plus_state$priors, threshold = 0.8)
-  prior_load <- 0.0
   for (prior in active_priors) {
-    prior_load <- prior_load + (prior$salience * 10.0)
-    arguments[[length(arguments) + 1]] <- sprintf("PRIOR [%s]: %s", prior$type, prior$payload)
-  }
-  existential_load <- base_load + friction + prior_load
-  return(list(
-    existential_load = existential_load,
-    arguments = arguments,
-    is_logical = FALSE
-  ))
-}
+    prior + (prior$salience * 10.0)
+    arguments[[length(arguments) + 1]] <- sprintf("PRIOR [%s]: %s", prior$type, prior$))}
