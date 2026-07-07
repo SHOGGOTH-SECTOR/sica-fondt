@@ -5,8 +5,9 @@ Driver 3: character as an **economic constraint field** — a cost-map, not a mo
 the E-cost of responding to reality: alignment discounts, antithetical penalties, conviction hardening.
 
 ## 2. Status / certainty
-Structure WORKING (`driver_ethical_integrity.R`, 87 L); numbers DISOWNED (body §5). Per arch §6 it is
+Structure WIP (`driver_ethical_integrity.R`, 87 L); numbers DISOWNED (body §5). Per arch §6 it is
 **not a stored stratum — a memory-derivative** (entries with memory-weighted shifting numerics).
+Still missing Committed Convictions.
 
 ## 3. Language & location
 R · `src/endocrine/driver_ethical_integrity.R` (+ `test_ethical_integrity.R`). Its state = the
@@ -17,16 +18,14 @@ R · `src/endocrine/driver_ethical_integrity.R` (+ `test_ethical_integrity.R`). 
   harden convictions upheld under load; treat middle-ground as its own trajectory; **surface the top X
   convictions** (the **~7 most committed**, **X adaptive** — Anja) into the agent's slot — *not* the whole
   array (**the conviction list can be massive**, so it must be ranked & truncated; A1 step 3 / input-slot).
-- **Does-not:** assert moral truth, or persist itself as a stratum (it derives from memory; see A7/E2).
+- **Does-not:** Exist independent of historical choices.
 
 ## 5. Interface contract
 - `evaluate_trajectory_costs(convictions, action_tags, alignment_tags, base_energy, compromise_factor)
   -> total_cost` (penalty exponential in conviction; discount exponential; compromise = partial penalty).
-- `enforce_conviction(convictions, chosen_alignment_tags, load_factor) -> convictions'`
-  (hardening ∝ load, diminishing toward 1.0).
-- `top_convictions(convictions, x) -> [..]` — the **top X by strength**, the only ones surfaced to the
-  slot (Anja). X is C1 (see §10).
-- Reads/writes the **conviction array** (A7). Emits `eth_penalty` consumed by Energy (A2).
+- `enforce_conviction(convictions, chosen_alignment_tags, load_factor) -> convictions'`(hardening ∝ load, diminishing toward 1.0).
+- `top_convictions(convictions, x) -> [..]` — the **top X by strength**, the only ones surfaced to the slot (Anja). X is C1 (see §10).
+- Reads the **conviction array** (A7). Emits `eth_penalty` which impacts tool limitations by Energy (A2).
 
 ## 6. Dependencies & stubs
 A7 conviction array — *stub:* a flat list `{id, conviction, antithesis}` (today's shape). Energy (A2)
@@ -53,3 +52,4 @@ k_discount=5. 3. Migrate state to the A7 conviction array (isomorphy tags + shif
 - **X — how many convictions surface** to the slot (default **~7 most committed**, **adaptive** — the
   adaptation signal is C1; ranked by commitment strength).
 - Exact "memory-derivative" derivation (how convictions are computed from memory) — ties to A7/E2.
+- The relation between conviction contradiction and sensates.
