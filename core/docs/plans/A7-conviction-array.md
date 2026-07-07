@@ -10,7 +10,7 @@ DESIGN-FIRST (extends today's flat principle list in `driver_ethical_integrity.R
 are new — C2/C1.
 
 ## 3. Language & location
-R · new module under `src/endocrine/` (e.g. `conviction_array.R`), consumed by A6.
+R · new module under `src/endocrine/` (e.g. `conviction_array.R`), consumed by A6. May not stay R.
 
 ## 4. Does / does-not
 - **Does:** hold principle entries with conviction + isomorphy tags + per-entry shift-rate; expose the
@@ -18,7 +18,7 @@ R · new module under `src/endocrine/` (e.g. `conviction_array.R`), consumed by 
 - **Does-not:** evaluate cost (A6 does that) or detect opposition (SAE F2 does); it is the data + its update rules.
 
 ## 5. Interface contract
-- **Entry:** `{ id, conviction(0..1), antithesis[], isomorphy_tags[], shift_rate }`.
+- **Entry:** `{ id, conviction(0..10), antithesis[], isomorphy_tags[], shift_rate }`.
 - `top_convictions(array, n) -> [entry]` (what SAE matches outputs against, G1 step 2).
 - `harden(array, ids, load) -> array'` · `set_shift_rate(array, delta_from_stress) -> array'`.
 - The **memory-derivative** rule: convictions are computed from memory-weighted entries (per arch §6) —
@@ -45,3 +45,4 @@ the G1 hook (L2). 3. Define the memory-derivative (L4) once E2 storage lands. 4.
 - **Isomorphy tag vocabulary** + how SAE matches outputs to it (C2, shared with F2/G1).
 - The **memory-derivative formula** (C1).
 - Shift-rate response curve to stress (C1).
+- Honestly most of it
