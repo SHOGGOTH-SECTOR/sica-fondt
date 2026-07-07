@@ -1,5 +1,5 @@
 --  The implementation of the Forge.
-package body Engine is
+package body bounds is
 
    protected body Core_State is
 
