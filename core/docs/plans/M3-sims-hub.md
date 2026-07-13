@@ -26,14 +26,14 @@ different runtime suited to its math.
   behaviors emerge from the sim's mathematical model; ingest live data from Data Feeds (M2)
   for calibration; respond to Trader queries with bounded predictions; produce outputs with
   **explicit upper/lower bounds** on every prediction value.
-  | Horizon | Window | At 360:1 floor (1s wall = 1h sim) |
-  |---------|--------|-----------------------------------|
-  | Tick–hourly | Next 1–60 min | Covered in <1s wall time |
-  | Daily | Next 24h | Covered in 24s wall time |
-  | Weekly | Next 7d | Covered in ~168s wall time |
-  | Monthly | Next 30d | Covered in ~720s wall time |
-  | Annual | Next 365d | Covered in ~2.4h wall time |
-  | 5-year | Next 1825d | Covered in ~12h wall time |
+  | Horizon | Window | Speed (1s wall =) | Ratio |
+  |---------|--------|-------------------|-------|
+  | Tick–hourly | Next 1–60 min | 1h sim | 3,600:1 |
+  | Daily | Next 24h | 1d sim | 86,400:1 (3600×24) |
+  | Weekly | Next 7d | 1w sim | 604,800:1 (3600×24×7) |
+  | Monthly | Next 30d | 1mo sim | 2,592,000:1 (3600×24×30) |
+  | Annual | Next 365d | 1yr sim | 31,536,000:1 (3600×24×365) |
+  | 5-year | Next 1825d | 5yr sim | 157,680,000:1 |
 - **Does-not:** trade (Traders/Marketplace do); make decisions for traders (it informs, they
   decide); enforce laws (Marketplace does); supervise behavior (Conductor/SAE do); skip ticks;
   run slower than 360:1.
@@ -61,8 +61,9 @@ different runtime suited to its math.
 - **L2 (C5):** every prediction output includes **explicit upper and lower bounds** — no
   unbounded point estimates. Uncertainty is a first-class value, not an afterthought.
 - **L3 (C5):** all sims are **tick-advanced and continuous** — they advance every tick, never
-  skip. The slowest system runs at **360:1** — 1 wall-clock second = 1 simulated hour. Sims
-  may run faster but never slower.
+  skip. Each time horizon runs at its own speed: **1 wall-second = 1 full window** of that
+  horizon's sim time. The slowest (hourly) is 3,600:1; daily is 86,400:1; up to 5-year at
+  ~158M:1. No horizon may run slower than its rated speed.
 - **L4 (C4):** sims are **read-only from traders' perspective** — a query never mutates sim
   state. Calibration happens only from Data Feeds (M2).
 - **L5 (C4):** each sim type is **independent** — failure in one sim does not cascade to others.
