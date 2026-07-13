@@ -7,7 +7,7 @@ optimal execution, and cross-exchange arbitrage** at the fastest time scales. Po
 **Almgren-Chriss optimal execution framework** for minimizing market impact of large orders.
 Operates at the highest temporal resolution — where M3a provides statistical forecasts and M3c
 models pool mechanics, M3g models the *plumbing* of how orders actually execute, across **six
-concurrent time horizons** at tick-advanced, ≥ 360:1 (1s wall = 1h sim).
+concurrent time horizons** at tick-advanced, 90:1 (1s wall = 90s sim).
 
 ## 2. Status / certainty
 DESIGN-FIRST · ABSENT. Order-book microstructure theory C4 (established). Almgren-Chriss
@@ -36,7 +36,7 @@ Python with optimized event loop.
 ## 5. Interface contract
 - Implements `query(PredictionQuery) -> BoundedPrediction` per M3 hub.
 - **Output bounds:** execution cost ranges, liquidity intervals, optimal trajectory envelopes.
-- **Time-horizon mapping** (all run concurrently, tick-advanced, ≥ 360:1 (1s wall = 1h sim)):
+- **Time-horizon mapping** (all run concurrently, tick-advanced, 90:1 (1s wall = 90s sim)):
   | Horizon | Primary models | Update cadence |
   |---------|---------------|----------------|
   | Tick–hourly | Almgren-Chriss execution, slippage, spread, arb decay | Every tick |
@@ -90,7 +90,7 @@ Slippage: larger orders produce greater slippage. Spread: spread widens under ad
 Almgren-Chriss: optimal trajectory minimizes total cost vs. naive execution on backtest; impact
 parameters update when market conditions change. Arb decay: detected arb opportunity closes over
 time. Depth: depth profile matches order book state. Bounds: all outputs bounded. Resolution:
-predictions update at tick frequency. Speed: sim tick-advances ≥ 360:1 (1s wall = 1h sim).
+predictions update at tick frequency. Speed: sim tick-advances at 90:1.
 
 ## 10. Open items
 - CEX order book data access (API limitations, costs).

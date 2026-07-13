@@ -47,7 +47,7 @@ and bilevel optimization (DSMFG). Python, Rust, or Julia.
 - Implements `query(PredictionQuery) -> BoundedPrediction` per M3 hub.
 - **Output bounds:** extraction probability ranges, gas cost intervals, cross-chain profit
   bounds, DSMFG equilibrium stability ranges.
-- **Time-horizon mapping** (all run concurrently, tick-advanced, ≥ 360:1 (1s wall = 1h sim)):
+- **Time-horizon mapping** (all run concurrently, tick-advanced, 90:1 (1s wall = 90s sim)):
   | Horizon | Primary models | Update cadence |
   |---------|---------------|----------------|
   | Tick–hourly | PGA auctions, sandwich detection, cross-chain arb | Every block |
@@ -103,7 +103,7 @@ under gas limit. Sandwich: known sandwich-vulnerable trade flagged; non-vulnerab
 Cross-chain: inventory path preferred when latency advantage exceeds capital cost. DSMFG: leader
 policy converges to fixed point with follower equilibrium. Kolokoltsov: WENO captures shock
 discontinuities in adversarial strategy distribution. Bounds: all outputs bounded. Pre-trade:
-query does not submit any transaction. Speed: sim tick-advances ≥ 360:1 (1s wall = 1h sim).
+query does not submit any transaction. Speed: sim tick-advances at 90:1.
 
 ## 10. Open items
 - Mempool data access (public mempool? private order flow?).
