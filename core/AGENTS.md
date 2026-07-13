@@ -8,7 +8,7 @@ working agreements: [`../CLAUDE.md`](../CLAUDE.md).
 The **Ada/SPARK border — D1**. All traffic to the inner brain crosses here
 first. Built with **Alire**. Internal modules under `src/`: `trust` (incl. the
 COBOL invariant-law vault), `organs`, `network`, `protocol`, `daemons`, `core`,
-`types`, `payloads`. These are modules, not separate organs — they share this
+`types`, `outputs`. These are modules, not separate organs — they share this
 file.
 
 ## Build & test

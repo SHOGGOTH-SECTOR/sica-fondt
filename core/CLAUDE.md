@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Keep this file under **200 lines**. For team setup and a newcomer walkthrough, see [`ONBOARDING.md`](ONBOARDING.md); for how the docs fit together and which to read when, see [`AGENTS.md`](AGENTS.md).[;human note: fix the hyperlinks|to:claude]
+Keep this file under **200 lines**. For team setup and a newcomer walkthrough, see [`ONBOARDING.md`](../ONBOARDING.md); for how the docs fit together and which to read when, see [`AGENTS.md`](AGENTS.md).
 
 ## What this is
 
@@ -8,7 +8,7 @@ sica-fondt is a **design-first, polyglot organism**: a Pony perfusion bus (Ichor
 
 ## Working agreements
 
-- **You're the dev.** When details are missing or a decision is open, make a reasonable reasonable call and fill in concrete details — aim to leave no placeholders, and only delay ifnsomething is genuinely ambiguous.
+- **You're the dev.** When details are missing or a decision is open, make a reasonable call and fill in concrete details — aim to leave no placeholders, and only delay if something is genuinely ambiguous.
 - **Verify, then commit.** After generating or editing, confirm it works (build / run / `run-sica-fondt` smoke), then commit with a descriptive message. Commit and push before ending a session — the container is ephemeral.
 - **Design before code.** If something feels ambiguous, the answer is usually already written in `docs/`. Sync the design first. Saves us all some time.
 
@@ -20,7 +20,7 @@ Use the `run-sica-fondt` skill (`.claude/skills/run-sica-fondt/`) — its `smoke
 .claude/skills/run-sica-fondt/smoke.sh
 ```
 
-Per-unit commands and gotchas live in that unit's `AGENTS.md`. Toolchains (ponyc/Alire/GnuCOBOL) are reinstalled each session by the SessionStart hook `.claude/hooks/install-toolchains.sh`; if `ponyc` isn't found,`export PATH=/root/.local/share/ponyup/bin:$PATH`. If a bew toolchain is needed, first add it to sessionStart hook.
+Per-unit commands and gotchas live in that unit's `AGENTS.md`. Toolchains (ponyc/Alire/GnuCOBOL) are reinstalled each session by the SessionStart hook `.claude/hooks/install-toolchains.sh`; if `ponyc` isn't found, `export PATH=/root/.local/share/ponyup/bin:$PATH`. If a new toolchain is needed, first add it to the SessionStart hook.
 
 ## Invariants — do not violate
 
