@@ -1,1 +1,1 @@
-Claude really wanted a single language build, but thats not what we are doing. All Ada in this folder is defunct, and must be replaced.
+Ada sources formerly here have been removed. The soul organ (B2) is being rehomed — see `docs/plans/B2-soul-identity.md`.
