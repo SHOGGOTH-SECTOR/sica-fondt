@@ -1,66 +1,73 @@
 # M0 — Economy organ hub (the stomach)
 
 ## 1. Component
-The economy organ — the organism's **stomach**. An outer organ on Ichor that **digests external
-input into context** and **tracks the cost of doing so**. Hub for the M-series sub-components
-(M1–M7): ingestion, digestion, cost ledger, budget governor, context yield, provenance chain,
-outer-bus exchange. "Economy" = the organ economizes: it spends scarce resources (tokens, compute,
-attention budget) to convert raw input into usable context, and **accounts for every unit spent**.
+The economy organ — the organism's **stomach**. An **independent, self-governing system**: a
+multi-agentic market prediction oracle and cryptocurrency trading engine. Houses the Marketplace
+(M1), Data Feeds (M2), Sims (M3), Wallets (M4), Traders (M5), Conductor (M6), and SAE monitor
+(M7). Communicates with the rest of the organism **via Ichor only** — reward signals back to the
+organism are TBD and out of scope.
+
+"A stomach rarely consults a brain for permission to digest." The economy organ operates with
+**scoped autonomy** and **multiple layers of failsafe braking** — it does not ask the organism's
+Brain for permission to trade.
 
 ## 2. Status / certainty
 DESIGN-FIRST · ABSENT. A `Stomach` primitive exists in Ichor (`src/ichor/envelope.pony:20`) with
 one smoke-test wire (`main.pony:29`), but no dedicated organ code. Role C4; implementation C1.
 
 ## 3. Language & location
-TBD · new location e.g. `src/economy/`. The digestion core (M2) requires a small-model runtime;
-the accounting/budget layers (M3–M4) can be any language that interops with Pony (Ichor) and Ada
-(D1). Pony actors are the natural fit for the bus-facing facade.
+TBD · new location e.g. `src/economy/`. The organ is polyglot by nature: trading infrastructure
+(APIs, wallets) may differ in language from simulations (numerical computing) and the conductor
+(AI supervision). Pony actors provide the Ichor-facing facade.
 
 ## 4. Does / does-not
-- **Does:** receive external input from Ichor; triage and classify it (M1); digest it via a small
-  model into context (M2); track the resource cost of that digestion (M3); enforce budget limits
-  and emit price signals to A2 (M4); shape output for Ada (M5); maintain provenance through the
-  pipeline (M6); coordinate with outer-bus peers — MoRAG, SAE, microagents (M7).
-- **Does-not:** police (Ada D1 does that); decide actions (the agent decides, per A1-L3); store
-  memories (E*); route the bus (Ichor broker); reason or deliberate (it digests, it doesn't think).
+- **Does:** host crypto/NFT trading via the Marketplace (M1); run always-on market prediction
+  Sims (M3) fed by live Data Feeds (M2); manage sovereign-custody Wallets (M4); supervise
+  Traders (M5) via a Conductor (M6) and SAE monitor (M7); collect taxes on trader income and
+  stub transfer to Verschwörern Veregeister wallets.
+- **Does-not:** consult the organism's Brain for trade decisions (scoped autonomy); route around
+  Ada for organism-bound messages (S1); store organism memories (E*); act as the organism's
+  conscience (that's Eth-Int / A6).
 
 ## 5. Interface contract
-- `ingest(external_input, provenance) -> classified_input` (M1 — triage + classify).
-- `digest(classified_input) -> digested_context` (M2 — small-model transform).
-- `record_cost(organ_id, action, resource_amt) -> receipt` (M3 — ledger entry).
-- `check_budget(organ_id, proposed_cost) -> { allowed:bool, remaining:num }` (M4).
-- `price_signal(tool_id) -> { resource_cost:num, budget_remaining:num }` (M4 → A2).
-- `yield(digested_context) -> Envelope` (M5 — shaped for Ada, with M6 provenance chain attached).
-- Output is an Ichor `Envelope` with `OrganSecretion` provenance, carrying the original input's
-  provenance origin in metadata (M6).
+- **Ichor interface (outbound):** `Envelope(Stomach, AdaBorder, OrganSecretion, payload)` — market
+  state summaries, prediction digests, and tax receipts cross Ada to reach the inner brain.
+- **Ichor interface (inbound):** organism directives arrive via Ichor (e.g. risk posture changes,
+  budget adjustments from A2 energy).
+- **Internal wiring:** Marketplace (M1) ↔ Data Feeds (M2) ↔ Sims (M3). Wallets (M4) bind to
+  Traders (M5). Conductor (M6) supervises Traders via SAE (M7). All trader actions route through
+  Marketplace.
+- **Tax stub:** `transfer_tax(amount, source_wallet, dest_wallet) -> receipt` — automation hook
+  for Verschwörern Veregeister internal wallet-to-wallet transfer. **Out of scope** — stub only.
 
 ## 6. Dependencies & stubs
 - Ichor bus (D2) — existing `Broker` + `Envelope`.
-- Ada border (D1) — existing `Trust_Guard` screens the output; *stub:* Ichor `Barrier`.
-- A2 energy — consumes price signals (M4); *stub:* print signals.
-- MoRAG (F1) — world-context retrieval; *stub:* fixed context.
+- Ada border (D1) — screens outbound organism messages; *stub:* Ichor `Barrier`.
+- A2 energy — potential consumer of economic signals; *stub:* no integration initially.
+- Verschwörern Veregeister wallets — tax destination; *stub:* log transfer, no real wallet.
 
 ## 7. Invariants / laws
 - **L1 (C5):** the stomach is an **OUTER** organ — it rides Ichor, never the inner bus.
-- **L2 (C4):** digestion does **not suppress** — it transforms for comprehension (summarize,
-  classify, extract), never censors. Filtering is Ada's job (D1).
-- **L3 (C4):** every resource expenditure is **accounted** — no digestion is "free"; the ledger
-  (M3) records every token/compute unit spent.
-- **L4 (C4):** provenance survives digestion — digested content retains its original provenance
-  origin in metadata, even as bus transport uses `OrganSecretion` (see M6, S1/S2).
+- **L2 (C5):** **scoped autonomy** — the organ trades without Brain permission, but within
+  deterministic law constraints (M1) and Conductor oversight (M6).
+- **L3 (C4):** **all market actions route through the Marketplace** (M1) — no trader may
+  execute directly on-chain without the Marketplace harness.
+- **L4 (C4):** **sovereign custody only** — all wallets are local-hosted, our keys, never
+  delegated to exchanges or third parties (M4).
+- **L5 (C4):** **multi-layered braking** — deterministic law script (M1), Conductor veto (M6),
+  SAE surveillance (M7), and wallet-level limits (M4) each independently constrain risk.
 
 ## 8. Build steps
-1. Define the hub wiring: how M1→M2→M5 pipeline + M3/M4 accounting + M6 provenance + M7 peers
-   connect. Decide: single Pony actor or actor-per-subcomponent.
+1. Define the internal wiring topology (how M1–M7 connect).
 2. Extend the existing `Stomach` primitive in Ichor to carry the hub facade.
-3. Wire sub-components as their specs land (M1–M7).
-4. Integrate price signals with A2 (energy driver).
+3. Wire sub-components as their specs land.
+4. Implement the tax stub for Verschwörern Veregeister transfer.
 
 ## 9. Tests
-Hub smoke: external input enters → classified → digested → yielded as Envelope → reaches Ada stub.
-Cost recorded in ledger. Budget check returns correct remaining. Price signal emitted.
+Hub smoke: Marketplace reachable; Sims running and queryable; Wallet bound to Trader; Conductor
+receives SAE reports; tax stub logs transfer. Ichor: outbound envelope reaches Ada stub.
 
 ## 10. Open items
-- Single actor vs actor-per-subcomponent (Pony concurrency model for the organ).
-- Whether the hub owns state or is purely a wiring facade (stateless router vs stateful coordinator).
-- The A2 price-signal protocol (push vs pull; frequency).
+- Reward signal protocol from economy organ to organism (TBD, out of scope).
+- Internal communication bus (reuse Ichor internally? separate actor topology?).
+- Language choices per sub-component.
