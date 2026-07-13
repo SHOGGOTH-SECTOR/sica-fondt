@@ -84,4 +84,6 @@ blocking in a protected action), **tasks = workers** that call into the organs
   structure that isn't a lookup "store"?
 - **MoRAG / GoDAGRAG language** (Haskell vs Crystal vs other).
 - Each outer organ's hand-off shape to Ada.
-- The stomach/economy organ's exact placement + which small model runs it.
+- ~~The stomach/economy organ's exact placement + which small model runs it.~~
+  **→ placed:** M-series (M0–M7) in `docs/plans/`. Outer organ on Ichor; small model TBD (M2).
+  See M0 (hub), M6 (provenance chain through digestion, S1/S2 compliance).

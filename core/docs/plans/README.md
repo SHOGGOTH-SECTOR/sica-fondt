@@ -49,6 +49,14 @@ Every `NN-<organ>.md` has the same 10 sections:
 | G1 | Stress-loop contract | Cross-cut | C1/C2 | — | _wave 2_ |
 | G2 | Governance | Cross-cut | DESIGN-FIRST (C2) | TBD | _wave 2_ |
 | G3 | Defense model | Cross-cut | emergent | — | _wave 2_ |
+| M0 | Economy organ hub (stomach) | Economy | DESIGN-FIRST | TBD | [M0](M0-economy-organ-hub.md) |
+| M1 | Ingestion gateway | Economy | DESIGN-FIRST | TBD | [M1](M1-ingestion.md) |
+| M2 | Digestion core (small-model) | Economy | DESIGN-FIRST | TBD | [M2](M2-digestion-core.md) |
+| M3 | Cost ledger | Economy | DESIGN-FIRST | TBD | [M3](M3-cost-ledger.md) |
+| M4 | Budget governor | Economy | DESIGN-FIRST | TBD | [M4](M4-budget-governor.md) |
+| M5 | Context yield (absorption) | Economy | DESIGN-FIRST | TBD | [M5](M5-context-yield.md) |
+| M6 | Provenance chain | Economy | DESIGN-FIRST | TBD | [M6](M6-provenance-chain.md) |
+| M7 | Outer-bus exchange | Economy | DESIGN-FIRST | TBD | [M7](M7-outer-bus-exchange.md) |
 
 ## Integration DAG (who feeds whom)
 ```
@@ -62,10 +70,12 @@ Hermes ──> [C1] ──> Inference cycle [C3] ──┬─ pulls Drive-Box sn
                                             └─ Ada routes tools [D1]
 SAE [F2] watches Subagents [F3];  stress-loop [G1]: F2 → A7 (EthInt) → stress endomotiv (A4) → A8 drift + full reshuffle (B2)
 Storage: INVARIANT [E1] / VARIANT [E2] / RAG+cross-store [E3] sit behind D1.  Medium [D2] = the perfusion bus (unnamed).
+Economy: world → Stomach [M0] ingests [M1] → digests [M2] → yields [M5] → Ada [D1].  Ledger [M3] + budget [M4] track cost.
+  Provenance [M6] chains origin through digestion.  Exchange [M7]: Stomach ↔ MoRAG [F1] / SAE [F2] / Microagents [F3].
 ```
 
 ## Build waves
 - **Wave 0** — this README + **C1** (priority).
 - **Wave 1 (buildable-now)** — A1–A8, B1–B3, C2–C4, D1, D3.
-- **Wave 2 (design-first)** — D2, E1–E3, F1–F3, G1–G3.
+- **Wave 2 (design-first)** — D2, E1–E3, F1–F3, G1–G3, M0–M7.
 Each spec is independent; review as they land.
