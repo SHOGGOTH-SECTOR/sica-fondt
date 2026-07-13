@@ -32,6 +32,8 @@ Per-unit commands and gotchas live in that unit's `AGENTS.md`. Toolchains (ponyc
 
 When spawning background agents (Haiku for research, etc.), **keep working on the main task while they run**. Don't wait idle — fold in results as they arrive, edit other files, or advance unrelated build steps. Background agents are cheap parallelism; wasting the main context window on waiting defeats the purpose.
 
+Correction log at `.claude/devCorrectionLog.md`.
+
 ## Docs map
 
 - `README.md` — the project and its intent.

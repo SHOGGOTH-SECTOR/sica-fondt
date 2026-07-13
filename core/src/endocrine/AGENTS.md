@@ -1,7 +1,7 @@
 # AGENTS.md — endocrine organs (R / Octave)
 
 Local guide for `src/endocrine`. Repo-wide map and rules: [`../../AGENTS.md`](../../AGENTS.md);
-working agreements: [`../../CLAUDE.md`](../../CLAUDE.md).
+working agreements: [`../../CLAUDE.md`](../../CLAUDE.md). Correction log: [`../../.claude/devCorrectionLog.md`](../../.claude/devCorrectionLog.md).
 
 ## What this is
 
