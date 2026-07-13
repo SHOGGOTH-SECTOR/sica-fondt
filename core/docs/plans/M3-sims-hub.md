@@ -26,14 +26,14 @@ different runtime suited to its math.
   behaviors emerge from the sim's mathematical model; ingest live data from Data Feeds (M2)
   for calibration; respond to Trader queries with bounded predictions; produce outputs with
   **explicit upper/lower bounds** on every prediction value.
-  | Horizon | Window | Wall time for window |
-  |---------|--------|---------------------|
-  | Tick–hourly | Next 1–60 min | ~40s |
-  | Daily | Next 24h | ~16 min |
-  | Weekly | Next 7d | ~1.9 hr |
-  | Monthly | Next 30d | ~8.3 hr |
-  | Annual | Next 365d | ~4.2 days |
-  | 5-year | Next 1825d | ~20.8 days |
+  | Horizon | Window | Tick step | Effective ratio | Wall time for window |
+  |---------|--------|-----------|-----------------|---------------------|
+  | Tick–hourly | Next 1–60 min | 1s | 90:1 | ~40s |
+  | Daily | Next 24h | 1 min | 5,400:1 | ~16s |
+  | Weekly | Next 7d | 10 min | 54,000:1 | ~11s |
+  | Monthly | Next 30d | 1 hr | 324,000:1 | ~8s |
+  | Annual | Next 365d | 6 hr | 1,944,000:1 | ~16s |
+  | 5-year | Next 1825d | 1 day | 7,776,000:1 | ~20s |
 - **Does-not:** trade (Traders/Marketplace do); make decisions for traders (it informs, they
   decide); enforce laws (Marketplace does); supervise behavior (Conductor/SAE do); skip ticks;
   run slower than 90:1.
@@ -61,8 +61,9 @@ different runtime suited to its math.
 - **L2 (C5):** every prediction output includes **explicit upper and lower bounds** — no
   unbounded point estimates. Uncertainty is a first-class value, not an afterthought.
 - **L3 (C5):** all sims are **tick-advanced and continuous** — they advance every tick, never
-  skip. Global sim speed: **1 wall-second = 90 simulated seconds** (90:1). All horizons share
-  this clock. No sim may run slower than 90:1.
+  skip. Base speed **90:1** (1 wall-second = 90 sim-seconds) at the finest tick resolution.
+  Longer horizons use **coarser ticks** (larger time steps) so they cover proportionally more
+  sim-time per wall-second. 90:1 is the floor; no horizon runs slower.
 - **L4 (C4):** sims are **read-only from traders' perspective** — a query never mutates sim
   state. Calibration happens only from Data Feeds (M2).
 - **L5 (C4):** each sim type is **independent** — failure in one sim does not cascade to others.
