@@ -60,10 +60,9 @@ different runtime suited to its math.
   current state; they don't trigger computation.
 - **L2 (C5):** every prediction output includes **explicit upper and lower bounds** — no
   unbounded point estimates. Uncertainty is a first-class value, not an afterthought.
-- **L3 (C5):** all sims are **tick-advanced and continuous** — they advance every tick, never
-  skip. Base speed **90:1** (1 wall-second = 90 sim-seconds) at the finest tick resolution.
-  Longer horizons use **coarser ticks** (larger time steps) so they cover proportionally more
-  sim-time per wall-second. 90:1 is the floor; no horizon runs slower.
+- **L3 (C5):** all sims are **tick-advanced and continuous** — fine-grained ticks (RTS-style).
+  Base speed **90:1** (1s wall = 90s sim). Longer horizons run at higher velocity with coarser
+  steps and update less frequently. No horizon runs slower than 90:1.
 - **L4 (C4):** sims are **read-only from traders' perspective** — a query never mutates sim
   state. Calibration happens only from Data Feeds (M2).
 - **L5 (C4):** each sim type is **independent** — failure in one sim does not cascade to others.
