@@ -6,7 +6,7 @@ burns, inflation), lending protocol dynamics, DeFi systemic risk, and stock-flow
 stochastic differential equations (SDEs), state-space models, kinked interest rate curves, and
 inter-protocol credit exposure networks. Pops here are **aggregate behavioral cohorts**
 (miners/validators, holders, speculators, protocol treasuries, borrowers/lenders) whose collective
-behavior drives token-level dynamics across **six concurrent time horizons** at ≥ 360:1 speed.
+behavior drives token-level dynamics across **six concurrent time horizons** at tick-advanced, ≥ 360:1 (1s wall = 1h sim).
 
 Grounded in Vienna complex-systems token modeling [7], ResearchGate engineering token economy
 frameworks [6], Aave/Compound kinked interest rate models (industry standard), and DeXposure
@@ -49,7 +49,7 @@ Julia (DifferentialEquations.jl), Python (scipy), or Octave.
 ## 5. Interface contract
 - Implements `query(PredictionQuery) -> BoundedPrediction` per M3 hub.
 - **Output bounds:** SDE confidence bands, utilization rate ranges, contagion impact intervals.
-- **Time-horizon mapping** (all run concurrently, ≥ 360:1 speed):
+- **Time-horizon mapping** (all run concurrently, tick-advanced, ≥ 360:1 (1s wall = 1h sim)):
   | Horizon | Primary models | Update cadence |
   |---------|---------------|----------------|
   | Hourly | Lending rates, utilization, liquidation risk | Every block |
@@ -107,7 +107,7 @@ Lending: rate curve exhibits kink at $U_{\text{opt}}$; liquidation cascades trig
 collateral ratio breached. DeXposure: shock to protocol A propagates to protocol B through shared
 collateral; isolated protocols unaffected. Yield: optimizer rebalances toward highest risk-adjusted
 APY. Calibration: state estimate converges to observed data. Bounds: SDE confidence bands cover
-realized paths on backtest. Speed: sim advances ≥ 360:1.
+realized paths on backtest. Speed: sim tick-advances ≥ 360:1 (1s wall = 1h sim).
 
 ## 10. Open items
 - Which tokens to model initially (ETH? BTC? a specific alt?).

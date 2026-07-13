@@ -31,7 +31,7 @@ invariant calculations (Solidity-equivalent precision). Python, Rust, or Julia.
   time_horizon: "7d", sim_type: "amm_liquidity" }` — projected impermanent loss for ETH/USDC pool.
   Example: `{ value: 0.082, lower_bound: 0.041, upper_bound: 0.127, confidence: 0.85,
   time_horizon: "30d", sim_type: "amm_liquidity" }` — net LP return (fees − IL).
-- **Time-horizon mapping** (all run concurrently, ≥ 360:1 speed):
+- **Time-horizon mapping** (all run concurrently, tick-advanced, ≥ 360:1 (1s wall = 1h sim)):
   | Horizon | Primary models | Update cadence |
   |---------|---------------|----------------|
   | Tick–hourly | Slippage curves, invariant state, JIT liquidity | Every swap event |

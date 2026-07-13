@@ -27,7 +27,7 @@ computation. Python, Julia, or R.
   $-\partial_t u + H(x, \nabla u) = F(x, m)$, $\partial_t m - \nabla \cdot (m \nabla_p H) = 0$
   — captures emergent staking coordination without enumerating every validator; predict slashing
   risk, validator set stability, and staking yield across **six concurrent time horizons** at
-  ≥ 360:1 speed; produce bounded predictions on consensus health and staking returns.
+  tick-advanced, ≥ 360:1 (1s wall = 1h sim); produce bounded predictions on consensus health and staking returns.
 - **Does-not:** validate blocks (this is a simulator); model AMM pools (M3c); model token supply
   (M3e — but consumes staking ratio from M3e as input).
 
@@ -39,7 +39,7 @@ computation. Python, Julia, or R.
   equilibrium.
   Example: `{ value: 4.2, lower_bound: 3.6, upper_bound: 5.1, confidence: 0.82,
   time_horizon: "30d", sim_type: "consensus_staking" }` — annualized staking yield (%).
-- **Time-horizon mapping** (all run concurrently, ≥ 360:1 speed):
+- **Time-horizon mapping** (all run concurrently, tick-advanced, ≥ 360:1 (1s wall = 1h sim)):
   | Horizon | Primary models | Update cadence |
   |---------|---------------|----------------|
   | Hourly | Markov chain validator state transitions | Every epoch |
