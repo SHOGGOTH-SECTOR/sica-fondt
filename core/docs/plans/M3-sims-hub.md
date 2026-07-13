@@ -26,14 +26,14 @@ different runtime suited to its math.
   behaviors emerge from the sim's mathematical model; ingest live data from Data Feeds (M2)
   for calibration; respond to Trader queries with bounded predictions; produce outputs with
   **explicit upper/lower bounds** on every prediction value.
-  | Horizon | Window | Speed (1s wall =) | Ratio |
-  |---------|--------|-------------------|-------|
-  | Tick–hourly | Next 1–60 min | 1h sim | 3,600:1 |
-  | Daily | Next 24h | 1d sim | 86,400:1 (3600×24) |
-  | Weekly | Next 7d | 1w sim | 604,800:1 (3600×24×7) |
-  | Monthly | Next 30d | 1mo sim | 2,592,000:1 (3600×24×30) |
-  | Annual | Next 365d | 1yr sim | 31,536,000:1 (3600×24×365) |
-  | 5-year | Next 1825d | 5yr sim | 157,680,000:1 |
+  | Horizon | Window | Speed (1s wall =) | Ratio | Wall time for window |
+  |---------|--------|-------------------|-------|---------------------|
+  | Tick–hourly | Next 1–60 min | 1h sim | 3,600:1 | <1s |
+  | Daily | Next 24h | 1d sim | 86,400:1 | 1s |
+  | Weekly | Next 7d | 1w sim | 604,800:1 | 1s |
+  | Monthly | Next 30d | 1d sim | 86,400:1 | 30s |
+  | Annual | Next 365d | 1w sim | 604,800:1 | ~52s |
+  | 5-year | Next 1825d | 1mo sim | 2,592,000:1 | ~60s |
 - **Does-not:** trade (Traders/Marketplace do); make decisions for traders (it informs, they
   decide); enforce laws (Marketplace does); supervise behavior (Conductor/SAE do); skip ticks;
   run slower than 360:1.
@@ -61,9 +61,10 @@ different runtime suited to its math.
 - **L2 (C5):** every prediction output includes **explicit upper and lower bounds** — no
   unbounded point estimates. Uncertainty is a first-class value, not an afterthought.
 - **L3 (C5):** all sims are **tick-advanced and continuous** — they advance every tick, never
-  skip. Each time horizon runs at its own speed: **1 wall-second = 1 full window** of that
-  horizon's sim time. The slowest (hourly) is 3,600:1; daily is 86,400:1; up to 5-year at
-  ~158M:1. No horizon may run slower than its rated speed.
+  skip. Each time horizon runs at its own rated speed (see §4 table). Hourly through weekly
+  cover their full window in ≤ 1 wall-second; monthly through 5-year dial down to coarser
+  ticks (daily/weekly/monthly steps) and take 30–60 wall-seconds for a full window pass.
+  No horizon may run slower than its rated speed.
 - **L4 (C4):** sims are **read-only from traders' perspective** — a query never mutates sim
   state. Calibration happens only from Data Feeds (M2).
 - **L5 (C4):** each sim type is **independent** — failure in one sim does not cascade to others.
