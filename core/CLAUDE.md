@@ -28,6 +28,10 @@ Per-unit commands and gotchas live in that unit's `AGENTS.md`. Toolchains (ponyc
 - **S2:** never reclassify a message's provenance.
 - **S3 / vault:** the COBOL invariant-law vault (Invariant 0, the culpability anchor; 01, "harm" "less";) is immutable at runtime — don't edit it unless explicitly directed and only as such.
 
+## Subagents
+
+When spawning background agents (Haiku for research, etc.), **keep working on the main task while they run**. Don't wait idle — fold in results as they arrive, edit other files, or advance unrelated build steps. Background agents are cheap parallelism; wasting the main context window on waiting defeats the purpose.
+
 ## Docs map
 
 - `README.md` — the project and its intent.

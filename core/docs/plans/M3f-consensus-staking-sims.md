@@ -9,7 +9,8 @@ theorems [10], and Monash dynamic PBFT modeling [11].
 
 ## 2. Status / certainty
 DESIGN-FIRST · ABSENT. Evolutionary PoS game theory C4 (Cornell [8]); staking pool Nash
-equilibrium proofs C4 (ACM [10]); Markov chain throughput models C4 (Monash [11]);
+equilibrium proofs C4 (ACM [10]); Markov chain throughput models C4 (Monash [11]); MFG for
+validator populations C4 (Lasry & Lions 2007; validator-specific application C3);
 simulation parameterization C1.
 
 ## 3. Language & location
@@ -21,8 +22,12 @@ computation. Python, Julia, or R.
   under bounded rationality [8]; model staking pool delegation as a game with proven reward-
   parameter thresholds enforcing subgame-perfect Nash equilibria favoring honest validation over
   malicious slashing [10]; simulate **throughput stability under shifting validator states** via
-  Markov chains [11]; predict slashing risk, validator set stability, and staking yield; produce
-  bounded predictions on consensus health and staking returns.
+  Markov chains [11]; solve **Mean-Field Game equilibria for large validator populations** —
+  coupled HJB (individual validator optimization) + Fokker-Planck (population density):
+  $-\partial_t u + H(x, \nabla u) = F(x, m)$, $\partial_t m - \nabla \cdot (m \nabla_p H) = 0$
+  — captures emergent staking coordination without enumerating every validator; predict slashing
+  risk, validator set stability, and staking yield across **six concurrent time horizons** at
+  ≥ 360:1 speed; produce bounded predictions on consensus health and staking returns.
 - **Does-not:** validate blocks (this is a simulator); model AMM pools (M3c); model token supply
   (M3e — but consumes staking ratio from M3e as input).
 
@@ -34,8 +39,18 @@ computation. Python, Julia, or R.
   equilibrium.
   Example: `{ value: 4.2, lower_bound: 3.6, upper_bound: 5.1, confidence: 0.82,
   time_horizon: "30d", sim_type: "consensus_staking" }` — annualized staking yield (%).
+- **Time-horizon mapping** (all run concurrently, ≥ 360:1 speed):
+  | Horizon | Primary models | Update cadence |
+  |---------|---------------|----------------|
+  | Hourly | Markov chain validator state transitions | Every epoch |
+  | Daily | Replicator dynamics strategy shifts, slashing events | Hourly roll |
+  | Weekly | Staking pool Nash equilibrium recalculation | Daily roll |
+  | Monthly | MFG equilibrium for validator population | Weekly roll |
+  | Annual | Evolutionary stable strategies, yield trajectory | Monthly roll |
+  | 5-year | Consensus mechanism structural evolution | Quarterly roll |
 - **Prediction types:** `validator_honesty_fraction`, `slashing_probability`, `staking_yield`,
-  `pool_delegation_equilibrium`, `throughput_stability`, `consensus_liveness`.
+  `pool_delegation_equilibrium`, `throughput_stability`, `consensus_liveness`,
+  `mfg_validator_equilibrium`.
 - Calibration: ingests `on_chain_event` (validator set changes, slashing events) from M2.
 
 ## 6. Dependencies & stubs
@@ -56,8 +71,9 @@ computation. Python, Julia, or R.
 1. Implement the evolutionary honesty game (replicator dynamics, bounded rationality).
 2. Implement the Markov chain validator-state model.
 3. Reproduce the staking pool Nash equilibrium reward threshold from [10].
-4. Wire M2 validator data → calibration of transition rates.
-5. Wire M3e staking ratio input.
+4. Implement MFG solver (HJB + Fokker-Planck) for large validator populations.
+5. Wire M2 validator data → calibration of transition rates.
+6. Wire M3e staking ratio input.
 
 ## 9. Tests
 Equilibrium: honesty fraction converges to Nash equilibrium under stable payoffs. Markov:

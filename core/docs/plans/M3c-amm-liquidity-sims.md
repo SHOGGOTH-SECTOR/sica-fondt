@@ -31,6 +31,15 @@ invariant calculations (Solidity-equivalent precision). Python, Rust, or Julia.
   time_horizon: "7d", sim_type: "amm_liquidity" }` — projected impermanent loss for ETH/USDC pool.
   Example: `{ value: 0.082, lower_bound: 0.041, upper_bound: 0.127, confidence: 0.85,
   time_horizon: "30d", sim_type: "amm_liquidity" }` — net LP return (fees − IL).
+- **Time-horizon mapping** (all run concurrently, ≥ 360:1 speed):
+  | Horizon | Primary models | Update cadence |
+  |---------|---------------|----------------|
+  | Tick–hourly | Slippage curves, invariant state, JIT liquidity | Every swap event |
+  | Daily | IL accumulation, fee income, LP profitability | Hourly roll |
+  | Weekly | Optimal LP range recalculation, pool composition | Daily roll |
+  | Monthly | LP strategy evolution (passive vs. active rebalance) | Weekly roll |
+  | Annual | Pool lifecycle, fee tier competitiveness | Monthly roll |
+  | 5-year | AMM design evolution, concentrated liquidity adoption | Quarterly roll |
 - **Prediction types:** `impermanent_loss`, `pool_return`, `optimal_range`, `slippage_estimate`,
   `lp_withdrawal_threshold`.
 - Calibration: ingests `dex_pool_state` and `price_tick` from M2.

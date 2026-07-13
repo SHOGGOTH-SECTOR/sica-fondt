@@ -20,12 +20,23 @@ simulation cores. A query facade accessible to Traders. Each sim type (M3a–M3g
 different runtime suited to its math.
 
 ## 4. Does / does-not
-- **Does:** run continuously across multiple time scales (tick-level, hourly, daily, weekly);
-  maintain populations of Pops whose behaviors emerge from the sim's mathematical model; ingest
-  live data from Data Feeds (M2) for calibration; respond to Trader queries with bounded
-  predictions; produce outputs with **explicit upper/lower bounds** on every prediction value.
+- **Does:** run continuously at **≥ 360:1 speed** (360 simulated seconds per wall-clock second)
+  across **six concurrent time horizons** — tick/hourly, daily, weekly, monthly, annual, and
+  5-year forecast windows; maintain populations of Pops whose behaviors emerge from the sim's
+  mathematical model; ingest live data from Data Feeds (M2) for calibration; respond to Trader
+  queries with bounded predictions; produce outputs with **explicit upper/lower bounds** on
+  every prediction value.
+  | Horizon | Window | Sim cadence at 360:1 |
+  |---------|--------|---------------------|
+  | Tick–hourly | Next 1–60 min | Real-time (360 sim-sec/s) |
+  | Daily | Next 24h | 4 sim-minutes per wall-second |
+  | Weekly | Next 7d | ~28 sim-minutes per wall-second |
+  | Monthly | Next 30d | ~2 sim-hours per wall-second |
+  | Annual | Next 365d | ~1 sim-day per wall-second |
+  | 5-year | Next 1825d | ~5 sim-days per wall-second |
 - **Does-not:** trade (Traders/Marketplace do); make decisions for traders (it informs, they
-  decide); enforce laws (Marketplace does); supervise behavior (Conductor/SAE do).
+  decide); enforce laws (Marketplace does); supervise behavior (Conductor/SAE do); run slower
+  than 360:1.
 
 ## 5. Interface contract
 - `query(sim_type: SimType, query: PredictionQuery) -> BoundedPrediction`.
@@ -49,11 +60,14 @@ different runtime suited to its math.
   current state; they don't trigger computation.
 - **L2 (C5):** every prediction output includes **explicit upper and lower bounds** — no
   unbounded point estimates. Uncertainty is a first-class value, not an afterthought.
-- **L3 (C4):** sims are **read-only from traders' perspective** — a query never mutates sim
+- **L3 (C5):** sims advance at a **minimum speed of 360:1** — 360 simulated seconds per 1
+  wall-clock second. Sims may run faster but never slower. This ensures predictions stay
+  ahead of real-time market state across all horizons.
+- **L4 (C4):** sims are **read-only from traders' perspective** — a query never mutates sim
   state. Calibration happens only from Data Feeds (M2).
-- **L4 (C4):** each sim type is **independent** — failure in one sim does not cascade to others.
+- **L5 (C4):** each sim type is **independent** — failure in one sim does not cascade to others.
   Degraded sims report their status; traders handle missing predictions.
-- **L5 (C3):** Pops are **simulation constructs, not AI actors** — they follow mathematical
+- **L6 (C3):** Pops are **simulation constructs, not AI actors** — they follow mathematical
   rules within the sim. Traders (M5) are the AI actors.
 
 ## 8. Build steps
