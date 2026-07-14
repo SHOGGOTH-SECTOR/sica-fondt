@@ -1,3 +1,7 @@
+--  this whole file is ad hoc and a placeholder
+--  as a whole, this is out of date and needs correction
+
+
 pragma SPARK_Mode (Off);  --  test harness uses Ada.Text_IO
 with Ada.Text_IO; use Ada.Text_IO;
 with Trust_Boundary;
