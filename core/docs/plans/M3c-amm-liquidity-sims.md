@@ -71,6 +71,6 @@ closed-form for known price ratios. Slippage: large swaps produce greater slippa
 LP threshold: LP withdraws when IL exceeds fee income. Bounds: all outputs bounded.
 
 ## 10. Open items
-- Concentrated liquidity (Uniswap v3 style) — extends the base model significantly.
-- Multi-pool routing (split swaps across pools).
-- Which specific pools to simulate (ETH/USDC? stablecoin pairs?).
+- Concentrated liquidity (>>>Uniswap v3 style<<<) — extends the base model significantly.
+- Multi-pool routing (split swaps across pools). >>>yes<<<
+- Which specific pools to simulate (>>>ETH<<</USDC? stablecoin pairs?). >>and other popular chains<< NOT STABLE/USDC/USDT etc.
