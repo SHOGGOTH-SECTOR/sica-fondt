@@ -21,7 +21,7 @@ WENO discretization established but crypto application novel). Parameterization 
 ## 3. Language & location
 TBD · `src/economy/sims/mev/`. Needs combinatorial optimization (OR-Tools for knapsack),
 continuous-time auction modeling, PDE solvers (WENO for shock-capturing in adversarial dynamics),
-and bilevel optimization (DSMFG). Julia, Fortran, or C++.
+and bilevel optimization (DSMFG). Julia or Fortran.
 
 ## 4. Does / does-not
 - **Does:** simulate Priority Gas Auctions where multiple searcher bots compete for the same

@@ -15,7 +15,7 @@ DESIGN-FIRST · ABSENT. Role C3; implementation C1. Mathematical foundations C4 
 established); specific model parameters C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/`. Numerical computing (Julia, Octave, Fortran, R, Solidity, or C++)
+TBD · `src/economy/sims/`. Numerical computing (Julia, Octave, Fortran, R, or Solidity)
 for the simulation cores. A query facade accessible to Traders. Each sim type (M3a–M3g) may use
 a different runtime suited to its math.
 
