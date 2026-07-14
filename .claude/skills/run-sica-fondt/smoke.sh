@@ -30,7 +30,7 @@ else
 fi
 
 # 2. mafiabot_core — Ada border, build + tests ------------------------------
-note "mafiabot_core (Ada): alr build + tests"
+note "core (Ada): alr build + tests"
 if command -v alr >/dev/null; then
   ( cd "$ROOT/core" && alr -n build >/dev/null 2>&1 \
       && for t in trust_tests config_tests engine_tests; do
