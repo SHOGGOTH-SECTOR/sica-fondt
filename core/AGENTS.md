@@ -1,7 +1,7 @@
 # AGENTS.md — Ada border (D1) + invariant vault
 
 Local guide for `mafiabot_core`. Repo-wide map and rules: [`../AGENTS.md`](../AGENTS.md);
-working agreements: [`../CLAUDE.md`](../CLAUDE.md).
+working agreements: [`../CLAUDE.md`](../CLAUDE.md). Correction log: [`../.claude/devCorrectionLog.md`](../.claude/devCorrectionLog.md).
 
 ## What this is
 

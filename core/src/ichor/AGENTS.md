@@ -1,7 +1,7 @@
 # AGENTS.md — Ichor bus (Pony)
 
 Local guide for `src/ichor`. Repo-wide map and rules: [`../../AGENTS.md`](../../AGENTS.md);
-working agreements: [`../../CLAUDE.md`](../../CLAUDE.md).
+working agreements: [`../../CLAUDE.md`](../../CLAUDE.md). Correction log: [`../../../.claude/devCorrectionLog.md`](../../../.claude/devCorrectionLog.md).
 
 ## What this is
 
