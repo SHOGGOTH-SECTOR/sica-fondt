@@ -17,9 +17,11 @@ solvers C3). Crypto pump-and-dump ABM C3 (3-agent protocol validated on historic
 Pop behavioral models C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/sociological/`. Agent-based modeling frameworks (NetLogo, or custom).
-Needs efficient population iteration, strategy mutation, PDE solvers for MFG (HJB +
-Fokker-Planck), and bandit algorithms (UCB/Thompson). Julia, R, or Fortran.
+ECLiPSe Prolog · `src/economy/sims/sociological/`. **Prolog** — game-theoretic equilibria, replicator
+dynamics, and strategy evolution are naturally expressed as logical relations over population
+states; Nash equilibrium search is constraint satisfaction. Needs efficient population iteration,
+strategy mutation, PDE solvers for MFG (HJB + Fokker-Planck), and bandit algorithms
+(UCB/Thompson).
 
 ## 4. Does / does-not
 - **Does:** simulate populations of behavioral archetypes competing in a market; apply
@@ -79,12 +81,12 @@ Fokker-Planck), and bandit algorithms (UCB/Thompson). Julia, R, or Fortran.
 - M3 Sims hub — lifecycle management; *stub:* manual init.
 
 ## 7. Invariants / laws
-- **L1 (C5):** pops are **archetypes, not individuals** — no attempt to model or track real
-  market participants. The sim models emergent behavior from strategy populations.
+- **L1 (C5):** pops are **archetypal individuals, not literao living persons** — no attempt to model or track real
+  market participants. The sim models emergent behavior from abstracted populations.
 - **L2 (C5):** strategies **evolve** — the population distribution shifts over time via
   replicator dynamics. No fixed strategy ratios.
-- **L3 (C4):** bounded rationality is the **default** — pops satisfice with heuristics, not
-  optimize with perfect information. Rational-agent models are a special case, not the baseline.
+- **L3 (C4):** rationality is ***NOT*** the **default** — pops satisfice with heuristics, not
+  optimize with perfect information. Rational-agent models are an **abnormal** case, not the baseline.
 - **L4 (C4):** **complex contagion requires multiple exposures** — adoption is non-linear in
   neighbor count, not simple diffusion. Single-exposure models undercount threshold effects.
 - **L5 (C4):** the MFG limit is **valid only for large populations** — below ~100 pops, use
@@ -93,7 +95,8 @@ Fokker-Planck), and bandit algorithms (UCB/Thompson). Julia, R, or Fortran.
   promote → distribute → collapse) has distinct statistical signatures in volume and price.
 
 ## 8. Build steps
-1. Define pop archetypes and their heuristic strategies.
+0. Get ECLiPSe tool chain installed and operational.
+1. Define pop archetypes and their various strategies.
 2. Implement replicator dynamics (strategy evolution over generations).
 3. Implement Hegselmann-Krause bounded confidence opinion model.
 4. Implement complex contagion with heterogeneous thresholds.
@@ -101,7 +104,7 @@ Fokker-Planck), and bandit algorithms (UCB/Thompson). Julia, R, or Fortran.
 6. Implement MFG solver (HJB + Fokker-Planck with Newton iteration).
 7. Implement pump-and-dump 3-type ABM (Normal, MA, MP) with 4-phase protocol.
 8. Wire M2 news/price data → calibration of pop parameters.
-9. Implement multi-horizon `BoundedPrediction` output.
+9. Implement multi-horizon `BoundedPrediction` outputs.
 
 ## 9. Tests
 Evolution: dominant strategy shifts when payoff landscape changes. Cascade: sentiment shock
@@ -115,7 +118,7 @@ include upper/lower.
 ## 10. Open items
 - Pop archetype catalog (which behavioral types? how many?).
 - Network topology for sentiment contagion (small-world? scale-free?).
-- Calibration from real market data — how to infer pop distribution from observable price action.
-- MFG tensor-train rank $r$ (accuracy vs. compute tradeoff).
-- Hegselmann-Krause confidence bound $d$ — fixed or adaptive?
-- Cross-sim interaction: do sociological predictions feed into M3c (AMM) or M3d (MEV)?
+- Calibration from real market data — how to infer pop distribution from observable price action. >>>We actually use blogs, reddit, and social networks to infer pops<<<
+- MFG tensor-train rank $r$ (>>>accuracy<<< vs. compute tradeoff).
+- Hegselmann-Krause confidence bound $d$ — fixed or >>>adaptive<<<?
+- Cross-sim interaction: do sociological predictions feed into M3c (AMM) or M3d (MEV)? [conditional on prediction accuracy over time]

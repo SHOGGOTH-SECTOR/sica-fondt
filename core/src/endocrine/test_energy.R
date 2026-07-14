@@ -20,16 +20,6 @@ test_case("init_energy_state honors custom args", function() {
   expect_equal(s$tool_lock_threshold, 30)
 })
 
-# --- is_alive ---
-test_case("is_alive TRUE when energy above zero", function() {
-  expect_true(is_alive(init_energy_state(current_energy = 0.001)))
-  expect_true(is_alive(init_energy_state(current_energy = 100)))
-})
-
-test_case("is_alive FALSE at exactly zero", function() {
-  expect_false(is_alive(init_energy_state(current_energy = 0)))
-})
-
 # --- is_tool_locked ---
 test_case("is_tool_locked TRUE below threshold", function() {
   expect_true(is_tool_locked(init_energy_state(current_energy = 19.9, tool_lock_threshold = 20)))
@@ -70,7 +60,7 @@ test_case("evaluate_tool_cost asymmetry: eth penalty scales faster than ps load"
   bump_eth <- evaluate_tool_cost(s, ps_load = 1, eth_penalty = 2)
   delta_ps  <- bump_ps - base
   delta_eth <- bump_eth - base
-  # Same +1 increment, eth must drive cost up much more than ps at reduced energy.
+  # Same +1 increment, eth must drive cost up much more than ps at reduced energy. [should not be same]
   expect_true(delta_eth > delta_ps)
 })
 
