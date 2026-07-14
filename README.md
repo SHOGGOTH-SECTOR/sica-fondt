@@ -2,4 +2,5 @@
 AI My Fiosa
 
 
-i hate restartibg
+DO NOT LINK MY SESSIONS
+DO NOT ASSUME VERSIONING
