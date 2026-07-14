@@ -15,10 +15,11 @@ DESIGN-FIRST · ABSENT. Role C3; implementation C1. Mathematical foundations C4 
 established); specific model parameters C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/`. Each sim type uses the runtime suited to its math: **Fortran**
-(M3d, M3e — dense numerical PDE/SDE), **Prolog** (M3b, M3f — game-theoretic equilibria),
-**R** (M3a — statistical inference), **Solidity** (M3c — on-chain precision), **Zig**
-(M3g — tick-level latency). A query facade accessible to Traders.
+**Tcl** · `src/economy/sims/`. The hub is a syntax-agnostic coordinator: Tcl manages
+lifecycle, tick-advancement, and query routing for sub-sims in their native runtimes via
+stdin/stdout JSON — **Fortran** (M3d, M3e), **Prolog** (M3b, M3f), **R** (M3a),
+**Solidity** (M3c), **Zig** (M3g). Tcl imposes no type system or paradigm on the
+sub-processes it orchestrates.
 
 ## 4. Does / does-not
 - **Does:** tick-advance continuously at **90:1** (1 wall-second = 90 simulated seconds)
