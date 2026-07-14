@@ -4,7 +4,7 @@
 Pure statistical simulation: **Monte Carlo methods, Bayesian inference, time-series forecasting,
 stochastic volatility, regime detection, and cross-asset correlation**. The mathematical backbone
 — no game theory, no sociology, just the numbers. Operates across **six concurrent time horizons**
-(tick → hourly → daily → weekly → monthly → annual → 5-year). Pops in this sim represent
+(tick/hourly → daily → weekly → monthly → annual → 5-year). Pops in this sim represent
 **stochastic sample paths**, not behavioral agents.
 
 ## 2. Status / certainty
