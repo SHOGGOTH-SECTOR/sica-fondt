@@ -1,6 +1,6 @@
 # --- The Endocrine Array ---
 # A standalone 30-channel affective vector field.
-# PS+ calls into this module to read state, compute friction, and aggregate load.
+# PS+ calls into this module to read state, parse sensation, and guide affect
 # Each channel carries two registers: operational (what it does) and sensational (what it feels like).
 
 # Channel Definitions (20 named + 10 reserved)
@@ -37,30 +37,12 @@ ENDOCRINE_CHANNELS <- list(
   list(id = "reserved_30",   operational = "undefined",                              sensational = "undefined")
 )
 
-# Contradictory Pairs
-# These define which channels, when simultaneously active, generate disproportionate friction/heat.
-CONTRADICTORY_PAIRS <- list(
-  c("panic", "clarity"),        # Acute narrowing vs resolvable distinction
-  c("curiosity", "constraint"), # Movement toward unknown vs limitation of motion
-  c("bonding", "numbing"),      # Persistence of nearness vs reduction of penetration
-  c("sympathy", "numbing"),     # Felt response vs reduction of penetration
-  c("vigilance", "repair"),     # Sustained alertness vs restoration after rupture
-  c("hiraeth", "continuity")    # Longing for home vs persistence across change
-)
 
 # Initialize a fresh endocrine state
 init_endocrine_state <- function() {
   channel_ids <- sapply(ENDOCRINE_CHANNELS, function(ch) ch$id)
   channels <- setNames(rep(0.0, 30), channel_ids)
   return(list(channels = channels))
-}
-
-# Set a specific channel's magnitude (clamped to [0.0, 1.0])
-set_vector <- function(endo_state, name, magnitude) {
-  if (name %in% names(endo_state$channels)) {
-    endo_state$channels[[name]] <- max(0.0, min(1.0, magnitude))
-  }
-  return(endo_state)
 }
 
 # Get all channels with magnitude above activation threshold
