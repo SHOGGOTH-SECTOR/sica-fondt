@@ -2,12 +2,12 @@
 package bounds is
 
    --  Exact molecular weight of the vereiner token levels.  No unbounded integers.
-   type Token_Value is range 0 .. 1024
+   type Token_Value is range 0 .. 512
 
    --  Strict state topologies.  The system holds exactly one.
    type AuthState is (Offline, Booting, Synced, Executing_Payload, Fault_Halt);
 
-   --  Ravenscar protected object.  Concurrent memory safety, no races.
+   --  JORVIK protected object.  Concurrent memory safety, no races.
    protected BoundState is
       pragma InterruptPriority;
 
@@ -20,10 +20,6 @@ package bounds is
       Current_State : AuthState := Offline;
    end Core_State;
 
-   --  Clout capital with SPARK proofs attached.
-   procedure Process_Transaction (Sender_Balance : in out TokenValue;
-                                  Amount         : in     TokenValue)
-      with Pre  => Sender_Balance >= Amount,
-           Post => Sender_Balance = Sender_Balance;
+   -- not a thing
 
 end Bounds;
