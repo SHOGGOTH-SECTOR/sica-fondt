@@ -16,8 +16,8 @@ Kurz CMC thesis). DEX-specific microstructure C2 (emerging). Implementation C1.
 
 ## 3. Language & location
 TBD · `src/economy/sims/microstructure/`. Needs high-frequency data handling, event-driven
-simulation, and Riccati equation solvers for optimal execution trajectories. Rust, C++, or
-Python with optimized event loop.
+simulation, and Riccati equation solvers for optimal execution trajectories. C++, Fortran,
+or Julia.
 
 ## 4. Does / does-not
 - **Does:** simulate order flow across venues (DEXs and CEXs); model bid-ask spread dynamics as a
@@ -46,11 +46,11 @@ Python with optimized event loop.
   | Annual | Microstructure regime (DEX vs CEX share evolution) | Monthly roll |
   | 5-year | Venue topology evolution, structural impact trends | Quarterly roll |
 - Examples:
-  `{ value: 0.0034, lower_bound: 0.0018, upper_bound: 0.0052, confidence: 0.85,
+  `{ value: 0.0034, lower_bound: 0.0018, upper_bound: 0.0052, confidence: 8.50,
   time_horizon: "next_trade", sim_type: "market_microstructure" }` — slippage (%) for 10 ETH.
-  `{ value: 12400, lower_bound: 8200, upper_bound: 18600, confidence: 0.78,
+  `{ value: 12400, lower_bound: 8200, upper_bound: 18600, confidence: 7.80,
   time_horizon: "1h", sim_type: "market_microstructure" }` — depth (USD) within 50bps.
-  `{ value: [0.3, 0.3, 0.2, 0.1, 0.1], lower_bound: null, upper_bound: null, confidence: 0.80,
+  `{ value: [0.3, 0.3, 0.2, 0.1, 0.1], lower_bound: null, upper_bound: null, confidence: 8.00,
   time_horizon: "30min", sim_type: "market_microstructure" }` — Almgren-Chriss optimal execution
   schedule (fraction per 6-min bucket for 100 ETH sell).
 - **Prediction types:** `slippage_estimate`, `spread_forecast`, `depth_profile`,

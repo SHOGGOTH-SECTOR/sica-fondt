@@ -13,7 +13,8 @@ simulation parameterization C1.
 
 ## 3. Language & location
 TBD · `src/economy/sims/amm/`. Needs precise fixed-point or arbitrary-precision arithmetic for
-invariant calculations (Solidity-equivalent precision). Python, Rust, or Julia.
+invariant calculations. Solidity for on-chain-equivalent precision; Julia or Octave for
+analytical models.
 
 ## 4. Does / does-not
 - **Does:** simulate constant-product pools with fee parameter $\gamma$:
@@ -27,9 +28,9 @@ invariant calculations (Solidity-equivalent precision). Python, Rust, or Julia.
 ## 5. Interface contract
 - Implements `query(PredictionQuery) -> BoundedPrediction` per M3 hub.
 - **Output bounds:** IL ranges and pool return intervals.
-  Example: `{ value: -0.034, lower_bound: -0.058, upper_bound: -0.012, confidence: 0.90,
+  Example: `{ value: -0.034, lower_bound: -0.058, upper_bound: -0.012, confidence: 9.00,
   time_horizon: "7d", sim_type: "amm_liquidity" }` — projected impermanent loss for ETH/USDC pool.
-  Example: `{ value: 0.082, lower_bound: 0.041, upper_bound: 0.127, confidence: 0.85,
+  Example: `{ value: 0.082, lower_bound: 0.041, upper_bound: 0.127, confidence: 8.50,
   time_horizon: "30d", sim_type: "amm_liquidity" }` — net LP return (fees − IL).
 - **Time-horizon mapping** (all run concurrently, tick-advanced, 90:1 (1s wall = 90s sim)):
   | Horizon | Primary models | Update cadence |

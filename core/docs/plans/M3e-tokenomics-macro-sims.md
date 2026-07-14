@@ -21,7 +21,7 @@ composable yield optimization C4 (Yearn v3, Beefy, production-validated). Specif
 ## 3. Language & location
 TBD · `src/economy/sims/tokenomics/`. Needs SDE solvers (Euler-Maruyama, Milstein),
 state-space estimation, and VAR (vector autoregression) for credit exposure impulse responses.
-Julia (DifferentialEquations.jl), Python (scipy), or Octave.
+Julia (DifferentialEquations.jl) or Octave.
 
 ## 4. Does / does-not
 - **Does:** simulate token state dynamics via the SDE framework:
@@ -59,13 +59,13 @@ Julia (DifferentialEquations.jl), Python (scipy), or Octave.
   | Annual | Halving/burn policy impacts, inflation trajectory | Monthly roll |
   | 5-year | Token supply long-run equilibrium, protocol lifecycle | Quarterly roll |
 - Examples:
-  `{ value: 2.1, lower_bound: 1.4, upper_bound: 3.2, confidence: 0.90,
+  `{ value: 2.1, lower_bound: 1.4, upper_bound: 3.2, confidence: 9.00,
   time_horizon: "90d", sim_type: "tokenomics_macro" }` — annualized inflation rate (%).
-  `{ value: 0.67, lower_bound: 0.58, upper_bound: 0.74, confidence: 0.85,
+  `{ value: 0.67, lower_bound: 0.58, upper_bound: 0.74, confidence: 8.50,
   time_horizon: "30d", sim_type: "tokenomics_macro" }` — staking ratio.
-  `{ value: 0.83, lower_bound: 0.78, upper_bound: 0.91, confidence: 0.88,
+  `{ value: 0.83, lower_bound: 0.78, upper_bound: 0.91, confidence: 8.80,
   time_horizon: "1h", sim_type: "tokenomics_macro" }` — Aave ETH utilization rate.
-  `{ value: 0.12, lower_bound: 0.04, upper_bound: 0.25, confidence: 0.72,
+  `{ value: 0.12, lower_bound: 0.04, upper_bound: 0.25, confidence: 7.20,
   time_horizon: "7d", sim_type: "tokenomics_macro" }` — systemic contagion risk index.
 - **Prediction types:** `supply_trajectory`, `inflation_rate`, `staking_ratio`,
   `velocity_estimate`, `halving_impact`, `treasury_runway`, `utilization_rate`,

@@ -15,9 +15,9 @@ DESIGN-FIRST · ABSENT. Role C3; implementation C1. Mathematical foundations C4 
 established); specific model parameters C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/`. Numerical computing (Julia, Python/NumPy, Octave, or Rust) for the
-simulation cores. A query facade accessible to Traders. Each sim type (M3a–M3g) may use a
-different runtime suited to its math.
+TBD · `src/economy/sims/`. Numerical computing (Julia, Octave, Fortran, R, Solidity, or C++)
+for the simulation cores. A query facade accessible to Traders. Each sim type (M3a–M3g) may use
+a different runtime suited to its math.
 
 ## 4. Does / does-not
 - **Does:** tick-advance continuously at **90:1** (1 wall-second = 90 simulated seconds)
@@ -29,11 +29,11 @@ different runtime suited to its math.
   | Horizon | Window | Tick step | Effective ratio | Wall time for window |
   |---------|--------|-----------|-----------------|---------------------|
   | Tick–hourly | Next 1–60 min | 1s | 90:1 | ~40s |
-  | Daily | Next 24h | 1 min | 5,400:1 | ~16s |
-  | Weekly | Next 7d | 10 min | 54,000:1 | ~11s |
-  | Monthly | Next 30d | 1 hr | 324,000:1 | ~8s |
-  | Annual | Next 365d | 6 hr | 1,944,000:1 | ~16s |
-  | 5-year | Next 1825d | 1 day | 7,776,000:1 | ~20s |
+  | Daily | Next 24h | 24s | 2,160:1 | ~40s |
+  | Weekly | Next 7d | ~3 min | 15,120:1 | ~40s |
+  | Monthly | Next 30d | 12 min | 64,800:1 | ~40s |
+  | Annual | Next 365d | ~2.5 hr | ~788,000:1 | ~40s |
+  | 5-year | Next 1825d | 12 hr | ~3,942,000:1 | ~40s |
 - **Does-not:** trade (Traders/Marketplace do); make decisions for traders (it informs, they
   decide); enforce laws (Marketplace does); supervise behavior (Conductor/SAE do); skip ticks;
   run slower than 90:1.
@@ -44,7 +44,10 @@ different runtime suited to its math.
   `tokenomics_macro`, `consensus_staking`, `market_microstructure` } (M3a–M3g).
 - `BoundedPrediction { value, lower_bound, upper_bound, confidence, time_horizon, sim_type, timestamp }`.
   Every output is bounded — no point estimates without uncertainty ranges.
-  Example: `{ value: 7.2, lower_bound: 5.8, upper_bound: 8.9, confidence: 0.73,
+  `confidence` ∈ [0.00, 10.00] — printed as `7.62/10.00`. Gain rates print as
+  `lower - value - upper / 10.00` (e.g. `2.31 - 4.44 - 7.11 / 10.00 gain over next 30 days`);
+  the denominator aids legibility — gain is not capped at 10.00.
+  Example: `{ value: 7.2, lower_bound: 5.8, upper_bound: 8.9, confidence: 7.30,
   time_horizon: "4h", sim_type: "amm_liquidity" }`.
 - `status(sim_type?) -> { running, pop_count, last_calibration, data_freshness }` — health check.
 - `calibrate(sim_type, feed_data: [NormalizedDatum])` — Data Feeds (M2) pushes live data for
@@ -62,8 +65,9 @@ different runtime suited to its math.
   unbounded point estimates. Uncertainty is a first-class value, not an afterthought.
 - **L3 (C5):** all sims are **tick-advanced and continuous** — fine-grained ticks (RTS-style).
   Base speed **90:1** (1s wall = 90s sim). Longer horizons run at higher velocity with coarser
-  steps and update less frequently. Each horizon runs **in parallel** — they are concurrent,
-  not sequential. No horizon runs slower than 90:1.
+  steps and update less frequently. Each horizon completes its forecast window in **~40s wall
+  time**. Each horizon runs **in parallel** — they are concurrent, not sequential. No horizon
+  runs slower than 90:1.
 - **L4 (C4):** sims are **read-only from traders' perspective** — a query never mutates sim
   state. Calibration happens only from Data Feeds (M2).
 - **L5 (C4):** each sim type is **independent** — failure in one sim does not cascade to others.

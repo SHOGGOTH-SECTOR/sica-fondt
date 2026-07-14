@@ -19,9 +19,9 @@ optimization C3 (emerging — SMFRL solvers); Kolokoltsov adversarial C3 (non-li
 WENO discretization established but crypto application novel). Parameterization C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/mev/`. Needs combinatorial optimization (PuLP/OR-Tools for knapsack),
+TBD · `src/economy/sims/mev/`. Needs combinatorial optimization (OR-Tools for knapsack),
 continuous-time auction modeling, PDE solvers (WENO for shock-capturing in adversarial dynamics),
-and bilevel optimization (DSMFG). Python, Rust, or Julia.
+and bilevel optimization (DSMFG). Julia, Fortran, or C++.
 
 ## 4. Does / does-not
 - **Does:** simulate Priority Gas Auctions where multiple searcher bots compete for the same
@@ -57,11 +57,11 @@ and bilevel optimization (DSMFG). Python, Rust, or Julia.
   | Annual | Kolokoltsov adversarial long-run dynamics | Monthly roll |
   | 5-year | Structural MEV regime shifts, protocol-level policy effects | Quarterly roll |
 - Examples:
-  `{ value: 0.23, lower_bound: 0.11, upper_bound: 0.38, confidence: 0.80,
+  `{ value: 0.23, lower_bound: 0.11, upper_bound: 0.38, confidence: 8.00,
   time_horizon: "next_block", sim_type: "mev_adversarial" }` — sandwich probability.
-  `{ value: 14.7, lower_bound: 8.2, upper_bound: 22.5, confidence: 0.75,
+  `{ value: 14.7, lower_bound: 8.2, upper_bound: 22.5, confidence: 7.50,
   time_horizon: "next_block", sim_type: "mev_adversarial" }` — optimal gas bid (gwei).
-  `{ value: 0.034, lower_bound: 0.018, upper_bound: 0.052, confidence: 0.82,
+  `{ value: 0.034, lower_bound: 0.018, upper_bound: 0.052, confidence: 8.20,
   time_horizon: "1h", sim_type: "mev_adversarial" }` — cross-chain arb profit (ETH).
 - **Prediction types:** `sandwich_probability`, `frontrun_risk`, `optimal_gas_bid`,
   `block_inclusion_probability`, `mev_exposure`, `cross_chain_arb_profit`,

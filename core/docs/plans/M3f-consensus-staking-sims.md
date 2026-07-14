@@ -15,7 +15,7 @@ simulation parameterization C1.
 
 ## 3. Language & location
 TBD · `src/economy/sims/consensus/`. Needs Markov chain solvers and game-theoretic equilibrium
-computation. Python, Julia, or R.
+computation. Julia, R, or Fortran.
 
 ## 4. Does / does-not
 - **Does:** simulate validator populations where honesty evolves via **evolutionary game theory**
@@ -34,10 +34,10 @@ computation. Python, Julia, or R.
 ## 5. Interface contract
 - Implements `query(PredictionQuery) -> BoundedPrediction` per M3 hub.
 - **Output bounds:** equilibrium stability ranges and yield intervals.
-  Example: `{ value: 0.89, lower_bound: 0.82, upper_bound: 0.94, confidence: 0.88,
+  Example: `{ value: 0.89, lower_bound: 0.82, upper_bound: 0.94, confidence: 8.80,
   time_horizon: "7d", sim_type: "consensus_staking" }` — fraction of validators honest in
   equilibrium.
-  Example: `{ value: 4.2, lower_bound: 3.6, upper_bound: 5.1, confidence: 0.82,
+  Example: `{ value: 4.2, lower_bound: 3.6, upper_bound: 5.1, confidence: 8.20,
   time_horizon: "30d", sim_type: "consensus_staking" }` — annualized staking yield (%).
 - **Time-horizon mapping** (all run concurrently, tick-advanced, 90:1 (1s wall = 90s sim)):
   | Horizon | Primary models | Update cadence |

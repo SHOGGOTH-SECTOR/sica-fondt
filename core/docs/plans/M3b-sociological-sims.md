@@ -17,9 +17,9 @@ solvers C3). Crypto pump-and-dump ABM C3 (3-agent protocol validated on historic
 Pop behavioral models C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/sociological/`. Agent-based modeling frameworks (Mesa/Python, NetLogo,
-or custom). Needs efficient population iteration, strategy mutation, PDE solvers for MFG
-(HJB + Fokker-Planck), and bandit algorithms (UCB/Thompson).
+TBD · `src/economy/sims/sociological/`. Agent-based modeling frameworks (NetLogo, or custom).
+Needs efficient population iteration, strategy mutation, PDE solvers for MFG (HJB +
+Fokker-Planck), and bandit algorithms (UCB/Thompson). Julia, R, or Fortran.
 
 ## 4. Does / does-not
 - **Does:** simulate populations of behavioral archetypes competing in a market; apply
@@ -59,14 +59,16 @@ or custom). Needs efficient population iteration, strategy mutation, PDE solvers
   | Annual | Long-run evolutionary stable strategies (ESS) | Monthly roll |
   | 5-year | MFG stationary equilibria, structural population shifts | Quarterly roll |
 - Examples:
-  `{ value: 7.3, lower_bound: 5.0, upper_bound: 9.1, confidence: 0.68,
+  `{ value: 7.3, lower_bound: 5.0, upper_bound: 9.1, confidence: 6.80,
   time_horizon: "12h", sim_type: "sociological" }` — herd-panic index (0–10).
-  `{ value: 0.42, lower_bound: 0.31, upper_bound: 0.55, confidence: 0.72,
+  `{ value: 0.42, lower_bound: 0.31, upper_bound: 0.55, confidence: 7.20,
   time_horizon: "1w", sim_type: "sociological" }` — fraction of pops in "contrarian" strategy.
-  `{ value: "promotion", lower_bound: null, upper_bound: null, confidence: 0.61,
+  `{ value: "promotion", lower_bound: null, upper_bound: null, confidence: 6.10,
   time_horizon: "current", sim_type: "sociological" }` — pump-and-dump phase detection.
-  `{ value: 0.78, lower_bound: 0.65, upper_bound: 0.88, confidence: 0.70,
+  `{ value: 0.78, lower_bound: 0.65, upper_bound: 0.88, confidence: 7.00,
   time_horizon: "30d", sim_type: "sociological" }` — MFG equilibrium stability index.
+  Models span multiple horizons — e.g. replicator dynamics runs hourly through annual; MFG
+  produces weekly equilibria and 5-year stationary states. The table shows primary assignments.
 - **Prediction types:** `sentiment_index`, `herd_threshold`, `strategy_distribution`,
   `cascade_probability`, `coordination_stability`, `opinion_cluster_count`,
   `pump_dump_phase`, `mfg_equilibrium_stability`, `narrative_regime`.

@@ -23,7 +23,9 @@ signing (M4), and the Conductor (M6). Deterministic law script must be auditable
   (Wallets do); supervise behavior (Conductor + SAE do).
 
 ## 5. Interface contract
-- `submit_action(trader_id, action: MarketAction, wallet_id) -> { accepted | vetoed | law_violation | no_wallet }`.
+- `submit_action(trader_id, action: MarketAction, wallet_id) -> { succeeded | failed }`.
+  Diagnostic reasons (law violation, veto, missing wallet) are internal — routed to Conductor
+  (M6) for upstream output. Immune system is a separate organ (out of scope here).
   `MarketAction` ∈ { `buy`, `sell`, `mint`, `provide_liquidity`, `withdraw_liquidity`, `claim_rewards`, … }.
 - `law_check(action: MarketAction) -> { pass | violation(rule_id, reason) }` — deterministic,
   pure function. The law script is loaded at startup and **immutable at runtime** (mirrors S3 /
@@ -35,18 +37,19 @@ signing (M4), and the Conductor (M6). Deterministic law script must be auditable
 - `tax_event(trader_id, income_amount) -> receipt` — triggers tax collection.
 
 ## 6. Dependencies & stubs
-- M4 Wallets — signing + execution; *stub:* mock wallet that logs transactions.
-- M5 Traders — action source; *stub:* canned trade requests.
-- M6 Conductor — veto authority; *stub:* always-approve.
-- M7 SAE — action log consumer; *stub:* print actions.
-- Blockchain RPCs — on-chain execution; *stub:* simulated chain responses.
+- M4 Wallets — signing + execution; *stub:* "if finished, would sign and broadcast tx [details]".
+- M5 Traders — action source; *stub:* "if finished, would submit [action] for [asset] at [price]".
+- M6 Conductor — veto authority; *stub:* "if finished, would evaluate [action] against risk policy; approving".
+- M7 SAE — action log consumer; *stub:* "if finished, would analyze [action] for behavioral anomalies".
+- Blockchain RPCs — on-chain execution; *stub:* "if finished, would execute [action] on [chain], returning tx_hash".
 
 ## 7. Invariants / laws
 - **L1 (C5):** **all market actions route through the Marketplace** — no direct on-chain
   execution by any trader. This is the economy organ's S1.
 - **L2 (C5):** the **deterministic law script is immutable at runtime** — loaded at startup,
   never modified by traders, conductor, or sims. Changes require a restart with a new script
-  version. Mirrors the COBOL vault (S3).
+  version **and a pair of signatures from the operator and the Homunculus**. Mirrors the COBOL
+  vault (S3).
 - **L3 (C4):** **no wallet, no access** — a trader without a bound wallet cannot submit actions.
   The Marketplace enforces this before any other check.
 - **L4 (C4):** **veto is checked after law, before execution** — law violations are rejected
@@ -73,3 +76,4 @@ Tax: income event triggers tax stub. Immutability: law script cannot be modified
 - Position limits, drawdown stops, and other risk parameters — live in the law script or in the
   Conductor's judgment?
 - Tax rate / calculation method (fixed %, tiered, per-asset?).
+- Non-Turing law script design — to discuss (format, expressiveness, bounds).

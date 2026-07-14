@@ -16,10 +16,10 @@ execution C5 (industry standard since 2001). Jump-diffusion C5 (Merton 1976). Pa
 for crypto markets C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/statistical/`. Python (NumPy/SciPy), Julia, or R for numerical
-computing. Needs efficient matrix operations, SDE solvers, and distribution sampling. Fractional
-Brownian motion generation requires specialized libraries (e.g. `fbm` in Python, or spectral
-methods).
+TBD · `src/economy/sims/statistical/`. Julia, R, Fortran, or Octave for numerical computing.
+Needs efficient matrix operations, SDE solvers, and distribution sampling. Fractional Brownian
+motion generation uses spectral methods (Hosking 1984, Wood & Chan 1994) or Cholesky
+decomposition of the covariance matrix.
 
 ## 4. Does / does-not
 - **Does:** run Monte Carlo price simulations (GBM, Merton jump-diffusion, Heston stochastic
@@ -52,11 +52,11 @@ methods).
   | Weekly–monthly | Jump-diffusion Monte Carlo, regime-conditional forecasts | Hourly roll |
   | Annual–5yr | SDE mean-reversion long-run $\theta$, macro regime priors | Daily roll |
 - Examples:
-  `{ value: 1847.30, lower_bound: 1790.15, upper_bound: 1905.60, confidence: 0.95,
+  `{ value: 1847.30, lower_bound: 1790.15, upper_bound: 1905.60, confidence: 9.50,
   time_horizon: "24h", sim_type: "statistical" }` — 95% CI on ETH price.
-  `{ value: 0.72, lower_bound: 0.58, upper_bound: 0.89, confidence: 0.90,
+  `{ value: 0.72, lower_bound: 0.58, upper_bound: 0.89, confidence: 9.00,
   time_horizon: "1h", sim_type: "statistical" }` — Heston instantaneous vol $\sqrt{\nu_t}$.
-  `{ value: "bear", lower_bound: null, upper_bound: null, confidence: 0.83,
+  `{ value: "bear", lower_bound: null, upper_bound: null, confidence: 8.30,
   time_horizon: "current", sim_type: "statistical" }` — HMM regime state.
 - **Prediction types:** `price_forecast`, `volatility_surface`, `var_calculation`,
   `correlation_matrix`, `regime_state`, `rough_vol_estimate`, `jump_intensity`.
@@ -68,10 +68,12 @@ methods).
 
 ## 7. Invariants / laws
 - **L1 (C5):** bounds are **statistical confidence intervals** — derived from the model's
-  distribution, not hand-picked. The confidence level (e.g. 0.95) is explicit in the output.
-- **L2 (C5):** **six time horizons run concurrently** — tick-level rough vol, hourly regime
-  detection, daily Heston surface, weekly Monte Carlo, annual mean-reversion, and 5-year macro
-  forecasts coexist; none blocks the others.
+  distribution, not hand-picked. Three distinct metrics in every output: **confidence** (how sure
+  the model is of this prediction), **correctness** (how accurate the model has been historically),
+  and **certainty** (how stable the estimate is across perturbations). All on the 0.00–10.00 scale.
+- **L2 (C5):** **six time horizons run concurrently** — models span multiple horizons (e.g.
+  Monte Carlo runs daily and annual, rough vol runs tick and hourly, Heston runs daily and
+  weekly). All coexist; none blocks the others.
 - **L3 (C4):** model parameters are **re-estimated on each calibration** from live data — no
   stale parameters carried across regime changes. Regime transitions trigger immediate
   re-estimation of conditional parameters.

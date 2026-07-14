@@ -11,7 +11,7 @@ DESIGN-FIRST · ABSENT. Role C3; implementation C1.
 
 ## 3. Language & location
 TBD · `src/economy/feeds/`. Needs async I/O for streaming data (WebSockets, SSE, RSS polling).
-Pony actors are a natural fit (async, backpressure-aware). Python or Rust for API client libs.
+Pony actors are a natural fit (async, backpressure-aware).
 
 ## 4. Does / does-not
 - **Does:** ingest live market data from external sources (RSS, price APIs, DEX subgraphs,
@@ -30,8 +30,8 @@ Pony actors are a natural fit (async, backpressure-aware). Python or Rust for AP
 - `query_history(feed_type, time_range) -> [NormalizedDatum]` — sims and traders can pull
   historical data within the session window.
 - `NormalizedDatum { feed_type, source, timestamp, payload, confidence }` — common shape.
-  `confidence` ∈ [0.0, 1.0] — data source reliability (exchange-reported price = high; RSS
-  sentiment = lower).
+  `confidence` ∈ [0.0, 10.0] — data source reliability per position produced (exchange-reported
+  price = high; RSS sentiment = lower). Sims produce even finer-grained confidence.
 
 ## 6. Dependencies & stubs
 - External data sources (price APIs, RSS, RPC nodes) — *stub:* canned market data replay.

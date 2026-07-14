@@ -23,11 +23,13 @@ TBD · new location e.g. `src/economy/`. The organ is polyglot by nature: tradin
 ## 4. Does / does-not
 - **Does:** host crypto/NFT trading via the Marketplace (M1); run always-on market prediction
   Sims (M3) fed by live Data Feeds (M2); manage sovereign-custody Wallets (M4); supervise
-  Traders (M5) via a Conductor (M6) and SAE monitor (M7); collect taxes on trader income and
-  stub transfer to Verschwörern Veregeister wallets.
+  Traders (M5) via a Conductor (M6); guard against anomalies via SAE monitor (M7); collect taxes
+  on trader income and stub transfer to Verschwörern Veregeister wallets; maintain a **ledger of
+  economy-related memories and patterns** (trade history, learned market patterns, calibration
+  state).
 - **Does-not:** consult the organism's Brain for trade decisions (scoped autonomy); route around
-  Ada for organism-bound messages (S1); store organism memories (E*); act as the organism's
-  conscience (that's Eth-Int / A6).
+  Ada for organism-bound messages (S1); store **organism** memories (E*) — economy-specific
+  memories stay local; act as the organism's conscience (that's Eth-Int / A6).
 
 ## 5. Interface contract
 - **Ichor interface (outbound):** `Envelope(Stomach, AdaBorder, OrganSecretion, payload)` — market
@@ -35,14 +37,15 @@ TBD · new location e.g. `src/economy/`. The organ is polyglot by nature: tradin
 - **Ichor interface (inbound):** organism directives arrive via Ichor (e.g. risk posture changes,
   budget adjustments from A2 energy).
 - **Internal wiring:** Marketplace (M1) ↔ Data Feeds (M2) ↔ Sims (M3). Wallets (M4) bind to
-  Traders (M5). Conductor (M6) supervises Traders via SAE (M7). All trader actions route through
-  Marketplace.
+  Traders (M5). Conductor (M6) supervises Traders (M5). SAE (M7) acts as an independent
+  antivirus / guarddog / alarm bell — monitors via Ichor-routed messages and alerts M6.
+  All trader actions route through Marketplace.
 - **Tax stub:** `transfer_tax(amount, source_wallet, dest_wallet) -> receipt` — automation hook
   for Verschwörern Veregeister internal wallet-to-wallet transfer. **Out of scope** — stub only.
 
 ## 6. Dependencies & stubs
 - Ichor bus (D2) — existing `Broker` + `Envelope`.
-- Ada border (D1) — screens outbound organism messages; *stub:* Ichor `Barrier`.
+- Ada border (D1) — outbound economy envelopes cross here (S1); *stub:* Ichor `Barrier`.
 - A2 energy — potential consumer of economic signals; *stub:* no integration initially.
 - Verschwörern Veregeister wallets — tax destination; *stub:* log transfer, no real wallet.
 
@@ -58,10 +61,10 @@ TBD · new location e.g. `src/economy/`. The organ is polyglot by nature: tradin
   SAE surveillance (M7), and wallet-level limits (M4) each independently constrain risk.
 
 ## 8. Build steps
-1. Define the internal wiring topology (how M1–M7 connect).
+1. Build sub-components (M1–M7) individually — each with defined success criteria and ablative tests.
 2. Extend the existing `Stomach` primitive in Ichor to carry the hub facade.
-3. Wire sub-components as their specs land.
-4. Implement the tax stub for Verschwörern Veregeister transfer.
+3. Define internal wiring topology and connect tested sub-components.
+4. Implement tax stub and Verschwörern Veregeister transfer last.
 
 ## 9. Tests
 Hub smoke: Marketplace reachable; Sims running and queryable; Wallet bound to Trader; Conductor
