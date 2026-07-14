@@ -19,7 +19,7 @@ optimization C3 (emerging — SMFRL solvers); Kolokoltsov adversarial C3 (non-li
 WENO discretization established but crypto application novel). Parameterization C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/mev/`. **Fortran** — dense numerical loops for PDE solvers (WENO
+FORTRAN [WHICH IMPLEMENTATIOBS?] · `src/economy/sims/mev/`. **Fortran** — dense numerical loops for PDE solvers (WENO
 shock-capturing), knapsack combinatorics, and continuous-time auction modeling at the throughput
 MEV extraction demands; no GC pauses during hot-path simulation.
 
@@ -57,12 +57,8 @@ MEV extraction demands; no GC pauses during hot-path simulation.
   | Annual | Kolokoltsov adversarial long-run dynamics | Monthly roll |
   | 5-year | Structural MEV regime shifts, protocol-level policy effects | Quarterly roll |
 - Examples:
-  `{ value: 0.23, lower_bound: 0.11, upper_bound: 0.38, confidence: 8.00,
-  time_horizon: "next_block", sim_type: "mev_adversarial" }` — sandwich probability.
-  `{ value: 14.7, lower_bound: 8.2, upper_bound: 22.5, confidence: 7.50,
-  time_horizon: "next_block", sim_type: "mev_adversarial" }` — optimal gas bid (gwei).
-  `{ value: 0.034, lower_bound: 0.018, upper_bound: 0.052, confidence: 8.20,
-  time_horizon: "1h", sim_type: "mev_adversarial" }` — cross-chain arb profit (ETH).
+  `{ value: 0.23 / 15.00 , lower_bound: 0.11 / 15.00 , upper_bound: 0.38 / 15.00 , confidence: 8.00 / 10.00,
+  time_horizon: "block", sim_type: "mev_adversarial" }`
 - **Prediction types:** `sandwich_probability`, `frontrun_risk`, `optimal_gas_bid`,
   `block_inclusion_probability`, `mev_exposure`, `cross_chain_arb_profit`,
   `adversarial_policy_stability`, `searcher_population_shift`.
