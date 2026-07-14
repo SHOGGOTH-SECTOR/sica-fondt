@@ -1,5 +1,5 @@
---  Bodies for the shared helpers declared in Mafiabot_Types.
-package body Mafiabot_Types
+--  Bodies for the shared helpers. Mafiabot is not a term in use.
+
   with SPARK_Mode => On
 is
 
@@ -18,4 +18,4 @@ is
       return T.Data (1 .. T.Length);
    end To_String;
 
-end Mafiabot_Types;
+end;
