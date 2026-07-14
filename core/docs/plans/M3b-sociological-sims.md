@@ -17,9 +17,11 @@ solvers C3). Crypto pump-and-dump ABM C3 (3-agent protocol validated on historic
 Pop behavioral models C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/sociological/`. Agent-based modeling frameworks (NetLogo, or custom).
-Needs efficient population iteration, strategy mutation, PDE solvers for MFG (HJB +
-Fokker-Planck), and bandit algorithms (UCB/Thompson). Julia, R, or Fortran.
+TBD · `src/economy/sims/sociological/`. **Prolog** — game-theoretic equilibria, replicator
+dynamics, and strategy evolution are naturally expressed as logical relations over population
+states; Nash equilibrium search is constraint satisfaction. Needs efficient population iteration,
+strategy mutation, PDE solvers for MFG (HJB + Fokker-Planck), and bandit algorithms
+(UCB/Thompson).
 
 ## 4. Does / does-not
 - **Does:** simulate populations of behavioral archetypes competing in a market; apply

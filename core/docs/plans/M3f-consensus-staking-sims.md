@@ -14,8 +14,10 @@ validator populations C4 (Lasry & Lions 2007; validator-specific application C3)
 simulation parameterization C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/consensus/`. Needs Markov chain solvers and game-theoretic equilibrium
-computation. Julia, R, or Fortran.
+TBD · `src/economy/sims/consensus/`. **Prolog** — Markov chain transition rules, Nash
+equilibrium search, and replicator dynamics are constraint-satisfaction problems over validator
+populations; Prolog's backtracking search finds equilibria declaratively rather than
+imperatively iterating toward them.
 
 ## 4. Does / does-not
 - **Does:** simulate validator populations where honesty evolves via **evolutionary game theory**

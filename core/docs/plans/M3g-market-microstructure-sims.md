@@ -15,8 +15,9 @@ optimal execution C5 (industry standard since 2001; crypto adaptations validated
 Kurz CMC thesis). DEX-specific microstructure C2 (emerging). Implementation C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/microstructure/`. Needs high-frequency data handling, event-driven
-simulation, and Riccati equation solvers for optimal execution trajectories. Fortran or Julia.
+TBD · `src/economy/sims/microstructure/`. **Zig** — tick-level event-driven simulation with
+deterministic memory layout, no GC pauses, and sub-microsecond latency for Riccati solvers and
+order-book state updates; comptime generics eliminate runtime dispatch on hot paths.
 
 ## 4. Does / does-not
 - **Does:** simulate order flow across venues (DEXs and CEXs); model bid-ask spread dynamics as a

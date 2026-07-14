@@ -19,9 +19,9 @@ optimization C3 (emerging — SMFRL solvers); Kolokoltsov adversarial C3 (non-li
 WENO discretization established but crypto application novel). Parameterization C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/mev/`. Needs combinatorial optimization (OR-Tools for knapsack),
-continuous-time auction modeling, PDE solvers (WENO for shock-capturing in adversarial dynamics),
-and bilevel optimization (DSMFG). Julia or Fortran.
+TBD · `src/economy/sims/mev/`. **Fortran** — dense numerical loops for PDE solvers (WENO
+shock-capturing), knapsack combinatorics, and continuous-time auction modeling at the throughput
+MEV extraction demands; no GC pauses during hot-path simulation.
 
 ## 4. Does / does-not
 - **Does:** simulate Priority Gas Auctions where multiple searcher bots compete for the same

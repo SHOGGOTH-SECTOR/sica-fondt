@@ -19,9 +19,10 @@ DeXposure inter-protocol credit propagation C3 (emerging, 2025 — high DeFi spe
 composable yield optimization C4 (Yearn v3, Beefy, production-validated). Specific parameters C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/tokenomics/`. Needs SDE solvers (Euler-Maruyama, Milstein),
-state-space estimation, and VAR (vector autoregression) for credit exposure impulse responses.
-Julia (DifferentialEquations.jl) or Octave.
+TBD · `src/economy/sims/tokenomics/`. **Fortran** — SDE solvers (Euler-Maruyama, Milstein),
+state-space estimation, and VAR impulse responses are dense matrix-heavy loops where Fortran's
+array intrinsics and zero-overhead numerics dominate; same language as M3d avoids a toolchain
+split across the heaviest numerical sims.
 
 ## 4. Does / does-not
 - **Does:** simulate token state dynamics via the SDE framework:

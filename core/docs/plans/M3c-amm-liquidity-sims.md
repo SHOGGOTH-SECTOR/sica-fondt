@@ -12,9 +12,9 @@ impermanent loss formula C5 (closed-form: $\text{IL}(r) = \frac{2\sqrt{r}}{1+r} 
 simulation parameterization C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/amm/`. Needs precise fixed-point or arbitrary-precision arithmetic for
-invariant calculations. Solidity for on-chain-equivalent precision; Julia or Octave for
-analytical models.
+TBD · `src/economy/sims/amm/`. **Solidity** — on-chain-equivalent fixed-point arithmetic
+reproduces the exact invariant calculations DEXs execute, eliminating precision-mismatch bugs
+between sim and production contracts.
 
 ## 4. Does / does-not
 - **Does:** simulate constant-product pools with fee parameter $\gamma$:
