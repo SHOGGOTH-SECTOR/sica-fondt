@@ -16,7 +16,7 @@ Kurz CMC thesis). DEX-specific microstructure C2 (emerging). Implementation C1.
 
 ## 3. Language & location
 TBD · `src/economy/sims/microstructure/`. Needs high-frequency data handling, event-driven
-simulation, and Riccati equation solvers for optimal execution trajectories. Fortran or Julia.
+simulation, and Riccati equation solvers for optimal execution trajectories. Fortran, Julia, Octave, or Zig.
 
 ## 4. Does / does-not
 - **Does:** simulate order flow across venues (DEXs and CEXs); model bid-ask spread dynamics as a

@@ -21,7 +21,7 @@ composable yield optimization C4 (Yearn v3, Beefy, production-validated). Specif
 ## 3. Language & location
 TBD · `src/economy/sims/tokenomics/`. Needs SDE solvers (Euler-Maruyama, Milstein),
 state-space estimation, and VAR (vector autoregression) for credit exposure impulse responses.
-Julia (DifferentialEquations.jl) or Octave.
+Julia (DifferentialEquations.jl), Octave, or Haskell.
 
 ## 4. Does / does-not
 - **Does:** simulate token state dynamics via the SDE framework:

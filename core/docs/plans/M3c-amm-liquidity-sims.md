@@ -13,8 +13,8 @@ simulation parameterization C1.
 
 ## 3. Language & location
 TBD · `src/economy/sims/amm/`. Needs precise fixed-point or arbitrary-precision arithmetic for
-invariant calculations. Solidity for on-chain-equivalent precision; Julia or Octave for
-analytical models.
+invariant calculations. Solidity for on-chain-equivalent precision; Julia, Octave, or
+Haskell for analytical models.
 
 ## 4. Does / does-not
 - **Does:** simulate constant-product pools with fee parameter $\gamma$:

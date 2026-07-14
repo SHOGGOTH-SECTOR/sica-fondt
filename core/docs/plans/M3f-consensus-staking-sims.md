@@ -15,7 +15,7 @@ simulation parameterization C1.
 
 ## 3. Language & location
 TBD · `src/economy/sims/consensus/`. Needs Markov chain solvers and game-theoretic equilibrium
-computation. Julia, R, or Fortran.
+computation. Julia, R, Fortran, Octave, Prolog, or Haskell.
 
 ## 4. Does / does-not
 - **Does:** simulate validator populations where honesty evolves via **evolutionary game theory**

@@ -16,7 +16,7 @@ execution C5 (industry standard since 2001). Jump-diffusion C5 (Merton 1976). Pa
 for crypto markets C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/statistical/`. Julia, R, Fortran, or Octave for numerical computing.
+TBD · `src/economy/sims/statistical/`. Julia, R, Fortran, Octave, or Haskell for numerical computing.
 Needs efficient matrix operations, SDE solvers, and distribution sampling. Fractional Brownian
 motion generation uses spectral methods (Hosking 1984, Wood & Chan 1994) or Cholesky
 decomposition of the covariance matrix.
