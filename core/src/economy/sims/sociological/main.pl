@@ -154,7 +154,7 @@ bounded_prediction(Value, Lower, Upper, Confidence, Horizon, Pred) :-
     Confidence =< 10.0,
     get_time(Now),
     Timestamp is round(Now * 1000),
-    Pred = pred(Value, Lower, Upper, Confidence, Horizon, statistical, Timestamp).
+    Pred = pred(Value, Lower, Upper, Confidence, Horizon, sociological, Timestamp).
 
 format_prediction(pred(V, L, U, C, H, T, _)) :-
     format("  value: ~4f [~4f, ~4f]~n", [V, L, U]),
