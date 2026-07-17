@@ -27,6 +27,10 @@ signing (M4), and the Conductor (M6). Deterministic law script must be auditable
   Diagnostic reasons (law violation, veto, missing wallet) are internal — routed to Conductor
   (M6) for upstream output. Immune system is a separate organ (out of scope here).
   `MarketAction` ∈ { `buy`, `sell`, `mint`, `provide_liquidity`, `withdraw_liquidity`, `claim_rewards`, … }.
+- `query_predictions(sim_type: SimType) -> [BoundedPrediction]` — traders read per-sim-type
+  predictions through the Marketplace. Predictions are published continuously by the sim hub
+  (M3) via M2 Data Feeds. The Marketplace holds the latest predictions from each sim type.
+  Traders see individual sim results (not aggregated) and decide how to weight them.
 - `law_check(action: MarketAction) -> { pass | violation(rule_id, reason) }` — deterministic,
   pure function. The law script is loaded at startup and **immutable at runtime** (mirrors S3 /
   the COBOL vault pattern).

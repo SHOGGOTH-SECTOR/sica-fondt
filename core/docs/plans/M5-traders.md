@@ -11,16 +11,15 @@ long-term holding, etc.).
 DESIGN-FIRST · ABSENT. Role C3; implementation C1.
 
 ## 3. Language & location
-TBD · `src/economy/traders/`. Each trader is an AI actor — likely LLM-based (small models for
-speed) or hybrid (LLM for strategy + deterministic execution logic). The harness managing
-multiple traders may be Pony actors or a Python async framework.
+TBD · `src/economy/traders/`. Traders are a mixed roster: some are LLM-powered AI agents, some
+are deterministic strategy bots. All use the same `MarketAction` interface through the
+Marketplace regardless of implementation.
 
 ## 4. Does / does-not
-- **Does:** query Sims (M3) for market predictions (bounded, multi-domain); consume Data Feeds
-  (M2) for real-time market state; formulate trade decisions based on predictions + data +
-  specialization; submit `MarketAction` requests to the Marketplace (M1) via bound wallet (M4);
-  operate with **scoped autonomy** — trades within law/budget constraints don't need Brain or
-  Conductor approval.
+- **Does:** read sim predictions from the Marketplace (M1) (bounded, multi-domain, per-sim-type);
+  formulate trade decisions based on predictions + market state + specialization; submit
+  `MarketAction` requests to the Marketplace (M1) via bound wallet (M4); operate with **scoped
+  autonomy** — trades within law/budget constraints don't need Brain or Conductor approval.
 - **Does-not:** execute on-chain directly (Marketplace does); hold keys (Wallet does); supervise
   other traders (Conductor does); modify the law script (immutable — M1-L2); bypass the
   Marketplace (M1-L1).
@@ -30,16 +29,16 @@ multiple traders may be Pony actors or a Python async framework.
   `specialization` ∈ { `defi_yield`, `nft_minter`, `arbitrageur`, `trend_follower`,
   `market_maker`, … } — extensible.
 - `decide(market_state, predictions: [BoundedPrediction]) -> MarketAction?` — the trader's core
-  loop. May return no action (waiting is a valid decision).
-- `tool_call(tool_name, args) -> result` — every tool call is intercepted and logged to SAE (M7)
-  before execution. Includes Marketplace submissions, Sim queries, and Data Feed reads.
+  loop. May return no action (waiting is a valid decision). Predictions are read from the
+  Marketplace, which receives them continuously from the sim hub via M2.
+- `tool_call(tool_name, args) -> result` — every tool call is intercepted and logged by the SAE
+  (M7) at the Marketplace level. The Marketplace is the only interface traders can act through.
 - `pause() / resume()` — Conductor (M6) can pause a trader pending investigation.
 - `status() -> { active | paused | investigating, wallet_id, specialization, position_summary }`.
 
 ## 6. Dependencies & stubs
 - M1 Marketplace — action submission; *stub:* mock marketplace that logs actions.
-- M2 Data Feeds — market data; *stub:* canned data.
-- M3 Sims — predictions; *stub:* fixed predictions.
+- M1 Marketplace — predictions (from sims via M2) and action submission; *stub:* mock marketplace.
 - M4 Wallet — bound 1:1; *stub:* mock wallet.
 - M6 Conductor — supervision; *stub:* no supervision.
 - M7 SAE — monitors all tool calls; *stub:* print calls.

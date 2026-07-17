@@ -81,7 +81,7 @@ strategy mutation, PDE solvers for MFG (HJB + Fokker-Planck), and bandit algorit
 - M3 Sims hub — lifecycle management; *stub:* manual init.
 
 ## 7. Invariants / laws
-- **L1 (C5):** pops are **archetypal individuals, not literao living persons** — no attempt to model or track real
+- **L1 (C5):** pops are **archetypal individuals, not literal living persons** — no attempt to model or track real
   market participants. The sim models emergent behavior from abstracted populations.
 - **L2 (C5):** strategies **evolve** — the population distribution shifts over time via
   replicator dynamics. No fixed strategy ratios.

@@ -2,8 +2,10 @@
 
 ## 1. Component
 The economy organ's vault: **sovereign, local-hosted, our-custody-only cryptocurrency wallets**.
-Each wallet binds to exactly one Trader (M5) — a trader without a wallet cannot access the
-Marketplace (M1). Wallets hold keys, sign transactions, and enforce wallet-level spending limits.
+Each wallet binds to exactly one Trader (M5) — strictly 1:1 both directions. A single wallet
+handles multiple chains internally (EVM, Solana, etc.). A trader without a wallet cannot access
+the Marketplace (M1). Wallets hold keys, sign transactions, and enforce wallet-level spending
+limits.
 Tax is collected on trader income and routed to the Verschwörern Veregeister wallets (stub — M0).
 
 ## 2. Status / certainty
@@ -24,7 +26,8 @@ with web3 libs for prototyping.
   custody to any third party — ever.
 
 ## 5. Interface contract
-- `create_wallet(chain: Chain, trader_id) -> wallet_id` — generates keys, binds to trader.
+- `create_wallet(chains: [Chain], trader_id) -> wallet_id` — generates keys for each chain,
+  binds to trader. One multi-chain wallet per trader.
 - `sign(wallet_id, tx: UnsignedTransaction) -> SignedTransaction` — signs with the wallet's key.
   Only the bound trader (via Marketplace) can request signing.
 - `balance(wallet_id) -> { chain, assets: [{ token, amount }] }`.

@@ -1,0 +1,13 @@
+name = "mev-sims"
+version = "0.1.0"
+license = "proprietary"
+
+[build]
+auto-executables = false
+auto-tests = true
+link = ["openblas"]
+
+[fortran]
+implicit-typing = false
+implicit-external = false
+source-form = "free"

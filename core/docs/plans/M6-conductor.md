@@ -57,7 +57,8 @@ inference wrapper sits alongside the Marketplace.
   fields, same signatures. The Conductor processes them the same way the Brain would.
 
 ## 8. Build steps
-1. Define the Conductor's decision model (rule-based for v1? fine-tuned LLM for v2?).
+1. Define the Conductor's LLM decision model (specialist-trained; rules are enforced by the
+   Marketplace law script and wallet spending limits — the Conductor applies judgment).
 2. Wire SAE alert intake (M7 → M6).
 3. Wire Marketplace veto check (M1 → M6 → approve/veto).
 4. Implement trader pause/investigate/resume flow.

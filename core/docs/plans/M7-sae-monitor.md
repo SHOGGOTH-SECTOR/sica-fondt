@@ -20,21 +20,23 @@ TBD · `src/economy/sae/`. ML interpretability (sparse autoencoder over trader a
 Shares the architectural pattern with F2 but is a separate instance scoped to the economy organ.
 
 ## 4. Does / does-not
-- **Does:** intercept and log **every trader tool call** (Marketplace, Sims, Feeds, internal);
-  embed trader action sequences; run SAE anomaly detection over action embeddings; flag suspicious
-  patterns (unusual trading frequency, outsized positions, coordinated behavior across traders,
-  repeated failed actions, unusual Sim query patterns); report alerts to the Conductor (M6) with
-  evidence; format alerts **identically to Brain messages** (same structure, same signatures).
+- **Does:** intercept and log **every trader action at the Marketplace level** — the Marketplace
+  is the only interface traders can act through, so monitoring it captures everything; embed trader
+  action sequences; run SAE anomaly detection over action embeddings; flag suspicious patterns
+  (unusual trading frequency, outsized positions, coordinated behavior across traders, repeated
+  failed actions); report alerts to the Conductor (M6) with evidence; format alerts **identically
+  to Brain messages** (same structure, same signatures).
 - **Does-not:** block actions directly (Conductor decides); watch the Conductor (the stomach's
   "homunculus" — echoes F2-L1); correct trader behavior (detection only — F2-L2: no closed
   elimination loop); trade or access wallets.
 
 ## 5. Interface contract
-- `log_tool_call(trader_id, tool_name, args, result, timestamp)` — called on every trader tool
-  invocation. Synchronous interception (the call is logged before execution proceeds).
+- `log_action(trader_id, action_type, args, result, timestamp)` — called on every trader
+  interaction at the Marketplace level. Synchronous interception (the action is logged before
+  execution proceeds).
 - `alert(trader_id, alert_type, evidence, severity) -> SAEAlert`.
   `alert_type` ∈ { `unusual_frequency`, `outsized_position`, `coordinated_behavior`,
-  `repeated_failures`, `anomalous_queries`, `pattern_deviation` }.
+  `repeated_failures`, `pattern_deviation` }.
   `severity` ∈ { `low`, `medium`, `high`, `critical` }.
 - `SAEAlert` structure is **identical to Brain message structure** — same fields, same
   signature scheme. The Conductor (M6) processes SAE alerts and Brain messages through the
@@ -62,15 +64,15 @@ Shares the architectural pattern with F2 but is a separate instance scoped to th
   in M1).
 
 ## 8. Build steps
-1. Implement tool-call interception in the trader harness (M5).
+1. Implement action interception at the Marketplace level (M1).
 2. Define the action embedding scheme (how tool calls are vectorized).
 3. Train the SAE on normal trader behavior (bootstrapped from simulated trading).
 4. Implement anomaly scoring and alert threshold.
 5. Wire alerts to Conductor (M6) in Brain-compatible message format.
 
 ## 9. Tests
-Interception: every tool call produces a log entry. Anomaly: known-suspicious patterns (e.g.
-100x normal frequency) trigger alert. Normal: baseline behavior does not trigger alert.
+Interception: every Marketplace action produces a log entry. Anomaly: known-suspicious patterns
+(e.g. 100x normal frequency) trigger alert. Normal: baseline behavior does not trigger alert.
 No enforcement: SAE cannot pause or block a trader (only Conductor can). Alert format: SAE
 alert parses as valid Brain message. Conductor-blind: no Conductor action appears in SAE logs.
 
