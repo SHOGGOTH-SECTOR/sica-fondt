@@ -17,10 +17,11 @@ for crypto markets C1.
 
 ## 3. Language & location
 **R 4.x** (apt `r-base-core`) · `src/economy/sims/statistical/`. Minimal dependencies:
-`r-base-core` + `jsonlite` (Hub JSON protocol). All statistical models — GARCH, Heston SDE,
-HMM, DCC, copula, jump-diffusion, fBM — are hand-rolled using base R primitives (`optim`,
-`fft`, `arima`, matrix ops). No CRAN statistical packages. Fractional Brownian motion via
-spectral methods (Hosking 1984 / Wood & Chan 1994) uses base R `fft()`.
+`r-base-core` + `HiddenMarkov` (CRAN — Viterbi filter, forward-backward, Baum-Welch). GARCH,
+Heston SDE, DCC, copula, jump-diffusion, and fBM are hand-rolled using base R primitives
+(`optim`, `fft`, `arima`, matrix ops). JSON I/O for the Hub stdin/stdout protocol is
+hand-rolled. Fractional Brownian motion via spectral methods (Hosking 1984 / Wood & Chan 1994)
+uses base R `fft()`.
 
 ## 4. Does / does-not
 - **Does:** run Monte Carlo price simulations (GBM, Merton jump-diffusion, Heston stochastic

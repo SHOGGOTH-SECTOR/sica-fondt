@@ -75,13 +75,16 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# R + jsonlite  (economy organ: M3a statistical sims)
+# R + HiddenMarkov  (economy organ: M3a statistical sims)
 # ---------------------------------------------------------------------------
-if command -v Rscript >/dev/null 2>&1 && Rscript -e 'library(jsonlite)' >/dev/null 2>&1; then
-  log "R + jsonlite already present; skipping."
+if command -v Rscript >/dev/null 2>&1 && Rscript -e 'library(HiddenMarkov)' >/dev/null 2>&1; then
+  log "R + HiddenMarkov already present; skipping."
 else
-  log "Installing r-base-core r-cran-jsonlite via apt-get ..."
-  sudo apt-get install -y r-base-core r-cran-jsonlite || die "apt-get install of r-base-core/r-cran-jsonlite failed."
+  log "Installing r-base-core via apt-get ..."
+  sudo apt-get install -y r-base-core || die "apt-get install of r-base-core failed."
+  log "Installing HiddenMarkov from CRAN ..."
+  Rscript -e 'install.packages("HiddenMarkov", repos="https://cloud.r-project.org", quiet=TRUE)' \
+    || die "CRAN install of HiddenMarkov failed."
 fi
 
 # ---------------------------------------------------------------------------
