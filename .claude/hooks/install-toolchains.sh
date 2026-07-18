@@ -96,31 +96,17 @@ else
   log "ECLiPSe installed to /opt/eclipseclp"
 fi
 
-# ---------------------------------------------------------------------------
-# Zig  (economy organ: M3g)
-# ---------------------------------------------------------------------------
-if command -v zig >/dev/null 2>&1; then
-  log "zig already present; skipping."
-else
-  log "Installing Zig ..."
-  ZIG_URL="https://ziglang.org/download/0.13.0/zig-linux-x86_64-0.13.0.tar.xz"
-  curl -sSL -o /tmp/zig.tar.xz "$ZIG_URL" || die "Zig download failed."
-  sudo tar -xJf /tmp/zig.tar.xz -C /opt || die "Zig extraction failed."
-  sudo ln -sf /opt/zig-linux-x86_64-0.13.0/zig /usr/local/bin/zig || die "Zig symlink failed."
-  log "zig installed to /usr/local/bin/zig"
-fi
-
-# ---------------------------------------------------------------------------
+# --------------------------------------------------------------------------- ---------------------------------------------------------------------------
 # Solidity / Foundry  (economy organ: M3c)
 # ---------------------------------------------------------------------------
-if command -v forge >/dev/null 2>&1; then
-  log "forge (Foundry) already present; skipping."
-else
-  log "Installing Foundry (forge, anvil) ..."
-  curl -sSL https://foundry.paradigm.xyz | bash || die "Foundry install script failed."
-  "$HOME/.foundry/bin/foundryup" || die "foundryup failed."
-  log "Foundry installed"
-fi
+# if command -v forge >/dev/null 2>&1; then
+#  log "forge (Foundry) already present; skipping."
+# else
+#  log "Installing Foundry (forge, anvil) ..."
+#  curl -sSL https://foundry.paradigm.xyz | bash || die "Foundry install script failed."
+#  "$HOME/.foundry/bin/foundryup" || die "foundryup failed."
+#  log "Foundry installed"
+# fi
 
 # ---------------------------------------------------------------------------
 # PATH for tools not in standard locations.
