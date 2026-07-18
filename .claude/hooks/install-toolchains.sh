@@ -75,6 +75,16 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# R + jsonlite  (economy organ: M3a statistical sims)
+# ---------------------------------------------------------------------------
+if command -v Rscript >/dev/null 2>&1 && Rscript -e 'library(jsonlite)' >/dev/null 2>&1; then
+  log "R + jsonlite already present; skipping."
+else
+  log "Installing r-base-core r-cran-jsonlite via apt-get ..."
+  sudo apt-get install -y r-base-core r-cran-jsonlite || die "apt-get install of r-base-core/r-cran-jsonlite failed."
+fi
+
+# ---------------------------------------------------------------------------
 # Tcl  (economy organ: M3 sim hub)
 # ---------------------------------------------------------------------------
 if command -v tclsh >/dev/null 2>&1; then

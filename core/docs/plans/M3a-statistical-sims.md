@@ -16,10 +16,11 @@ execution C5 (industry standard since 2001). Jump-diffusion C5 (Merton 1976). Pa
 for crypto markets C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/statistical/`. **R** — native statistical distribution ecosystem,
-matrix operations, and time-series libraries (GARCH, ARIMA, HMM) without wrapping external
-solvers. Fractional Brownian motion generation uses spectral methods (Hosking 1984, Wood & Chan
-1994) or Cholesky decomposition of the covariance matrix.
+**R 4.x** (apt `r-base-core`) · `src/economy/sims/statistical/`. Minimal dependencies:
+`r-base-core` + `jsonlite` (Hub JSON protocol). All statistical models — GARCH, Heston SDE,
+HMM, DCC, copula, jump-diffusion, fBM — are hand-rolled using base R primitives (`optim`,
+`fft`, `arima`, matrix ops). No CRAN statistical packages. Fractional Brownian motion via
+spectral methods (Hosking 1984 / Wood & Chan 1994) uses base R `fft()`.
 
 ## 4. Does / does-not
 - **Does:** run Monte Carlo price simulations (GBM, Merton jump-diffusion, Heston stochastic
