@@ -75,16 +75,19 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# R + HiddenMarkov  (economy organ: M3a statistical sims)
+# R + vital CRAN packages  (economy organ: M3a statistical sims)
+# Vital: HiddenMarkov (HMM regime detection), rugarch (GARCH volatility),
+# rmgarch (DCC-GARCH correlation). Everything else in M3a is hand-rolled.
 # ---------------------------------------------------------------------------
-if command -v Rscript >/dev/null 2>&1 && Rscript -e 'library(HiddenMarkov)' >/dev/null 2>&1; then
-  log "R + HiddenMarkov already present; skipping."
+if command -v Rscript >/dev/null 2>&1 \
+  && Rscript -e 'library(HiddenMarkov); library(rugarch); library(rmgarch)' >/dev/null 2>&1; then
+  log "R + HiddenMarkov/rugarch/rmgarch already present; skipping."
 else
   log "Installing r-base-core via apt-get ..."
   sudo apt-get install -y r-base-core || die "apt-get install of r-base-core failed."
-  log "Installing HiddenMarkov from CRAN ..."
-  Rscript -e 'install.packages("HiddenMarkov", repos="https://cloud.r-project.org", quiet=TRUE)' \
-    || die "CRAN install of HiddenMarkov failed."
+  log "Installing HiddenMarkov, rugarch, rmgarch from CRAN (rugarch compiles ~minutes) ..."
+  Rscript -e 'install.packages(c("HiddenMarkov","rugarch","rmgarch"), repos="https://cloud.r-project.org", quiet=TRUE)' \
+    || die "CRAN install of HiddenMarkov/rugarch/rmgarch failed."
 fi
 
 # ---------------------------------------------------------------------------

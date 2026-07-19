@@ -16,12 +16,13 @@ execution C5 (industry standard since 2001). Jump-diffusion C5 (Merton 1976). Pa
 for crypto markets C1.
 
 ## 3. Language & location
-**R 4.x** (apt `r-base-core`) · `src/economy/sims/statistical/`. Minimal dependencies:
-`r-base-core` + `HiddenMarkov` (CRAN — Viterbi filter, forward-backward, Baum-Welch). GARCH,
-Heston SDE, DCC, copula, jump-diffusion, and fBM are hand-rolled using base R primitives
-(`optim`, `fft`, `arima`, matrix ops). JSON I/O for the Hub stdin/stdout protocol is
-hand-rolled. Fractional Brownian motion via spectral methods (Hosking 1984 / Wood & Chan 1994)
-uses base R `fft()`.
+**R 4.x** (apt `r-base-core`) · `src/economy/sims/statistical/`. Vital CRAN packages only:
+`HiddenMarkov` (Viterbi filter, forward-backward, Baum-Welch), `rugarch` (univariate GARCH
+volatility — GJR/EGARCH families, ML fitting), `rmgarch` (DCC-GARCH cross-asset correlation).
+Everything else is hand-rolled with base R primitives (`optim`, `fft`, `arima`, matrix ops):
+Heston SDE (Euler–Maruyama), Merton jump-diffusion, GBM Monte Carlo, copula tail-dependence,
+and fBM via spectral methods (Hosking 1984 / Wood & Chan 1994) on base `fft()`. JSON I/O for
+the Hub stdin/stdout protocol is hand-rolled.
 
 ## 4. Does / does-not
 - **Does:** run Monte Carlo price simulations (GBM, Merton jump-diffusion, Heston stochastic
