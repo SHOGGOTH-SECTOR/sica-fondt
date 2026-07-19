@@ -1,0 +1,28 @@
+abstract project Core_Config is
+
+   for Source_Dirs use ();
+
+   type Yes_No_Type is ("yes", "no");
+   type Library_Type_Type is ("relocatable", "static", "static-pic");
+
+   Library_Type : Library_Type_Type := external ("CORE_LIBRARY_TYPE", "static");
+   Static_Build : Yes_No_Type := external ("CORE_STATIC_BUILD", "yes");
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022",
+         "-gnatwa",
+         "-gnatwe",
+         "-gnatyyM",
+         "-gnaty3abcdefhijklmnoprstux",
+         "-Wall",
+         "-O2",
+         "-gnatf",
+         "-gnatpn");
+   end Compiler;
+
+   package Binder is
+      for Default_Switches ("Ada") use ("-Es");
+   end Binder;
+
+end Core_Config;
