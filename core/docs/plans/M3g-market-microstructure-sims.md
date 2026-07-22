@@ -15,9 +15,11 @@ optimal execution C5 (industry standard since 2001; crypto adaptations validated
 Kurz CMC thesis). DEX-specific microstructure C2 (emerging). Implementation C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/microstructure/`. **Zig** — tick-level event-driven simulation with
-deterministic memory layout, no GC pauses, and sub-microsecond latency for Riccati solvers and
-order-book state updates; comptime generics eliminate runtime dispatch on hot paths.
+**Fortran 2018** (gfortran) · `src/economy/sims/microstructure/`. Build: **fpm**. Dependencies:
+**OpenBLAS** (LAPACK/BLAS via native Fortran interfaces). Hand-rolled: Riccati ODE solver,
+order-book state arrays, JSON I/O against fixed schemas. Almgren-Chriss optimal execution is a
+dense ODE (Riccati equations) — Fortran's home turf; LAPACK is native, array intrinsics map
+directly to order-book depth vectors, and zero new toolchain is needed (same as M3d/M3e).
 
 ## 4. Does / does-not
 - **Does:** simulate order flow across venues (DEXs and CEXs); model bid-ask spread dynamics as a

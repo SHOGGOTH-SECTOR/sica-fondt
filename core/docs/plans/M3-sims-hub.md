@@ -18,8 +18,8 @@ established); specific model parameters C1.
 ## 3. Language & location
 **Tcl** · `src/economy/sims/`. The hub is a syntax-agnostic coordinator: Tcl manages
 lifecycle, tick-advancement, and query routing for sub-sims in their native runtimes via
-stdin/stdout JSON — **Fortran** (M3d, M3e), **Prolog** (M3b, M3f), **R** (M3a),
-**Solidity** (M3c), **Zig** (M3g). Tcl imposes no type system or paradigm on the
+stdin/stdout JSON — **Fortran** (M3d, M3e, M3g), **Prolog** (M3b, M3f), **R** (M3a),
+**Solidity** (M3c). Tcl imposes no type system or paradigm on the
 sub-processes it orchestrates.
 
 ## 4. Does / does-not
@@ -50,17 +50,22 @@ sub-processes it orchestrates.
   `SimType` ∈ { `statistical`, `sociological`, `amm_liquidity`, `mev_adversarial`,
   `tokenomics_macro`, `consensus_staking`, `market_microstructure` } (M3a–M3g).
 - `BoundedPrediction { value, lower_bound, upper_bound, confidence, correctness, certainty,
-  time_horizon, sim_type, timestamp }`.
+  time_horizon, sim_type, timestamp, token_ticker, recent_shift }`.
   Every output is bounded — no point estimates without uncertainty ranges.
   Three quality metrics, each ∈ [0.00, 10.00]:
   **confidence** — how sure the model is of this prediction;
-  **correctness** — how accurate the model has been historically;
+  **correctness** — how accurate the model has been historically (scored against literal
+  market values from M2);
   **certainty** — how stable the estimate is across perturbations.
+  **token_ticker** — which asset this prediction concerns (e.g. `"ETH"`, `"BTC"`).
+  **recent_shift** — literal observed market movement (ground truth from M2, not sim output).
+  Same M2 source feeds calibration and `correctness` scoring.
   Gain rates print as `lower - value - upper / 10.00`
   (e.g. `2.31 - 4.44 - 7.11 / 10.00 gain over next 30 days`);
   the denominator aids legibility — gain is not capped at 10.00.
   Example: `{ value: 7.2, lower_bound: 5.8, upper_bound: 8.9, confidence: 7.30,
-  correctness: 8.10, certainty: 6.50, time_horizon: "4h", sim_type: "amm_liquidity" }`.
+  correctness: 8.10, certainty: 6.50, time_horizon: "4h", sim_type: "amm_liquidity",
+  token_ticker: "ETH", recent_shift: -0.023 }`.
 - `status(sim_type?) -> { running, pop_count, last_calibration, data_freshness }` — health check.
 - `calibrate(sim_type, feed_data: [NormalizedDatum])` — Data Feeds (M2) pushes live data for
   model recalibration.

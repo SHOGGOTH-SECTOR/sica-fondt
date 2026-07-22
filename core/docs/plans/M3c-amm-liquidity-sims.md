@@ -12,9 +12,11 @@ impermanent loss formula C5 (closed-form: $\text{IL}(r) = \frac{2\sqrt{r}}{1+r} 
 simulation parameterization C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/amm/`. **Solidity** — on-chain-equivalent fixed-point arithmetic
-reproduces the exact invariant calculations DEXs execute, eliminating precision-mismatch bugs
-between sim and production contracts.
+**Solidity** + **Foundry** (forge, anvil) · `src/economy/sims/amm/`. Foundry is hosted
+separately from the session container — not a session-start install. M3c's output enters the
+system through Hub like every other sim, same `BoundedPrediction` schema, same M2 path.
+On-chain-equivalent fixed-point arithmetic reproduces the exact invariant calculations DEXs
+execute, eliminating precision-mismatch bugs between sim and production contracts.
 
 ## 4. Does / does-not
 - **Does:** simulate constant-product pools with fee parameter $\gamma$:

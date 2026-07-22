@@ -14,10 +14,11 @@ validator populations C4 (Lasry & Lions 2007; validator-specific application C3)
 simulation parameterization C1.
 
 ## 3. Language & location
-TBD · `src/economy/sims/consensus/`. **Prolog** — Markov chain transition rules, Nash
-equilibrium search, and replicator dynamics are constraint-satisfaction problems over validator
-populations; Prolog's backtracking search finds equilibria declaratively rather than
-imperatively iterating toward them.
+**ECLiPSe Prolog 7.2** · `src/economy/sims/consensus/`. Libraries: **ic** (interval
+constraints), **eplex** (LP/MIP via COIN-OR CLP/CBC — Nash equilibrium via linear programming).
+Markov chain transition rules, Nash equilibrium search, and replicator dynamics are
+constraint-satisfaction problems over validator populations; Prolog's backtracking search finds
+equilibria declaratively rather than imperatively iterating toward them.
 
 ## 4. Does / does-not
 - **Does:** simulate validator populations where honesty evolves via **evolutionary game theory**
