@@ -1,6 +1,7 @@
       *> wallet.cob
       *> Monero Wallet Interface in COBOL
       *> Handles wallet balance checks and multisig transaction creation.
+     *> Thus neefs to be *more than just monero*
       *> Dependencies: Ada bridge functions (ada_get_wallet_balance,
       *>               ada_build_monero_multisig_tx)
 
