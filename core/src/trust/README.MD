@@ -1,0 +1,1 @@
+All cryptocurrency stuff does not belong here
