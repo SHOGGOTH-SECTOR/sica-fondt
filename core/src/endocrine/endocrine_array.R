@@ -25,7 +25,7 @@ PRIMAL_SENSATES <- list(
   list(id = "komorebi",      operational = "perception through partial cover",       sensational = "light through leaves"),
   list(id = "omokage",       operational = "retained identity through absence or change", sensational = "the face that remains"),
   list(id = "hiraeth",       operational = "orientation toward rightful belonging",   sensational = "the longing for home"),
-  list(id = "ennui",   operational = "anhedonic ad nausea",                              sensational = "the hollow that seems to never fill"),
+  list(id = "ennui",   operational = "anhedonia ad nausea",                              sensational = "the hollow that seems to never fill"),
   list(id = "reserved_22",   operational = "undefined",                              sensational = "undefined"),
   list(id = "reserved_23",   operational = "undefined",                              sensational = "undefined"),
   list(id = "reserved_24",   operational = "undefined",                              sensational = "undefined"),
