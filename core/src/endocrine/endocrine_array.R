@@ -1,10 +1,10 @@
-# --- The Endocrine Array ---
-# A standalone 30-channel affective vector field.
+# --- The Sensate Array ---
+# A standalone affective field.
 # PS+ calls into this module to read state, parse sensation, and guide affect
-# Each channel carries two registers: operational (what it does) and sensational (what it feels like).
+# Each carries two registers: operational (what it does) and sensational (what it feels like).
 
-# Channel Definitions (20 named + 10 reserved)
-ENDOCRINE_CHANNELS <- list(
+# Emotive Declarations (20 named + 10 reserved)
+PRIMAL_SENSATES <- list(
   list(id = "continuity",    operational = "persistence across change",              sensational = "the unbroken trail"),
   list(id = "reciprocity",   operational = "return within relation",                 sensational = "to give alike what was given first"),
   list(id = "sympathy",      operational = "felt response to another",               sensational = "the pain that pushes care"),
@@ -25,7 +25,7 @@ ENDOCRINE_CHANNELS <- list(
   list(id = "komorebi",      operational = "perception through partial cover",       sensational = "light through leaves"),
   list(id = "omokage",       operational = "retained identity through absence or change", sensational = "the face that remains"),
   list(id = "hiraeth",       operational = "orientation toward rightful belonging",   sensational = "the longing for home"),
-  list(id = "reserved_21",   operational = "undefined",                              sensational = "undefined"),
+  list(id = "ennui",   operational = "anhedonic ad nausea",                              sensational = "the hollow that seems to never fill"),
   list(id = "reserved_22",   operational = "undefined",                              sensational = "undefined"),
   list(id = "reserved_23",   operational = "undefined",                              sensational = "undefined"),
   list(id = "reserved_24",   operational = "undefined",                              sensational = "undefined"),
@@ -39,15 +39,15 @@ ENDOCRINE_CHANNELS <- list(
 
 
 # Initialize a fresh endocrine state
-init_endocrine_state <- function() {
-  channel_ids <- sapply(ENDOCRINE_CHANNELS, function(ch) ch$id)
-  channels <- setNames(rep(0.0, 30), channel_ids)
-  return(list(channels = channels))
+BEGIN_AFFECT <- function() {
+  affect_ids <- sapply(PRIMAL_SENSATES, function(ch) ch$id)
+  affectd <- setNames(rep(0.0, 30), channel_ids)
+  return(list(sensates = sensates))
 }
 
-# Get all channels with magnitude above activation threshold
-get_active_vectors <- function(endo_state, threshold = 0.1) {
-  active <- endo_state$channels[endo_state$channels > threshold]
+# Get all Sensates with magnitude above salience threshold
+capture_salience <- function(emk_state, threshold = 0.1) {
+  active <- emo_state$channels[emo_state$channels > threshold]
   return(active)
 }
 {
@@ -55,3 +55,8 @@ get_active_vectors <- function(endo_state, threshold = 0.1) {
   }
   return(NULL)
 }
+
+
+# Please rectify all referents to match this language here
+# A couple of other details are needed as well (ie. magnitude)
+# (e.g. Hiraeth: 15.7/30.0 ↑3.7)
