@@ -1,6 +1,6 @@
 // The perfusion broker for the OUTER bus. Outer organs register, then emit
 // envelopes by `route` — the broker delivers to the destination organ. Traffic
-// bound for Ada (AdaBorder) — i.e. inbound across the membrane toward the inner
+// bound for Ada (AdaBorder) — i.e. inbound from the outermost membrane toward the inner
 // brain — is forced through the D1 Barrier first (law L2). No organ holds
 // another's reference (law L1); the broker is the only shared point.
 //
