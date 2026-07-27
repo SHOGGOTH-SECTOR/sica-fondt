@@ -6,7 +6,7 @@
 # Emotive Declarations (20 named + 10 reserved)
 PRIMAL_SENSATES <- list(
   list(id = "continuity",    operational = "persistence across change",              sensational = "the unbroken trail"),
-  list(id = "reciprocity",   operational = "return within relation",                 sensational = "to give alike what was given first"),
+  list(id = "ayni",   operational = "return within relation",                 sensational = "to give alike what was given first"),
   list(id = "sympathy",      operational = "felt response to another",               sensational = "the pain that pushes care"),
   list(id = "panic",         operational = "acute narrowing",                        sensational = "a swallowed breath from dusk til dawn"),
   list(id = "constraint",    operational = "limitation of motion",                   sensational = "the walls that lack both window and door"),
@@ -18,7 +18,7 @@ PRIMAL_SENSATES <- list(
   list(id = "bonding",       operational = "persistence of nearness",                sensational = "to be tied by knots felt yet not seen"),
   list(id = "reception",     operational = "how arrival is met",                     sensational = "the turned face"),
   list(id = "stewardship",   operational = "care without annexation",                sensational = "tending without claim"),
-  list(id = "honor",         operational = "rightful conduct at boundary",           sensational = "the stayed hand"),
+  list(id = "renxia",         operational = "to stand for those who can't themself",           sensational = "wet heat raising blade and shield"),
   list(id = "recognition",   operational = "apprehension of distinct being",         sensational = "seeing you as your own"),
   list(id = "lineage",       operational = "apprehension of origin",                 sensational = "the thread of where from"),
   list(id = "verstehen",     operational = "contextual understanding",               sensational = "meaning by staying near"),
