@@ -8,13 +8,12 @@
 docs:
   read_order:                       # newcomer reading path
     - README.md                     # what sica-fondt is
-    - SOUL.md                       # intent and principles — the "why"
     - docs/                         # architecture in detail
     - CLAUDE.md                     # working agreements, build/run, invariants
     - ONBOARDING.md                 # newcomer setup + first task
 
   routing:                          # which doc for which task
-    high_level_overview: [README.md, SOUL.md]
+    high_level_overview: [README.md]
     architecture: [docs/bus-topology.md, docs/gen03_state_of_architecture.md]
     build_run_test: .claude/skills/run-sica-fondt/   # smoke.sh
     rules_before_editing: CLAUDE.md
@@ -40,11 +39,11 @@ organs:
     lang: [r, octave]
     role: endocrine array — R Drive-Box + Octave ETR
     build: "src/endocrine/run_tests.sh ; src/endocrine/etr/run_etr_tests.sh"
-  - path: mafiabot_core
-    agents_md: mafiabot_core/AGENTS.md
+  - path: core
+    agents_md: core/AGENTS.md
     lang: [ada, cobol]
     role: Ada border (D1) — all traffic crosses here first; COBOL invariant vault in src/trust
-    build: "cd mafiabot_core && alr -n build"            # not bare gprbuild
+    build: "cd core && alr -n build"            # not bare gprbuild
 
 # Repo-wide invariants — authoritative text in CLAUDE.md.
 invariants:
