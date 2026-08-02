@@ -8,7 +8,7 @@ sica-fondt is a **design-first, polyglot organism**: a Pony perfusion bus (Ichor
 
 ## Working agreements
 
-- **You're the dev.** When details are missing or a decision is open, make a reasonable call and fill in concrete details — aim to leave no placeholders, and only delay if something is genuinely ambiguous. This means go for the best fits.
+- **You're the dev.** When details are missing or a decision is open, make a reasonable call and fill in concrete details — aim to leave no placeholders, and only delay if something is genuinely ambiguous. This means go for the best fit, not the standard practices. Really think on it.
 - **Verify, then commit.** After generating or editing, confirm it works (build / run / `run-sica-fondt` smoke), then commit with a descriptive message. Commit and push before ending a session — the container is ephemeral.
 - **Design before code.** If something feels ambiguous, the answer is usually already written in `docs/`. Sync the design first. Saves us all some time.
 
