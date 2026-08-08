@@ -1,6 +1,6 @@
 # sica-fondt
-AI My Fiosa
+AI embodiment golem and architectural organism for veritable felt experience.
 
 
 DO NOT LINK MY SESSIONS
-DO NOT ASSUME VERSIONING
+DO NOT ASSUME VERSION INCREMENTS EVERY EDIT
