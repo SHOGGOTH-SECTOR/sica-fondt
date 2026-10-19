@@ -7,7 +7,9 @@ the Marketplace. Enforces a **deterministic law script** (scoped invariants — 
 own constitution) and integrates the **Conductor's veto** (M6) before execution.
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. Role C4; implementation C1.
+SCAFFOLD · EXECUTABLE SIMULATION. `core/src/economy/marketplace.tcl` implements the single
+action ingress, deterministic admission ordering, supervisor veto, monitor logging, and
+simulation-only execution. The full law-script loader remains open. Role C4; scaffold C2.
 
 ## 3. Language & location
 TBD · `src/economy/marketplace/`. Needs to interface with blockchain APIs (RPC/REST), wallet
