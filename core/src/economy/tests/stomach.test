@@ -1,0 +1,139 @@
+package require tcltest 2
+namespace import ::tcltest::*
+
+set here [file dirname [file normalize [info script]]]
+source [file join $here .. stomach.tcl]
+
+proc new_stomach {{cap 2}} {
+    set s [::stomach::Economy new -history_cap $cap]
+    $s register_trader trader-a statistical
+    $s register_trader trader-b microstructure
+    return $s
+}
+
+test walletless-rejected-1.0 {M1 L3 rejects a trader with no wallet before execution} -body {
+    set s [new_stomach]
+    set result [$s submit_action trader-a wallet-a [dict create type buy asset BTC chain ethereum amount 0.1 price 100.0]]
+    set out [list [dict get $result status] [dict get $result reason] [$s execution_count]]
+    $s destroy
+    set out
+} -result {failed missing_wallet 0}
+
+test binding-rejected-1.0 {M4 one-to-one binding prevents use of another trader's wallet} -body {
+    set s [new_stomach]
+    $s bind_wallet wallet-a trader-a 1000.0 500.0
+    $s bind_wallet wallet-b trader-b 1000.0 500.0
+    set result [$s submit_action trader-a wallet-b [dict create type buy asset ETH chain ethereum amount 1.0 price 10.0]]
+    set out [list [dict get $result status] [dict get $result reason]]
+    $s destroy
+    set out
+} -result {failed wallet_binding}
+
+test valid-dry-run-1.0 {valid market action traverses M1/M4/M6 and remains simulated} -body {
+    set s [new_stomach]
+    $s bind_wallet wallet-a trader-a 1000.0 500.0
+    set result [$s submit_action trader-a wallet-a [dict create type buy asset BTC chain ethereum amount 2.0 price 100.0]]
+    set out [list [dict get $result status] [dict get $result execution] [dict get $result tx_id] [$s execution_count]]
+    $s destroy
+    set out
+} -result {succeeded simulated simtx-000001 1}
+
+test law-before-veto-1.0 {M1 rejects a law violation before M6 veto is consumed} -body {
+    set s [new_stomach]
+    $s bind_wallet wallet-a trader-a 1000.0 500.0
+    $s conductor_veto_next trader-a strategic_risk
+    set bad [$s submit_action trader-a wallet-a [dict create type buy asset BTC chain forbidden-chain amount 1.0 price 10.0]]
+    set good [$s submit_action trader-a wallet-a [dict create type buy asset BTC chain ethereum amount 1.0 price 10.0]]
+    set out [list [dict get $bad reason] [dict get $good reason] [$s execution_count]]
+    $s destroy
+    set out
+} -result {chain_not_allowed strategic_risk 0}
+
+test every-action-logged-1.0 {M7 receives pass and fail marketplace submissions} -body {
+    set s [new_stomach]
+    $s bind_wallet wallet-a trader-a 1000.0 500.0
+    $s submit_action trader-a wallet-a [dict create type buy asset BTC chain forbidden-chain amount 1.0 price 10.0]
+    $s submit_action trader-a wallet-a [dict create type buy asset BTC chain ethereum amount 1.0 price 10.0]
+    set events [$s sae_log]
+    set out [list [llength $events] [dict get [lindex $events 0] tool] [dict get [lindex $events 1] tool]]
+    $s destroy
+    set out
+} -result {2 submit_action submit_action}
+
+test severe-sae-alert-pauses-1.0 {M7 severe alert reaches M6 and mechanically pauses trader} -body {
+    set s [new_stomach]
+    $s bind_wallet wallet-a trader-a 1000.0 500.0
+    set decision [$s sae_alert trader-a frequency_spike {burst of calls} 9 1700000000]
+    set attempt [$s submit_action trader-a wallet-a [dict create type buy asset BTC chain ethereum amount 1.0 price 10.0]]
+    set out [list [dict get $decision decision] [dict get $attempt reason]]
+    $s destroy
+    set out
+} -result {pause trader_paused}
+
+test resume-1.0 {M6 pause is reversible} -body {
+    set s [new_stomach]
+    $s bind_wallet wallet-a trader-a 1000.0 500.0
+    $s conductor_pause trader-a manual_review
+    $s conductor_resume trader-a cleared
+    set result [$s submit_action trader-a wallet-a [dict create type buy asset BTC chain ethereum amount 1.0 price 10.0]]
+    set out [dict get $result status]
+    $s destroy
+    set out
+} -result succeeded
+
+test bounded-prediction-1.0 {M3 rejects a point estimate outside its explicit bounds} -body {
+    set s [new_stomach]
+    set code [catch {$s sim_publish statistical [dict create value 11.0 lower_bound 5.0 upper_bound 10.0 confidence 7.0 correctness 7.0 certainty 7.0 time_horizon 4h token_ticker BTC recent_shift 0.0 timestamp 1700000000]} msg]
+    set out [list $code $msg]
+    $s destroy
+    set out
+} -result {1 prediction_out_of_bounds}
+
+test marketplace-prediction-query-1.0 {trader reads bounded predictions through Marketplace, not sim hub directly} -body {
+    set s [new_stomach]
+    $s sim_publish statistical [dict create value 7.0 lower_bound 5.0 upper_bound 10.0 confidence 7.0 correctness 8.0 certainty 6.0 time_horizon 4h token_ticker BTC recent_shift -0.02 timestamp 1700000000]
+    set p [$s query_predictions trader-a statistical]
+    set out [list [dict get $p value] [dict get $p lower_bound] [dict get $p upper_bound]]
+    $s destroy
+    set out
+} -result {7.0 5.0 10.0}
+
+test feed-backpressure-1.0 {M2 returns backpressure without silently dropping buffered data} -body {
+    set s [new_stomach 2]
+    set a [$s feed_publish price_tick source-a 1 {BTC 100} 9.0]
+    set b [$s feed_publish price_tick source-a 2 {BTC 101} 9.0]
+    set c [$s feed_publish price_tick source-a 3 {BTC 102} 9.0]
+    set h [$s feed_history price_tick]
+    set out [list [dict get $a status] [dict get $b status] [dict get $c status] [llength $h] [dict get [lindex $h 1] timestamp]]
+    $s destroy
+    set out
+} -result {accepted accepted backpressure 2 2}
+
+test wallet-limit-1.0 {M4 wallet-level per-action limit independently brakes exposure} -body {
+    set s [new_stomach]
+    $s bind_wallet wallet-a trader-a 1000.0 50.0
+    set result [$s submit_action trader-a wallet-a [dict create type buy asset BTC chain ethereum amount 1.0 price 100.0]]
+    set out [list [dict get $result status] [dict get $result reason]]
+    $s destroy
+    set out
+} -result {failed wallet_limit}
+
+test tax-stub-1.0 {M0 tax hook produces a receipt but does not transfer value} -body {
+    set s [new_stomach]
+    set r [$s tax_event trader-a 12.5 wallet-a verein-wallet]
+    set out [list [dict get $r status] [dict get $r transferred] [dict get $r amount]]
+    $s destroy
+    set out
+} -result {staged 0 12.5}
+
+test secretion-1.0 {M0 produces an Ada-bound organ secretion summary} -body {
+    set s [new_stomach]
+    $s bind_wallet wallet-a trader-a 1000.0 500.0
+    $s sim_publish statistical [dict create value 7.0 lower_bound 5.0 upper_bound 10.0 confidence 7.0 correctness 8.0 certainty 6.0 time_horizon 4h token_ticker BTC recent_shift -0.02 timestamp 1700000000]
+    set secretion [$s secretion]
+    set out [list [dict get $secretion source] [dict get $secretion destination] [dict get $secretion provenance] [dict get $secretion live_execution]]
+    $s destroy
+    set out
+} -result {stomach ada_border organ_secretion 0}
+
+cleanupTests
