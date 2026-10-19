@@ -69,10 +69,13 @@ the runtime bridge between Ichor and this scaffold is still open.
 4. Implement tax stub and Verschwörern Veregeister transfer last.
 
 ## 9. Tests
-Executable contract suite: `tclsh core/src/economy/tests/stomach.test`. The current 13
+Executable contract suite: `tclsh core/src/economy/tests/stomach.test`. The current 17
 tests cover admission ordering, 1:1 binding, simulation-only execution, monitor logging,
 supervisor pause/resume, bounded predictions, feed backpressure, exposure limits, tax staging,
-and Ada-bound secretion. Ichor runtime bridging remains a separate integration test.
+Ada-bound secretion, all seven M3 engine registrations, source presence, the six horizon clocks,
+and the running scheduler. Native simulator tests are driven by
+`tclsh core/src/economy/sims/run_tests.tcl`. Ichor runtime bridging remains a separate
+integration test.
 
 ## 10. Open items
 - Reward signal protocol from economy organ to organism (TBD, out of scope).
