@@ -1,0 +1,8 @@
+name = "sica-tokenomics-sim"
+version = "0.1.0"
+[library]
+source-dir = "src"
+[[test]]
+name = "tokenomics"
+source-dir = "test"
+main = "test_tokenomics.f90"
