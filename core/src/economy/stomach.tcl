@@ -32,6 +32,7 @@ oo::class create ::stomach::Economy {
         set sims [::stomach::SimsHub new]
         set registry [::stomach::EngineRegistry new [file join $::stomach::root sims]]
         set clock [::stomach::HorizonClock new]
+        $clock start
         set market [::stomach::Marketplace new $traders $wallets $conductor $sae $sims]
         set taxes {}
     }
@@ -60,6 +61,7 @@ oo::class create ::stomach::Economy {
     method sim_engines {} { return [$registry names] }
     method sim_engine_status {} { return [$registry status] }
     method sim_horizons {} { return [$clock horizons] }
+    method sim_running {} { return [$clock running] }
     method sim_advance {wall_seconds} { return [$clock advance $wall_seconds] }
     method tax_event {trader_id amount source_wallet dest_wallet} {
         if {![string is double -strict $amount] || $amount < 0} { error "invalid_tax_amount" }
