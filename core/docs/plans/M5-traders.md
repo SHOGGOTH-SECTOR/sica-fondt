@@ -5,7 +5,9 @@ The economy organ's hands: **specialized AI instances** that buy, sell, and mint
 NFTs. Each trader is bound to a Wallet (M4), operates through the Marketplace (M1), queries Market to receive predictions (M3), and are monitored by the SAE (M7) via Marketplace. Multiple traders operate concurrently with **different heuristics and specializations**.
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. Role C3; implementation C1.
+SCAFFOLD · PARTIAL. `core/src/economy/traders.tcl` implements trader identity,
+specialization labels, and mechanical pause/resume state. Trader inference remains open.
+Role C3; scaffold C2.
 
 ## 3. Language & location
 TBD · `src/economy/traders/`. Traders are AI agents.All use the same `MarketAction` interface through the Marketplace regardless of implementation. Traders are the agentic entities, the determininistic bots are subservient to them.
