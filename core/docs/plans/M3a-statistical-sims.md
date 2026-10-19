@@ -8,12 +8,12 @@ stochastic volatility, regime detection, and cross-asset correlation**. The math
 **stochastic sample paths**, not behavioral agents.
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. Core quant methods C5 (GBM, GARCH, ARIMA — textbook). Heston stochastic
-volatility C5 (closed-form characteristic function; industry standard since 1993). Rough
-volatility C4 (Gatheral et al. 2018, heavily cited; crypto implementations exist). HMM regime
-detection C4 (established; crypto-specific copula hybrids emerging 2023–2024). Almgren-Chriss
-execution C5 (industry standard since 2001). Jump-diffusion C5 (Merton 1976). Parameterization
-for crypto markets C1.
+KERNEL IMPLEMENTED · R. `core/src/economy/sims/statistical/engine.R` contains GBM Monte
+Carlo, Merton jump-diffusion, Heston full-truncation simulation, GARCH(1,1) QMLE, a rolling
+Hurst estimator, regime classification, bounded Monte Carlo price predictions, and hand-rolled
+JSON stdin/stdout. Native tests are in `tests.R`. Full HMM Viterbi, DCC/t-copula, and live
+Bayesian recalibration remain incremental. Core quant methods C5; implementation C2;
+live-market parameterization C1.
 
 ## 3. Language & location
 **R 4.x** (apt `r-base-core`) · `src/economy/sims/statistical/`. Vital CRAN packages only:
