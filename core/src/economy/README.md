@@ -23,8 +23,6 @@ tclsh core/src/economy/tests/stomach.test
 
 Expected: `Total 13 Passed 13 ... Failed 0`.
 
-The repo smoke harness also runs this suite.
-
 ## Public scaffold API
 
 `::stomach::Economy` exposes `register_trader`, `bind_wallet`, `submit_action`, `feed_publish`, `feed_history`, `sim_publish`, `query_predictions`, `conductor_veto_next`, `conductor_pause`, `conductor_resume`, `sae_alert`, `tax_event`, and `secretion`.
