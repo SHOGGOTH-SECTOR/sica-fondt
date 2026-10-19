@@ -8,7 +8,9 @@ the Marketplace (M1). Wallets hold keys, sign transactions, and enforce wallet-l
 Tax is collected on trader income and routed to the Verschwörern Veregeister wallets (stub — M0).
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. Role C4 (sovereign custody is a hard requirement); implementation C1.
+SCAFFOLD · PARTIAL. `core/src/economy/wallets.tcl` implements permanent 1:1 binding and
+independent exposure limits for the simulation scaffold. Custody/signing implementation remains
+open. Role C4; scaffold C2.
 
 ## 3. Language & location
 TBD · `src/economy/wallets/`. Needs cryptographic key management (secp256k1 for EVM, ed25519 for
