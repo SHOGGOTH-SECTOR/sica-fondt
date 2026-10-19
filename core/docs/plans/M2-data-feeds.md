@@ -7,7 +7,9 @@ produces execution data (fills, positions, P&L) that feeds back into Sims, and S
 predictions that inform Traders operating through the Marketplace. Data Feeds is the bridge.
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. Role C3; implementation C1.
+SCAFFOLD · EXECUTABLE. `core/src/economy/feeds.tcl` implements normalized in-session history
+and explicit backpressure without silent drop. External stream adapters remain open. Role C3;
+scaffold C2.
 
 ## 3. Language & location
 TBD · `src/economy/feeds/`. Needs async I/O for streaming data (WebSockets, SSE, RSS polling).
