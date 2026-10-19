@@ -1,0 +1,46 @@
+package require tcltest 2
+namespace import ::tcltest::*
+set here [file dirname [file normalize [info script]]]
+source [file join $here .. registry.tcl]
+source [file join $here .. scheduler.tcl]
+set simsRoot [file normalize [file join $here ..]]
+
+test registry-seven-1.0 {all seven M3 engines are registered} -body {
+    set r [::stomach::EngineRegistry new $simsRoot]
+    set n [llength [$r names]]
+    $r destroy
+    set n
+} -result 7
+
+test registry-sources-1.0 {all registered engine sources are built into the tree} -body {
+    set r [::stomach::EngineRegistry new $simsRoot]
+    set present {}
+    foreach n [$r names] { lappend present [$r source_present $n] }
+    $r destroy
+    expr {[lsearch -exact $present 0] < 0}
+} -result 1
+
+test six-horizons-1.0 {scheduler contains all six concurrent horizon clocks} -body {
+    set c [::stomach::HorizonClock new]
+    set n [llength [$c horizons]]
+    $c destroy
+    set n
+} -result 6
+
+test minimum-speed-1.0 {no simulation horizon advances below the 90:1 base ratio} -body {
+    set c [::stomach::HorizonClock new]
+    set ok 1
+    foreach h [$c horizons] { if {[$c ratio $h] < 90} { set ok 0 } }
+    $c destroy
+    set ok
+} -result 1
+
+test concurrent-advance-1.0 {one wall tick advances every horizon concurrently} -body {
+    set c [::stomach::HorizonClock new]
+    set st [$c advance 1.0]
+    set out [list [dict get $st tick_hourly] [dict get $st daily] [dict get $st five_year]]
+    $c destroy
+    set out
+} -result {90.0 2160.0 3942000.0}
+
+cleanupTests
