@@ -136,4 +136,31 @@ test secretion-1.0 {M0 produces an Ada-bound organ secretion summary} -body {
     set out
 } -result {stomach ada_border organ_secretion 0}
 
+test sim-engine-registry-1.0 {M0 exposes all seven built-in M3 engine identities} -body {
+    set s [new_stomach]
+    set n [llength [$s sim_engines]]
+    $s destroy
+    set n
+} -result 7
+
+test sim-engine-sources-1.0 {all seven registered native engine sources are present in the organ tree} -body {
+    set s [new_stomach]
+    set status [$s sim_engine_status]
+    set ok 1
+    dict for {name state} $status {
+        if {![dict get $state source_present]} { set ok 0 }
+    }
+    $s destroy
+    set ok
+} -result 1
+
+test sim-six-horizons-1.0 {M0 advances all six forecast clocks and preserves 90:1 minimum speed} -body {
+    set s [new_stomach]
+    set horizons [$s sim_horizons]
+    set state [$s sim_advance 1.0]
+    set out [list [llength $horizons] [dict get $state tick_hourly] [dict get $state five_year]]
+    $s destroy
+    set out
+} -result {6 90.0 3942000.0}
+
 cleanupTests
