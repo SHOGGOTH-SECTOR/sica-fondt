@@ -10,9 +10,11 @@ models pool mechanics, M3g models the *plumbing* of how orders actually execute,
 concurrent time horizons** at tick-advanced, 90:1 (1s wall = 90s sim).
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. Order-book microstructure theory C4 (established). Almgren-Chriss
-optimal execution C5 (industry standard since 2001; crypto adaptations validated 2023–2024,
-Kurz CMC thesis). DEX-specific microstructure C2 (emerging). Implementation C1.
+KERNEL IMPLEMENTED · Fortran 2018. `core/src/economy/sims/microstructure/` implements
+depth-consuming buy slippage, bid/ask spread, Almgren-Chriss execution schedules, exponential
+cross-venue arbitrage decay, and live linear impact estimation. Native tests compile cleanly
+under strict gfortran flags. Full order-event simulation and venue adapters remain incremental.
+Microstructure C4; Almgren-Chriss C5; implementation C2; DEX-specific calibration C1/C2.
 
 ## 3. Language & location
 **Fortran 2018** (gfortran) · `src/economy/sims/microstructure/`. Build: **fpm**. Dependencies:
