@@ -163,4 +163,11 @@ test sim-six-horizons-1.0 {M0 advances all six forecast clocks and preserves 90:
     set out
 } -result {6 90.0 3942000.0}
 
+test sim-clock-running-1.0 {M3 horizon scheduler starts with the stomach} -body {
+    set s [new_stomach]
+    set running [$s sim_running]
+    $s destroy
+    set running
+} -result 1
+
 cleanupTests
