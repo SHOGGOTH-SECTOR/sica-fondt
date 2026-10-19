@@ -12,8 +12,9 @@ The academic foundations span AMM mechanism design [1,2], MEV game theory [3,4,5
 tokenomics via SDEs [6,7], and evolutionary consensus games [8–11].
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. Role C3; implementation C1. Mathematical foundations C4 (literature
-established); specific model parameters C1.
+SCAFFOLD · EXECUTABLE HUB STATE. `core/src/economy/sims/hub.tcl` validates bounded
+predictions and exposes current per-sim state. The continuous scheduler and M3a–M3g engines
+remain open. Role C3; scaffold C2. Mathematical foundations C4; parameters C1.
 
 ## 3. Language & location
 **Tcl** · `src/economy/sims/`. The hub is a syntax-agnostic coordinator: Tcl manages
