@@ -10,11 +10,11 @@ pressure across **six concurrent time horizons**. Grounded in evolutionary conse
 MFG theory (Lasry & Lions 2007), and crypto manipulation ABMs.
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. Evolutionary game theory C4 (Cornell [8]). Hegselmann-Krause bounded
-confidence C5 (established 2002). Complex contagion C4 (Centola & Macy 2007; crypto applications
-C3). Bandit-replicator hybrid C3 (emerging). Mean-Field Games C4 (Lasry & Lions 2007; tensor-train
-solvers C3). Crypto pump-and-dump ABM C3 (3-agent protocol validated on historical data).
-Pop behavioral models C1.
+KERNEL IMPLEMENTED · ECLiPSe Prolog. `core/src/economy/sims/sociological/engine.ecl`
+implements replicator dynamics, Hegselmann-Krause bounded-confidence updates, heterogeneous
+complex-contagion thresholds, and four-phase pump/dump classification. Native tests live beside
+the engine. UCB/Thompson bandit coupling and the HJB/Fokker-Planck MFG layer remain incremental.
+Foundations C4/C5 as previously stated; implementation C2; calibrated pop models C1.
 
 ## 3. Language & location
 **ECLiPSe Prolog 7.2** · `src/economy/sims/sociological/`. Libraries: **ic** (interval
