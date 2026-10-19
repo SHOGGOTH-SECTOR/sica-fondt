@@ -43,4 +43,27 @@ test concurrent-advance-1.0 {one wall tick advances every horizon concurrently} 
     set out
 } -result {90.0 2160.0 3942000.0}
 
+test clock-start-stop-1.0 {horizon clock is a live event-loop clock, not just a counter} -body {
+    set c [::stomach::HorizonClock new]
+    set before [$c running]
+    $c start 10
+    set during [$c running]
+    $c stop
+    set after [$c running]
+    $c destroy
+    list $before $during $after
+} -result {0 1 0}
+
+test clock-pulse-1.0 {a running clock advances simulated time from wall time} -body {
+    set c [::stomach::HorizonClock new]
+    $c start 10
+    after 30 {set ::m3_clock_done 1}
+    vwait ::m3_clock_done
+    unset ::m3_clock_done
+    set st [$c state]
+    $c stop
+    $c destroy
+    expr {[dict get $st tick_hourly] > 0}
+} -result 1
+
 cleanupTests
