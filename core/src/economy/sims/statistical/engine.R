@@ -316,7 +316,7 @@ hurst_variogram <- function(x, max_lag=NULL) {
   keep <- is.finite(variogram) & variogram > 0
   if (sum(keep) < 3) return(0.5)
   slope <- unname(coef(lm(log(variogram[keep]) ~ log(lags[keep])))[2])
-  clamp(slope/2, 0.01, 0.99)
+  clamp(slope/2, 0.02, 0.98)
 }
 
 hurst_rs <- function(x) {
