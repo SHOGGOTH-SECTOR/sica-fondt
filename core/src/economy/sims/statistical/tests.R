@@ -52,6 +52,18 @@ rough <- rough_vol_state(rv)
 stopifnot(rough$hurst > 0.01, rough$hurst < 0.80)
 stopifnot(rough$forecast_variance > 0)
 
+fgn <- fgn_davies_harte(4096, H=0.35, seed=410)
+fgn_h <- hurst_variogram(cumsum(fgn))
+stopifnot(abs(fgn_h-0.35) < 0.10)
+stopifnot(abs(var(fgn)-1) < 0.12)
+
+rough_terminal <- rough_vol_terminal(
+  s0=100, mu=0.03, v0=0.04, H=0.35, eta=0.25,
+  dt=1/365, steps=24, paths=300, seed=411
+)
+stopifnot(length(rough_terminal) == 300)
+stopifnot(all(is.finite(rough_terminal)), all(rough_terminal > 0))
+
 # Cross-asset DCC and t-copula tail dependence -------------------------------
 set.seed(42)
 n <- 700
@@ -61,9 +73,20 @@ z2 <- rho*z1 + sqrt(1-rho^2)*rnorm(n)
 dcc <- dcc_fit(cbind(z1,z2), a=0.03, b=0.94)
 stopifnot(length(dcc$correlation) == n)
 stopifnot(mean(dcc$correlation[500:700]) > mean(dcc$correlation[50:250]) + 0.15)
+
+dcc_qml <- dcc_estimate(cbind(z1,z2))
+stopifnot(dcc_qml$a >= 0, dcc_qml$b >= 0, dcc_qml$a+dcc_qml$b < 1)
+stopifnot(is.finite(dcc_qml$loglik))
+stopifnot(mean(dcc_qml$correlation[500:700]) >
+          mean(dcc_qml$correlation[50:250]) + 0.15)
+
 td_lo <- t_copula_tail_dependence(0.2, 6)
 td_hi <- t_copula_tail_dependence(0.8, 6)
 stopifnot(td_hi > td_lo, td_lo >= 0, td_hi <= 1)
+
+set.seed(420)
+df_hat <- estimate_t_df(rt(6000,df=7))
+stopifnot(df_hat > 4.1, df_hat < 15)
 
 # Bayesian calibration + AR forecast -----------------------------------------
 set.seed(43)
