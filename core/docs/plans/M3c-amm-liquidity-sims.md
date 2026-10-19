@@ -7,9 +7,11 @@ loss, and the non-cooperative game between liquidity providers and arbitrageurs*
 literature [1,2].
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. Mathematical foundations C5 (constant product invariant is proven);
-impermanent loss formula C5 (closed-form: $\text{IL}(r) = \frac{2\sqrt{r}}{1+r} - 1$);
-simulation parameterization C1.
+KERNEL IMPLEMENTED · Solidity/Foundry. `core/src/economy/sims/amm/src/AMMSim.sol`
+implements fee-adjusted constant-product swaps, fixed-point impermanent loss, nonlinear
+slippage, and an IL-vs-fee withdrawal decision; Foundry-native tests cover the invariants.
+Concentrated liquidity, multi-pool routing, and richer LP/arbitrage populations remain
+incremental. Mathematical foundations C5; implementation C2; parameterization C1.
 
 ## 3. Language & location
 **Solidity** + **Foundry** (forge, anvil) · `src/economy/sims/amm/`. Foundry is hosted
