@@ -12,9 +12,12 @@ The academic foundations span AMM mechanism design [1,2], MEV game theory [3,4,5
 tokenomics via SDEs [6,7], and evolutionary consensus games [8–11].
 
 ## 2. Status / certainty
-SCAFFOLD · EXECUTABLE HUB STATE. `core/src/economy/sims/hub.tcl` validates bounded
-predictions and exposes current per-sim state. The continuous scheduler and M3a–M3g engines
-remain open. Role C3; scaffold C2. Mathematical foundations C4; parameters C1.
+EXECUTABLE KERNEL SET. `core/src/economy/sims/` now contains all seven native engine
+trees (M3a–M3g), a seven-engine registry, and a live Tcl event-loop scheduler for all six
+horizons at the specified 90:1-or-faster ratios. The hub still validates/publishes bounded
+predictions. Advanced model layers called out in the individual sub-specs remain incremental
+work; the simulator family is no longer absent. Role C3; kernel implementation C2.
+Mathematical foundations C4; live-market parameterization C1.
 
 ## 3. Language & location
 **Tcl** · `src/economy/sims/`. The hub is a syntax-agnostic coordinator: Tcl manages
