@@ -89,6 +89,21 @@ contains
     end do
   end subroutine
 
+  subroutine kalman_scalar_update(prior_mean, prior_var, observation, observation_var, &
+       process_var, posterior_mean, posterior_var)
+    real(8), intent(in) :: prior_mean, prior_var, observation, observation_var, process_var
+    real(8), intent(out) :: posterior_mean, posterior_var
+    real(8) :: predicted_var, gain
+
+    if (prior_var < 0d0 .or. observation_var <= 0d0 .or. process_var < 0d0) &
+         error stop 'invalid kalman variance'
+
+    predicted_var = prior_var + process_var
+    gain = predicted_var / (predicted_var + observation_var)
+    posterior_mean = prior_mean + gain*(observation-prior_mean)
+    posterior_var = max(0d0,(1d0-gain)*predicted_var)
+  end subroutine kalman_scalar_update
+
   subroutine contagion_step(exposure, shock, propagated)
     real(8), intent(in) :: exposure(:,:), shock(:)
     real(8), intent(out) :: propagated(size(shock))
