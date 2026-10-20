@@ -5,6 +5,12 @@ library AMMSim {
     uint256 internal constant WAD = 1e18;
     uint256 internal constant BPS = 10_000;
 
+    struct Pool {
+        uint256 x;
+        uint256 y;
+        uint256 feeBps;
+    }
+
     function amountOut(uint256 x, uint256 y, uint256 dx, uint256 feeBps) internal pure returns (uint256 dy) {
         require(x > 0 && y > 0 && dx > 0 && feeBps < BPS, "bad pool");
         uint256 dxEff = dx * (BPS - feeBps) / BPS;
@@ -120,6 +126,64 @@ library AMMSim {
     /// @notice Split one exact-input swap across two constant-product pools.
     /// The optimum is where their marginal outputs equalize; binary search is
     /// deterministic because each pool's marginal output is monotone.
+    function _routeOutput(
+        Pool memory a,
+        Pool memory b,
+        uint256 dx,
+        uint256 splitA
+    ) private pure returns (uint256) {
+        return
+            _amountOutOrZero(a.x, a.y, splitA, a.feeBps) +
+            _amountOutOrZero(b.x, b.y, dx - splitA, b.feeBps);
+    }
+
+    function _bestSplit(
+        Pool memory a,
+        Pool memory b,
+        uint256 dx
+    ) private pure returns (uint256 splitA, uint256 totalOut) {
+        uint256 lo = 0;
+        uint256 hi = dx;
+
+        for (uint256 i = 0; i < 64 && lo < hi; ++i) {
+            uint256 mid = lo + (hi - lo) / 2;
+            if (
+                _marginalOutWad(a.x, a.y, mid, a.feeBps) >
+                _marginalOutWad(b.x, b.y, dx - mid, b.feeBps)
+            ) {
+                lo = mid + 1;
+            } else {
+                hi = mid;
+            }
+        }
+
+        splitA = lo;
+        totalOut = _routeOutput(a, b, dx, splitA);
+
+        if (splitA > 0) {
+            uint256 alt = splitA - 1;
+            uint256 altOut = _routeOutput(a, b, dx, alt);
+            if (altOut > totalOut) {
+                splitA = alt;
+                totalOut = altOut;
+            }
+        }
+
+        uint256 onlyA = _routeOutput(a, b, dx, dx);
+        if (onlyA > totalOut) {
+            splitA = dx;
+            totalOut = onlyA;
+        }
+
+        uint256 onlyB = _routeOutput(a, b, dx, 0);
+        if (onlyB > totalOut) {
+            splitA = 0;
+            totalOut = onlyB;
+        }
+    }
+
+    /// @notice Split one exact-input swap across two constant-product pools.
+    /// The optimum is where their marginal outputs equalize.
     function bestSplitTwoPools(
         uint256 xA,
         uint256 yA,
@@ -134,53 +198,9 @@ library AMMSim {
             dx > 0 && feeABps < BPS && feeBBps < BPS,
             "bad route"
         );
-
-        uint256 lo = 0;
-        uint256 hi = dx;
-        for (uint256 i = 0; i < 64 && lo < hi; ++i) {
-            uint256 mid = lo + (hi - lo) / 2;
-            uint256 marginalA = _marginalOutWad(
-                xA, yA, mid, feeABps
-            );
-            uint256 marginalB = _marginalOutWad(
-                xB, yB, dx - mid, feeBBps
-            );
-            if (marginalA > marginalB) {
-                lo = mid + 1;
-            } else {
-                hi = mid;
-            }
-        }
-
-        uint256 candidate = lo;
-        uint256 outCandidate =
-            _amountOutOrZero(xA, yA, candidate, feeABps) +
-            _amountOutOrZero(xB, yB, dx - candidate, feeBBps);
-
-        splitA = candidate;
-        totalOut = outCandidate;
-
-        if (candidate > 0) {
-            uint256 alt = candidate - 1;
-            uint256 outAlt =
-                _amountOutOrZero(xA, yA, alt, feeABps) +
-                _amountOutOrZero(xB, yB, dx - alt, feeBBps);
-            if (outAlt > totalOut) {
-                splitA = alt;
-                totalOut = outAlt;
-            }
-        }
-
-        uint256 onlyA = amountOut(xA, yA, dx, feeABps);
-        if (onlyA > totalOut) {
-            splitA = dx;
-            totalOut = onlyA;
-        }
-
-        uint256 onlyB = amountOut(xB, yB, dx, feeBBps);
-        if (onlyB > totalOut) {
-            splitA = 0;
-            totalOut = onlyB;
-        }
-    }
-}
+        return _bestSplit(
+            Pool({x: xA, y: yA, feeBps: feeABps}),
+            Pool({x: xB, y: yB, feeBps: feeBBps}),
+            dx
+        );
+    }}
