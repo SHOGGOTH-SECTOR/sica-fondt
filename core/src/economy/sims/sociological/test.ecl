@@ -93,4 +93,23 @@ run_tests :-
          Stability >= 0.0, Stability =< 1.0,
          Residual >= 0.0, Residual < 0.25)),
 
+
+    must(pump_abm_promotion_selects_manipulators,
+        (pump_abm_step(
+            [0.80,0.10,0.10],
+            0.10,3.0,0.85,0.25,
+            Promotion,promotion
+         ),
+         Promotion=[_,_,PromoMP],
+         PromoMP > 0.10)),
+
+    must(pump_abm_collapse_selects_against_manipulators,
+        (pump_abm_step(
+            [0.70,0.15,0.15],
+            -0.12,3.2,0.20,0.25,
+            Collapse,collapse
+         ),
+         Collapse=[_,_,CollapseMP],
+         CollapseMP < 0.15)),
+
     writeln("SOCIOLOGICAL TESTS PASSED").
