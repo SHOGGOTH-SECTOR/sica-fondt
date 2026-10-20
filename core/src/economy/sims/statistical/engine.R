@@ -591,6 +591,205 @@ arima_forecast_base <- function(x, horizon=1L, order=c(1L,0L,0L)) {
   list(mean=as.numeric(pred$pred),sd=pmax(as.numeric(pred$se),0),fit=fit)
 }
 
+# --- Heston characteristic-function pricing --------------------------------
+
+black_scholes_call <- function(spot,strike,maturity,rate=0,dividend=0,sigma) {
+  stopifnot(
+    spot > 0, strike > 0, maturity >= 0,
+    is.finite(rate), is.finite(dividend), sigma >= 0
+  )
+  if (maturity == 0) return(max(spot-strike,0))
+  discounted_spot <- spot*exp(-dividend*maturity)
+  discounted_strike <- strike*exp(-rate*maturity)
+  if (sigma <= 1e-14) return(max(discounted_spot-discounted_strike,0))
+  vol_t <- sigma*sqrt(maturity)
+  d1 <- (log(spot/strike)+(rate-dividend+0.5*sigma^2)*maturity)/vol_t
+  d2 <- d1-vol_t
+  discounted_spot*pnorm(d1)-discounted_strike*pnorm(d2)
+}
+
+heston_characteristic <- function(
+    u,spot,maturity,rate,dividend,kappa,theta,xi,rho,v0) {
+  stopifnot(
+    spot > 0, maturity >= 0, kappa >= 0, theta >= 0,
+    xi > 0, abs(rho) <= 1, v0 >= 0
+  )
+  iu <- 1i*u
+  drift <- log(spot)+(rate-dividend)*maturity
+  d <- sqrt((kappa-rho*xi*iu)^2 + xi^2*(u^2+iu))
+  g <- (kappa-rho*xi*iu-d)/(kappa-rho*xi*iu+d)
+  exp_dt <- exp(-d*maturity)
+  one_minus_g <- 1-g
+  one_minus_gexp <- 1-g*exp_dt
+
+  C <- iu*drift +
+    (kappa*theta/xi^2) * (
+      (kappa-rho*xi*iu-d)*maturity -
+        2*log(one_minus_gexp/one_minus_g)
+    )
+  D <- ((kappa-rho*xi*iu-d)/xi^2) *
+    ((1-exp_dt)/one_minus_gexp)
+  exp(C + D*v0)
+}
+
+trapz_real <- function(x,y) {
+  x <- as.numeric(x)
+  y <- as.numeric(y)
+  stopifnot(length(x) == length(y), length(x) >= 2)
+  sum(diff(x)*(head(y,-1)+tail(y,-1))*0.5)
+}
+
+heston_call_price <- function(
+    spot,strike,maturity,rate=0,dividend=0,
+    kappa,theta,xi,rho,v0,
+    integration_points=1024L,integration_limit=100) {
+  stopifnot(
+    spot > 0, strike > 0, maturity >= 0,
+    kappa >= 0, theta >= 0, xi >= 0, abs(rho) <= 1, v0 >= 0,
+    integration_points >= 64, integration_limit > 0
+  )
+  if (maturity == 0) return(max(spot-strike,0))
+
+  # With no vol-of-vol, variance is deterministic under CIR mean reversion.
+  if (xi <= 1e-12) {
+    integrated_variance <- if (kappa <= 1e-12) {
+      v0*maturity
+    } else {
+      theta*maturity + (v0-theta)*(1-exp(-kappa*maturity))/kappa
+    }
+    sigma_eff <- sqrt(max(integrated_variance/maturity,0))
+    return(black_scholes_call(
+      spot,strike,maturity,rate,dividend,sigma_eff
+    ))
+  }
+
+  n <- as.integer(integration_points)
+  u <- seq(1e-5,integration_limit,length.out=n)
+  phi_u <- heston_characteristic(
+    u,spot,maturity,rate,dividend,kappa,theta,xi,rho,v0
+  )
+  phi_u_minus_i <- heston_characteristic(
+    u-1i,spot,maturity,rate,dividend,kappa,theta,xi,rho,v0
+  )
+  phi_minus_i <- heston_characteristic(
+    -1i,spot,maturity,rate,dividend,kappa,theta,xi,rho,v0
+  )
+  oscillation <- exp(-1i*u*log(strike))
+
+  integrand1 <- Re(
+    oscillation*phi_u_minus_i/(1i*u*phi_minus_i)
+  )
+  integrand2 <- Re(
+    oscillation*phi_u/(1i*u)
+  )
+  p1 <- 0.5 + trapz_real(u,integrand1)/pi
+  p2 <- 0.5 + trapz_real(u,integrand2)/pi
+
+  raw <- spot*exp(-dividend*maturity)*p1 -
+    strike*exp(-rate*maturity)*p2
+  lower <- max(
+    spot*exp(-dividend*maturity)-strike*exp(-rate*maturity),0
+  )
+  upper <- spot*exp(-dividend*maturity)
+  clamp(Re(raw),lower,upper)
+}
+
+heston_params_vector <- function(params) {
+  q <- unlist(params[c("kappa","theta","xi","rho","v0")],use.names=TRUE)
+  if (length(q) != 5 || any(!is.finite(q))) stop("invalid_heston_params")
+  q
+}
+
+heston_surface_rmse <- function(
+    params,surface,spot,rate=0,dividend=0,integration_points=512L) {
+  q <- heston_params_vector(params)
+  required <- c("strike","maturity","price")
+  if (!all(required %in% names(surface))) stop("invalid_option_surface")
+  predicted <- mapply(
+    function(strike,maturity) {
+      heston_call_price(
+        spot,strike,maturity,rate,dividend,
+        q["kappa"],q["theta"],q["xi"],q["rho"],q["v0"],
+        integration_points=integration_points
+      )
+    },
+    surface$strike,surface$maturity
+  )
+  weights <- if ("weight" %in% names(surface)) {
+    pmax(as.numeric(surface$weight),0)
+  } else {
+    rep(1,nrow(surface))
+  }
+  if (sum(weights) <= 0) stop("invalid_surface_weights")
+  sqrt(sum(weights*(predicted-surface$price)^2)/sum(weights))
+}
+
+calibrate_heston_surface <- function(
+    surface,spot,rate=0,dividend=0,
+    start=c(kappa=1.5,theta=0.04,xi=0.3,rho=-0.5,v0=0.04),
+    integration_points=512L,maxit=200L) {
+  start <- heston_params_vector(start)
+  stopifnot(
+    start["kappa"] > 0, start["theta"] > 0,
+    start["xi"] >= 0, abs(start["rho"]) < 1, start["v0"] > 0
+  )
+
+  encode <- function(q) {
+    c(
+      log(max(q["kappa"],1e-8)),
+      log(max(q["theta"],1e-8)),
+      log(max(q["xi"],1e-8)),
+      atanh(clamp(q["rho"],-0.999,0.999)),
+      log(max(q["v0"],1e-8))
+    )
+  }
+  decode <- function(p) {
+    c(
+      kappa=exp(clamp(p[1],-12,8)),
+      theta=exp(clamp(p[2],-12,2)),
+      xi=exp(clamp(p[3],-12,3)),
+      rho=tanh(p[4]),
+      v0=exp(clamp(p[5],-12,2))
+    )
+  }
+  objective <- function(p) {
+    q <- decode(p)
+    err <- tryCatch(
+      heston_surface_rmse(
+        q,surface,spot,rate,dividend,integration_points
+      ),
+      error=function(e) Inf
+    )
+    if (!is.finite(err)) 1e12 else err
+  }
+
+  initial_rmse <- objective(encode(start))
+  opt <- tryCatch(
+    optim(
+      encode(start),objective,method="Nelder-Mead",
+      control=list(maxit=as.integer(maxit),reltol=1e-7)
+    ),
+    error=function(e) NULL
+  )
+  if (is.null(opt) || !is.finite(opt$value)) {
+    params <- start
+    rmse <- initial_rmse
+    convergence <- 1L
+  } else {
+    params <- decode(opt$par)
+    rmse <- objective(opt$par)
+    convergence <- opt$convergence
+  }
+
+  list(
+    params=as.list(params),
+    rmse=rmse,
+    start_rmse=initial_rmse,
+    convergence=convergence,
+    observations=nrow(surface)
+  )
+}
+
 # --- Risk and parameter proxies --------------------------------------------
 
 historical_var_es <- function(returns, alpha=0.99) {
