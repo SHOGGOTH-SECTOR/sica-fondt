@@ -74,4 +74,29 @@ test m3b-bandit-population-evolves-1.0 {live population state evolves through ba
     set out
 } -result {bandit_replicator 1 2 1}
 
+proc seed_m3b_accuracy {s ticker direction} {
+    for {set i 0} {$i < 16} {incr i} {
+        set sign [expr {$direction eq "up" ? 1.0 : -1.0}]
+        set price [expr {100.0 * exp($sign*0.008*$i)}]
+        $s feed_publish price_tick exchange [expr {$i*3600}]             [dict create token_ticker $ticker price $price] 9.5
+    }
+    set sources {reddit social blog reddit social blog reddit social blog}
+    set i 0
+    foreach source_type $sources {
+        $s feed_publish rss_news $source_type [expr {($i+1)*3600-60}]             [dict create token_ticker $ticker source_type $source_type sentiment 0.90 engagement 0.85] 9.0
+        incr i
+    }
+}
+
+test m3b-correctness-walk-forward-1.0 {correctness measures whether social direction predicts subsequent price movement} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    seed_m3b_accuracy $s GOOD up
+    seed_m3b_accuracy $s BAD down
+    set good [$s sociological_from_feed GOOD sentiment_index daily]
+    set bad [$s sociological_from_feed BAD sentiment_index daily]
+    set out [list         [expr {[dict get $good correctness] > 8.0}]         [expr {[dict get $bad correctness] < 2.0}]         [expr {[dict get $good correctness] > [dict get $bad correctness] + 6.0}]]
+    $s destroy
+    set out
+} -result {1 1 1}
+
 cleanupTests
