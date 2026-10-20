@@ -5,16 +5,20 @@ oo::class create ::stomach::AMMRunner {
 
     constructor {} {
         set runtime cast
-        set rpc [expr {[info exists ::env(AMM_RPC_URL)] ? $::env(AMM_RPC_URL) : ""}]
-        set address [expr {[info exists ::env(AMM_QUERY_ADDRESS)] ? $::env(AMM_QUERY_ADDRESS) : ""}]
+        set rpc ""
+        set address ""
+        if {[info exists ::env(AMM_RPC_URL)]} {
+            set rpc $::env(AMM_RPC_URL)
+        }
+        if {[info exists ::env(AMM_QUERY_ADDRESS)]} {
+            set address $::env(AMM_QUERY_ADDRESS)
+        }
     }
 
     method available {} {
-        expr {
-            [auto_execok $runtime] ne "" &&
-            $rpc ne "" &&
-            [regexp {^0x[0-9A-Fa-f]{40}$} $address]
-        }
+        if {[auto_execok $runtime] eq ""} { return 0 }
+        if {$rpc eq "" || $address eq ""} { return 0 }
+        return [regexp {^0x[0-9A-Fa-f]{40}$} $address]
     }
 
     method _prediction_index {prediction_type} {
