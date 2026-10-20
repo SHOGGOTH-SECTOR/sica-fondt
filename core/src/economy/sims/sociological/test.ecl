@@ -172,4 +172,20 @@ run_tests :-
          NL =< NV, NV =< NU,
          NLabel = bullish)),
 
+
+    must(multi_horizon_uncertainty_widens,
+        (HState=state(
+            0.40,0.15,0.03,0.45,0.50,
+            [0.45,0.20,0.15,0.15,0.05],
+            [0.80,0.10,0.10],
+            0.85,
+            [0.35,0.40,0.45,0.50]
+         ),
+         sociological_prediction(sentiment_index,HState,hourly,HV,HL,HU,_),
+         sociological_prediction(sentiment_index,HState,five_year,FV,FL,FU,_),
+         approx(HV,FV,1.0e-9),
+         HWidth is HU-HL,
+         FWidth is FU-FL,
+         FWidth > HWidth)),
+
     writeln("SOCIOLOGICAL TESTS PASSED").
