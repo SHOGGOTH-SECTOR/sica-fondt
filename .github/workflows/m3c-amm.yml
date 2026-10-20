@@ -6,6 +6,9 @@ on:
       - feat/stomach-economic-organ
     paths:
       - "core/src/economy/sims/amm/**"
+      - "core/src/economy/stomach.tcl"
+      - "core/src/economy/feeds.tcl"
+      - "core/src/economy/sims/hub.tcl"
       - ".github/workflows/m3c-amm.yml"
   pull_request:
     paths:
@@ -31,6 +34,37 @@ jobs:
 
       - name: Run M3c native tests
         run: forge test -vv
+
+      - name: Start local EVM and deploy read-only M3c bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          anvil --silent --port 8545 > /tmp/m3c-anvil.log 2>&1 &
+          echo $! > /tmp/m3c-anvil.pid
+          ready=0
+          for i in $(seq 1 30); do
+            if cast block-number --rpc-url http://127.0.0.1:8545 >/dev/null 2>&1; then
+              ready=1
+              break
+            fi
+            sleep 0.2
+          done
+          test "$ready" = 1
+
+          wallet="$(cast wallet new)"
+          key="$(printf '%s\n' "$wallet" | awk '/Private key:/ {print $3}')"
+          addr="$(printf '%s\n' "$wallet" | awk '/Address:/ {print $2}')"
+          test -n "$key"
+          test -n "$addr"
+
+          cast rpc anvil_setBalance "$addr" 0x3635C9ADC5DEA00000             --rpc-url http://127.0.0.1:8545 >/dev/null
+
+          deploy="$(forge create src/AMMQuery.sol:AMMQuery             --rpc-url http://127.0.0.1:8545             --private-key "$key"             --broadcast)"
+          query_addr="$(printf '%s\n' "$deploy" | awk '/Deployed to:/ {print $3}')"
+          [[ "$query_addr" =~ ^0x[0-9A-Fa-f]{40}$ ]]
+
+          echo "AMM_RPC_URL=http://127.0.0.1:8545" >> "$GITHUB_ENV"
+          echo "AMM_QUERY_ADDRESS=$query_addr" >> "$GITHUB_ENV"
 
       - name: Run M2 → M3c → Hub integration
         shell: bash
