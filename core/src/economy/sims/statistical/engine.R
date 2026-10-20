@@ -410,6 +410,38 @@ rough_vol_state <- function(realized_variance_series) {
   )
 }
 
+fit_rough_volatility <- function(realized_variance_series,dt,max_lag=NULL) {
+  rv <- pmax(as.numeric(realized_variance_series),eps)
+  stopifnot(length(rv) >= 64, dt > 0, all(is.finite(rv)))
+  logv <- log(rv)
+  n <- length(logv)
+  if (is.null(max_lag)) max_lag <- min(64L,floor(n/8))
+  max_lag <- max(4L,min(as.integer(max_lag),floor(n/3)))
+  lags <- unique(as.integer(round(exp(seq(log(1),log(max_lag),length.out=14)))))
+  lags <- lags[lags >= 1 & lags < n]
+  variogram <- vapply(lags,function(lag) {
+    mean((logv[(lag+1):n]-logv[1:(n-lag)])^2)
+  },numeric(1))
+  keep <- is.finite(variogram) & variogram > 0
+  if (sum(keep) < 3) stop("rough_vol_insufficient_variogram")
+  x <- log(lags[keep]*dt)
+  y <- log(variogram[keep])
+  fit <- lm(y ~ x)
+  slope <- unname(coef(fit)[2])
+  intercept <- unname(coef(fit)[1])
+  H <- clamp(slope/2,0.02,0.98)
+  eta <- sqrt(max(exp(intercept),eps))
+  r2 <- summary(fit)$r.squared
+  if (!is.finite(r2)) r2 <- 0
+  list(
+    hurst=H,
+    eta=eta,
+    r_squared=clamp(r2,0,1),
+    lags=lags[keep],
+    variogram=variogram[keep]
+  )
+}
+
 # --- DCC correlation + t-copula --------------------------------------------
 
 dcc_core <- function(standardized_returns, a, b) {
@@ -857,9 +889,94 @@ coverage_correctness <- function(standardized_returns, target=0.95) {
   clamp(10 - 25*abs(observed-target),0,10)
 }
 
+backtest_quality_scores <- function(
+    prices,dt,min_train=80L,max_points=24L,target_coverage=0.95) {
+  p <- as.numeric(prices)
+  stopifnot(
+    length(p) >= 40, all(is.finite(p)), all(p > 0), dt > 0,
+    max_points >= 5, target_coverage > 0.5, target_coverage < 1
+  )
+  r <- returns_from_prices(p)
+  min_train <- as.integer(min(min_train,length(r)-5L))
+  min_train <- max(20L,min_train)
+  if (length(r) <= min_train) stop("insufficient_backtest_history")
+
+  base_fit <- garch11_fit(r[seq_len(min_train)])
+  perturb_start <- max(1L,as.integer(floor(min_train*0.1)))
+  perturbed_fit <- garch11_fit(r[perturb_start:min_train])
+
+  h_base <- tail(base_fit$variance,1)
+  h_pert <- tail(perturbed_fit$variance,1)
+  rows <- vector("list",length(r)-min_train)
+
+  for (t in (min_train+1L):length(r)) {
+    prev_base_error <- r[t-1L]-base_fit$mean
+    prev_pert_error <- r[t-1L]-perturbed_fit$mean
+    h_base <- max(
+      eps,
+      base_fit$omega +
+        base_fit$alpha*prev_base_error^2 +
+        base_fit$beta*h_base
+    )
+    h_pert <- max(
+      eps,
+      perturbed_fit$omega +
+        perturbed_fit$alpha*prev_pert_error^2 +
+        perturbed_fit$beta*h_pert
+    )
+
+    sigma_base <- sqrt(h_base)
+    sigma_pert <- sqrt(h_pert)
+    lo <- base_fit$mean-qnorm((1+target_coverage)/2)*sigma_base
+    hi <- base_fit$mean+qnorm((1+target_coverage)/2)*sigma_base
+    actual <- r[t]
+    rows[[t-min_train]] <- c(
+      covered=as.numeric(actual >= lo && actual <= hi),
+      relative_error=abs(exp(actual)-exp(base_fit$mean)),
+      relative_width=exp(hi)-exp(lo),
+      perturbation=abs(sigma_base-sigma_pert)/max(sigma_base,eps)
+    )
+  }
+
+  mat <- do.call(rbind,rows)
+  if (nrow(mat) > max_points) {
+    mat <- tail(mat,as.integer(max_points))
+  }
+  coverage <- mean(mat[,"covered"])
+  med_err <- median(mat[,"relative_error"])
+  med_width <- median(mat[,"relative_width"])
+  med_perturb <- median(mat[,"perturbation"])
+
+  coverage_score <- clamp(
+    10 - 40*abs(coverage-target_coverage),0,10
+  )
+  error_score <- 10*exp(-med_err/0.03)
+  sharpness_score <- 10*exp(-med_width/0.20)
+  correctness <- clamp(
+    0.55*coverage_score + 0.45*error_score,0,10
+  )
+  confidence <- clamp(
+    0.65*coverage_score + 0.35*sharpness_score,0,10
+  )
+  certainty <- clamp(10*exp(-4*med_perturb),0,10)
+
+  list(
+    source="walk_forward",
+    observations=nrow(mat),
+    coverage=coverage,
+    median_relative_error=med_err,
+    median_relative_width=med_width,
+    median_perturbation=med_perturb,
+    confidence=confidence,
+    correctness=correctness,
+    certainty=certainty
+  )
+}
+
 # --- Calibration state ------------------------------------------------------
 
-calibrate_market <- function(prices, dt=1/365, ticker="ASSET") {
+calibrate_market <- function(
+    prices,dt=1/365,ticker="ASSET",quality_points=16L) {
   p <- as.numeric(prices)
   stopifnot(length(p) >= 80, all(is.finite(p)), all(p > 0), dt > 0)
   r <- returns_from_prices(p)
@@ -872,7 +989,10 @@ calibrate_market <- function(prices, dt=1/365, ticker="ASSET") {
   rv_window <- min(24L,max(4L,floor(length(r)/10)))
   rv <- realized_variance(r,rv_window)
   rough <- rough_vol_state(rv)
-  rough$eta <- rough$vol_of_log_vol/(dt^rough$hurst)
+  rough_fit <- fit_rough_volatility(rv,dt)
+  rough$hurst <- rough_fit$hurst
+  rough$eta <- rough_fit$eta
+  rough$r_squared <- rough_fit$r_squared
 
   prior <- normal_inverse_gamma_prior(mu=0,kappa=1,alpha=2,beta=max(var(r),1e-6))
   posterior <- bayes_return_update(prior,r)
@@ -894,6 +1014,14 @@ calibrate_market <- function(prices, dt=1/365, ticker="ASSET") {
   last_posterior <- tail(hmm$posterior,1)
   regime_certainty <- max(last_posterior)
 
+  bt_min_train <- min(
+    80L,max(20L,as.integer(floor(length(r)*0.60)))
+  )
+  quality <- backtest_quality_scores(
+    p,dt,min_train=bt_min_train,
+    max_points=max(5L,as.integer(quality_points))
+  )
+
   list(
     ticker=ticker,
     spot=tail(p,1),
@@ -910,7 +1038,10 @@ calibrate_market <- function(prices, dt=1/365, ticker="ASSET") {
     jump=jump,
     heston=heston,
     risk=historical_var_es(r,0.99),
-    correctness=coverage_correctness(g$standardized),
+    quality=quality,
+    confidence=quality$confidence,
+    correctness=quality$correctness,
+    certainty=quality$certainty,
     recent_shift=recent_shift,
     calibrated_at=as.numeric(Sys.time())
   )
@@ -932,14 +1063,13 @@ bounded_from_samples <- function(samples, state, label, model) {
   q <- as.numeric(quantile(samples,c(.025,.5,.975),names=FALSE,type=8))
   width <- (q[3]-q[1])/max(abs(q[2]),eps)
   confidence <- clamp(
-    0.55*state$correctness +
-      4.5*state$regime_certainty +
-      2.0*(1-clamp(width,0,1)),
+    0.75*state$confidence +
+      0.25*10*(1-clamp(width,0,1)),
     0,10
   )
   certainty <- clamp(
-    5.0*state$regime_certainty +
-      5.0*(1-clamp(width,0,1)),
+    0.75*state$certainty +
+      0.25*10*(1-clamp(width,0,1)),
     0,10
   )
   list(
