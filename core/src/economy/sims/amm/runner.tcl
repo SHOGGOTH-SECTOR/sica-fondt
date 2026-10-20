@@ -51,7 +51,11 @@ oo::class create ::stomach::AMMRunner {
         if {[regexp {^([+-]?)([0-9]+)(?:\.([0-9]*))?$} $s -> sign whole frac]} {
             if {$frac eq ""} { set frac "" }
             set frac [string range "${frac}000000000000000000" 0 17]
-            set n [expr {$whole * 1000000000000000000 + $frac}]
+            set whole_dec [string trimleft $whole 0]
+            set frac_dec [string trimleft $frac 0]
+            if {$whole_dec eq ""} { set whole_dec 0 }
+            if {$frac_dec eq ""} { set frac_dec 0 }
+            set n [expr {$whole_dec * 1000000000000000000 + $frac_dec}]
             if {$sign eq "-"} { set n [expr {-$n}] }
             return $n
         }
