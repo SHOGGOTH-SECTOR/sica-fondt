@@ -55,4 +55,58 @@ contract AMMSimTest {
         require(totalOut > singleA && totalOut > singleB, "split improves");
     }
 
+    function testActiveLpRebalanceComparesIlFeesAndCost() public pure {
+        require(
+            AMMSim.lpShouldRebalance(1e16, 5e15, 4e18),
+            "rebalance when IL dominates"
+        );
+        require(
+            !AMMSim.lpShouldRebalance(25e16, 5e15, 4e18),
+            "stay when fees dominate"
+        );
+    }
+
+    function testJitLiquidityRequiresPositiveNetFeeShare() public pure {
+        uint256 income=AMMSim.jitFeeIncomeWad(
+            1000e18, 30, 100e18, 1000e18
+        );
+        require(income == 3e17, "fee share");
+        require(
+            AMMSim.jitShouldProvide(
+                1000e18, 30, 100e18, 1000e18, 2e17
+            ),
+            "profitable JIT"
+        );
+        require(
+            !AMMSim.jitShouldProvide(
+                1000e18, 30, 100e18, 1000e18, 4e17
+            ),
+            "costly JIT"
+        );
+    }
+
+    function testBackrunMovesPoolTowardExternalPrice() public pure {
+        AMMSim.ArbitrageResult memory a=AMMSim.backrunToPrice(
+            1000e18, 2000e18, 15e17, 30
+        );
+        require(a.amountIn > 0 && a.amountOut > 0, "arb size");
+        require(a.zeroForOne, "x in");
+        require(a.profitQuote > 0, "profitable");
+        uint256 pre=2e18;
+        uint256 preError=pre > 15e17 ? pre-15e17 : 15e17-pre;
+        uint256 postError=a.postPriceWad > 15e17
+            ? a.postPriceWad-15e17
+            : 15e17-a.postPriceWad;
+        require(postError < preError, "price converges");
+    }
+
+    function testSandwichSimulationAccountsForBothLegs() public pure {
+        AMMSim.SandwichResult memory s=AMMSim.simulateSandwich(
+            1000e18, 1000e18, 100e18, 10e18, 30
+        );
+        require(s.frontOut > 0 && s.victimOut > 0 && s.backOut > 0, "legs");
+        require(s.profitToken0 > 0, "positive sandwich");
+        require(s.victimOut < AMMSim.amountOut(1000e18,1000e18,100e18,30), "victim worsens");
+    }
+
 }
