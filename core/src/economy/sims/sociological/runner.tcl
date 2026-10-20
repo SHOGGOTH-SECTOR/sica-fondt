@@ -184,6 +184,48 @@ oo::class create ::stomach::SociologicalRunner {
         my _clamp [expr {$total/double([llength $items])}] 0.0 10.0
     }
 
+    method _walk_forward_correctness {prices social} {
+        set correct 0.0
+        set total_weight 0.0
+        foreach event $social {
+            set sentiment [dict get $event sentiment]
+            if {abs($sentiment) < 0.10} { continue }
+            set ts [dict get $event timestamp]
+            if {![string is double -strict $ts]} { continue }
+
+            set before ""
+            set after ""
+            foreach point $prices {
+                set pts [dict get $point timestamp]
+                if {![string is double -strict $pts]} { continue }
+                if {$pts <= $ts} {
+                    set before $point
+                    continue
+                }
+                set after $point
+                break
+            }
+            if {$before eq "" || $after eq ""} { continue }
+
+            set p0 [dict get $before price]
+            set p1 [dict get $after price]
+            set move [expr {$p1/$p0-1.0}]
+            if {abs($move) < 0.0005} { continue }
+
+            set predicted [expr {$sentiment > 0 ? 1 : -1}]
+            set actual [expr {$move > 0 ? 1 : -1}]
+            set engagement [dict get $event engagement]
+            set confidence [my _clamp                 [expr {double([dict get $event confidence])}] 0.0 10.0]
+            set weight [expr {max(0.05,$engagement)*max(0.1,$confidence/10.0)}]
+            set total_weight [expr {$total_weight+$weight}]
+            if {$predicted == $actual} {
+                set correct [expr {$correct+$weight}]
+            }
+        }
+        if {$total_weight <= 0.0} { return 5.0 }
+        return [my _clamp [expr {10.0*$correct/$total_weight}] 0.0 10.0]
+    }
+
     method _bandit_update {
         ticker initial_shares sentiment price_shift volatility exposure evidence_count
     } {
@@ -293,12 +335,9 @@ oo::class create ::stomach::SociologicalRunner {
         set scale [expr {max(abs($value),1.0)}]
         set certainty [my _clamp [expr {$confidence/(1.0+$width/$scale)}] 0.0 10.0]
 
-        # V1 boundary correctness is evidence coverage rather than a trained
-        # classifier score: reward agreement of independent social sources.
-        array set source_seen {}
-        foreach d $social { set source_seen([dict get $d source_type]) 1 }
-        set source_count [array size source_seen]
-        set correctness [my _clamp [expr {4.0+1.5*min($source_count,4)}] 0.0 10.0]
+        # Empirical correctness: does signed aggregate social evidence predict
+        # the next observed price move in walk-forward order?
+        set correctness [my _walk_forward_correctness $prices $social]
 
         return [dict create             value $value             lower_bound $lower             upper_bound $upper             confidence $confidence             correctness $correctness             certainty $certainty             time_horizon $horizon_label             sim_type sociological             token_ticker $ticker             recent_shift $price_shift             prediction_type $prediction_type             label [dict get $native label]             calibration_sources rss_news,price_tick             population_model bandit_replicator             population_epoch $population_epoch             population_shares [join $shares ,]             timestamp [clock seconds]]
     }
