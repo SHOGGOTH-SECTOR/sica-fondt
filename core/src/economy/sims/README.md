@@ -4,7 +4,7 @@ Seven native simulator engines live here behind the Tcl M3 hub.
 
 | ID | Engine | Native language | Implemented kernel |
 |---|---|---|---|
-| M3a | statistical | R | GBM, Merton jump diffusion, Heston, GARCH(1,1), Hurst estimate, regime state, bounded MC forecast |
+| M3a | statistical | R | GBM, Merton, Heston, GARCH(1,1), Gaussian HMM/Viterbi, Davies–Harte rough vol, fitted DCC, t-copula tails, Bayesian calibration, ARIMA, VaR/ES, six-horizon forecasts |
 | M3b | sociological | ECLiPSe Prolog | replicator dynamics, Hegselmann-Krause, complex contagion, pump/dump phase |
 | M3c | AMM/liquidity | Solidity + Foundry | fee-adjusted x*y=k, impermanent loss, slippage, IL-derived withdrawal |
 | M3d | MEV/adversarial | Fortran 2018 | all-pay PGA, block knapsack, cross-chain path comparison, sandwich score |
@@ -22,6 +22,6 @@ tclsh core/src/economy/sims/run_tests.tcl
 
 Pass `--strict` when the environment is expected to contain every external runtime.
 
-The Fortran engines are verified with `gfortran -std=f2018 -Wall -Wextra -Werror -pedantic`. R is installed by the repo SessionStart hook in remote sessions. ECLiPSe and Foundry remain separately hosted toolchains, matching the existing M3 design; their native test files are checked in next to their engines.
+The Fortran engines are verified with `gfortran -std=f2018 -Wall -Wextra -Werror -pedantic`. M3a has a dedicated GitHub Actions R job that runs both the native statistical suite and the `M2 price_tick → R → M3 hub` Tcl integration suite. R is installed by the repo SessionStart hook in remote sessions. ECLiPSe and Foundry remain separately hosted toolchains, matching the existing M3 design; their native test files are checked in next to their engines.
 
 This directory contains simulators only. Nothing here broadcasts transactions or bypasses M1 Marketplace, M4 wallet brakes, or D1.
