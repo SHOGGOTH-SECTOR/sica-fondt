@@ -24,4 +24,35 @@ contract AMMSimTest {
         require(AMMSim.lpShouldWithdraw(1e16,4e18), "withdraw");
         require(!AMMSim.lpShouldWithdraw(3e17,4e18), "stay");
     }
+    function testConcentratedLiquidityAmountsAtMidPrice() public pure {
+        (uint256 amount0,uint256 amount1)=AMMSim.concentratedAmounts(
+            600e18, 1e18, 2e18, 3e18
+        );
+        require(amount0 == 100e18, "amount0");
+        require(amount1 == 600e18, "amount1");
+    }
+
+    function testConcentratedLiquidityBecomesOneSidedOutsideRange() public pure {
+        (uint256 below0,uint256 below1)=AMMSim.concentratedAmounts(
+            600e18, 1e18, 5e17, 3e18
+        );
+        require(below0 == 400e18 && below1 == 0, "below");
+        (uint256 above0,uint256 above1)=AMMSim.concentratedAmounts(
+            600e18, 1e18, 4e18, 3e18
+        );
+        require(above0 == 0 && above1 == 1200e18, "above");
+    }
+
+    function testSplitRoutingUsesBothPoolsAndImprovesOutput() public pure {
+        uint256 dx=100e18;
+        uint256 singleA=AMMSim.amountOut(1000e18,1000e18,dx,30);
+        uint256 singleB=AMMSim.amountOut(500e18,500e18,dx,30);
+        (uint256 splitA,uint256 totalOut)=AMMSim.bestSplitTwoPools(
+            1000e18,1000e18,500e18,500e18,dx,30,30
+        );
+        require(splitA > 0 && splitA < dx, "must split");
+        require(splitA > dx/2, "deeper pool gets more");
+        require(totalOut > singleA && totalOut > singleB, "split improves");
+    }
+
 }
