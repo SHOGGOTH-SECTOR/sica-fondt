@@ -255,3 +255,182 @@ pump_abm_step(
     pump_phase_payoffs(Phase, RawPayoffs),
     satisficing_payoffs(RawPayoffs, 1.0, 0.75, Payoffs),
     replicator_step(Shares, Payoffs, Dt, Next).
+
+
+% --- Adaptive confidence, clusters, and bounded prediction contract --------
+
+clamp_value(X, Lo, Hi, Y) :-
+    ( X < Lo -> Y = Lo
+    ; X > Hi -> Y = Hi
+    ; Y = X
+    ).
+
+adaptive_confidence_bound(Base, Volatility, Dispersion, Bound) :-
+    Base > 0.0,
+    Penalty is 0.35*Volatility + 0.45*Dispersion,
+    Raw is Base * (1.0 - Penalty),
+    clamp_value(Raw, 0.01, Base, Bound).
+
+opinion_cluster_count([], _, 0) :- !.
+opinion_cluster_count(Opinions, Bound, Count) :-
+    Bound >= 0.0,
+    sort(Opinions, Sorted),
+    Sorted = [First|Rest],
+    cluster_count_sorted(Rest, First, Bound, 1, Count).
+
+cluster_count_sorted([], _, _, Count, Count).
+cluster_count_sorted([X|Xs], Previous, Bound, Acc, Count) :-
+    Gap is X - Previous,
+    ( Gap > Bound -> Acc1 is Acc + 1 ; Acc1 = Acc ),
+    cluster_count_sorted(Xs, X, Bound, Acc1, Count).
+
+sentiment_label(Sentiment, bullish) :- Sentiment > 0.25, !.
+sentiment_label(Sentiment, bearish) :- Sentiment < -0.25, !.
+sentiment_label(_, neutral).
+
+narrative_label(Sentiment, PriceShift, bearish) :-
+    (Sentiment < -0.25 ; PriceShift < -0.05), !.
+narrative_label(Sentiment, PriceShift, bullish) :-
+    Sentiment > 0.25, PriceShift >= 0.0, !.
+narrative_label(_, _, neutral).
+
+dominant_strategy(Shares, Label, Share) :-
+    archetype_catalog(Labels),
+    Shares = [S|Ss],
+    Labels = [L|Ls],
+    dominant_strategy_(Ss, Ls, L, S, Label, Share).
+
+dominant_strategy_([], [], Label, Share, Label, Share).
+dominant_strategy_([S|Ss], [L|Ls], BestL, BestS, Label, Share) :-
+    ( S > BestS ->
+        NextL = L, NextS = S
+    ;
+        NextL = BestL, NextS = BestS
+    ),
+    dominant_strategy_(Ss, Ls, NextL, NextS, Label, Share).
+
+bounded_unit(Value0, Width0, Value, Lower, Upper) :-
+    clamp_value(Value0, 0.0, 1.0, Value),
+    (Width0 < 0.0 -> Width = 0.0 ; Width = Width0),
+    L0 is Value - Width,
+    U0 is Value + Width,
+    clamp_value(L0, 0.0, 1.0, Lower),
+    clamp_value(U0, 0.0, 1.0, Upper).
+
+bounded_ten(Value0, Width0, Value, Lower, Upper) :-
+    clamp_value(Value0, 0.0, 10.0, Value),
+    (Width0 < 0.0 -> Width = 0.0 ; Width = Width0),
+    L0 is Value - Width,
+    U0 is Value + Width,
+    clamp_value(L0, 0.0, 10.0, Lower),
+    clamp_value(U0, 0.0, 10.0, Upper).
+
+phase_code(accumulation, 0.25).
+phase_code(promotion, 0.50).
+phase_code(distribution, 0.75).
+phase_code(collapse, 1.00).
+
+regime_code(bearish, 0.0).
+regime_code(neutral, 0.5).
+regime_code(bullish, 1.0).
+
+sociological_prediction(
+    sentiment_index,
+    state(Sentiment,Dispersion,_,_,_,_,_,_,_),
+    _,
+    Value,Lower,Upper,Label
+) :- !,
+    Raw is (Sentiment + 1.0) * 5.0,
+    Width is 0.5 + 4.0*Dispersion,
+    bounded_ten(Raw, Width, Value, Lower, Upper),
+    sentiment_label(Sentiment, Label).
+
+sociological_prediction(
+    herd_threshold,
+    state(_,Dispersion,_,Volatility,_,_,_,_,_),
+    _,
+    Value,Lower,Upper,herd_activation
+) :- !,
+    adaptive_confidence_bound(0.35, Volatility, Dispersion, Value),
+    Width is 0.10 + 0.20*Dispersion,
+    bounded_unit(Value, Width, Value, Lower, Upper).
+
+sociological_prediction(
+    strategy_distribution,
+    state(_,Dispersion,_,_,_,Shares,_,_,_),
+    _,
+    Value,Lower,Upper,Label
+) :- !,
+    dominant_strategy(Shares, Label, Dominant),
+    Width is 0.05 + 0.20*Dispersion,
+    bounded_unit(Dominant, Width, Value, Lower, Upper).
+
+sociological_prediction(
+    cascade_probability,
+    state(_,Dispersion,_,Volatility,ExposureRate,_,_,_,_),
+    _,
+    Value,Lower,Upper,complex_contagion
+) :- !,
+    adaptive_confidence_bound(0.35, Volatility, Dispersion, Threshold),
+    E2 is ExposureRate*ExposureRate,
+    T2 is Threshold*Threshold,
+    ( E2 + T2 =< 0.0 -> Raw = 0.0 ; Raw is E2/(E2+T2) ),
+    Width is 0.05 + 0.25*Dispersion,
+    bounded_unit(Raw, Width, Value, Lower, Upper).
+
+sociological_prediction(
+    coordination_stability,
+    state(_,Dispersion,_,Volatility,_,_,_,MfgStability,_),
+    _,
+    Value,Lower,Upper,coordination
+) :- !,
+    Raw is MfgStability * (1.0-Dispersion) * (1.0-0.25*Volatility),
+    Width is 0.05 + 0.20*Dispersion,
+    bounded_unit(Raw, Width, Value, Lower, Upper).
+
+sociological_prediction(
+    opinion_cluster_count,
+    state(_,Dispersion,_,Volatility,_,_,_,_,Opinions),
+    _,
+    Value,Lower,Upper,clusters
+) :- !,
+    adaptive_confidence_bound(0.35, Volatility, Dispersion, Bound),
+    opinion_cluster_count(Opinions, Bound, Count),
+    length(Opinions, N),
+    Value is float(Count),
+    L0 is max(1, Count-1),
+    U0 is min(N, Count+1),
+    Lower is float(L0),
+    Upper is float(U0).
+
+sociological_prediction(
+    pump_dump_phase,
+    state(Sentiment,Dispersion,PriceShift,_,ExposureRate,_,_,_,_),
+    _,
+    Value,Lower,Upper,Phase
+) :- !,
+    VolumeRatio is 1.0 + 2.0*ExposureRate,
+    pump_phase(PriceShift, VolumeRatio, Sentiment, Phase),
+    phase_code(Phase, Raw),
+    Width is 0.05 + 0.15*Dispersion,
+    bounded_unit(Raw, Width, Value, Lower, Upper).
+
+sociological_prediction(
+    mfg_equilibrium_stability,
+    state(_,Dispersion,_,_,_,_,_,MfgStability,_),
+    _,
+    Value,Lower,Upper,mfg
+) :- !,
+    Width is 0.05 + 0.20*Dispersion,
+    bounded_unit(MfgStability, Width, Value, Lower, Upper).
+
+sociological_prediction(
+    narrative_regime,
+    state(Sentiment,Dispersion,PriceShift,_,_,_,_,_,_),
+    _,
+    Value,Lower,Upper,Label
+) :- !,
+    narrative_label(Sentiment, PriceShift, Label),
+    regime_code(Label, Raw),
+    Width is 0.05 + 0.20*Dispersion,
+    bounded_unit(Raw, Width, Value, Lower, Upper).
