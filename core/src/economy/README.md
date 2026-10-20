@@ -6,7 +6,7 @@ Executable scaffold for M0–M7. The stomach is an OUTER organ: its only organis
 
 - **M1 Marketplace** — single action ingress; wallet-first admission; deterministic action/chain law; wallet brake; Conductor veto after law; simulated execution only.
 - **M2 Feeds** — normalized datum history with explicit backpressure instead of silent eviction.
-- **M3 Sims** — all seven native engine trees are now built in: M3a R statistical, M3b ECLiPSe sociological, M3c Solidity AMM, M3d Fortran MEV, M3e Fortran tokenomics, M3f ECLiPSe consensus, and M3g Fortran microstructure. A live Tcl event-loop clock runs all six horizons at 90:1 or faster; the registry exposes source/runtime status through M0.
+- **M3 Sims** — all seven native engine trees are built in. M3a is now a substantial R engine with calibrated HMM regimes, spectral rough volatility, fitted DCC/t-copula dependence, Bayesian/ARIMA/GARCH risk forecasting and a tested M2→R→Hub path; M3b is ECLiPSe sociological, M3c Solidity AMM, M3d Fortran MEV, M3e Fortran tokenomics, M3f ECLiPSe consensus, and M3g Fortran microstructure. A live Tcl event-loop clock runs all six horizons at 90:1 or faster.
 - **M4 Wallets** — permanent 1:1 trader binding plus per-action/session exposure brakes. No private-key field, signer, or RPC surface exists yet.
 - **M5 Traders** — trader registry and mechanical pause state. AI trader inference is not implemented here.
 - **M6 Conductor** — veto-next, pause/resume, SAE alert intake, append-only in-memory decision log. Specialist inference is not implemented yet.
@@ -33,6 +33,6 @@ It executes Tcl + every native suite whose runtime is installed. Use `--strict` 
 
 ## Public scaffold API
 
-`::stomach::Economy` exposes `register_trader`, `bind_wallet`, `submit_action`, `feed_publish`, `feed_history`, `sim_publish`, `query_predictions`, `sim_engines`, `sim_engine_status`, `sim_horizons`, `sim_running`, `sim_advance`, `conductor_veto_next`, `conductor_pause`, `conductor_resume`, `sae_alert`, `tax_event`, and `secretion`.
+`::stomach::Economy` exposes `register_trader`, `bind_wallet`, `submit_action`, `feed_publish`, `feed_history`, `sim_publish`, `query_predictions`, `statistical_runner_available`, `statistical_query`, `statistical_from_feed`, `sim_engines`, `sim_engine_status`, `sim_horizons`, `sim_running`, `sim_advance`, `conductor_veto_next`, `conductor_pause`, `conductor_resume`, `sae_alert`, `tax_event`, and `secretion`.
 
 `secretion` returns the envelope-compatible metadata `source stomach`, `destination ada_border`, `provenance organ_secretion`. The runtime Pony↔Tcl bridge is still an integration task; no code may shortcut D1 while that bridge is built.
