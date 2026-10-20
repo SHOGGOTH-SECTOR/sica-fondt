@@ -59,12 +59,22 @@ oo::class create ::stomach::Economy {
     method feed_history {feed_type} { return [$feeds history $feed_type] }
     method sim_publish {sim_type prediction} { return [$sims publish $sim_type $prediction] }
     method statistical_runner_available {} { return [$statistical_runner available] }
-    method statistical_query {prices ticker horizon {paths 4000} {seed 1} {dt 0.0027397260273972603}} {
-        set p [$statistical_runner query $prices $ticker $horizon $paths $seed $dt]
+    method statistical_query_type {
+        prices ticker prediction_type horizon
+        {paths 4000} {seed 1} {dt 0.0027397260273972603}
+        {pool_prices {}} {pool_liquidity {}}
+    } {
+        set p [$statistical_runner query_typed             $prices $ticker $prediction_type $horizon $paths $seed $dt             $pool_prices $pool_liquidity]
         $sims publish statistical $p
         return $p
     }
-    method statistical_from_feed {ticker horizon {paths 4000} {seed 1} {dt 0.0027397260273972603}} {
+    method statistical_query {prices ticker horizon {paths 4000} {seed 1} {dt 0.0027397260273972603}} {
+        return [my statistical_query_type             $prices $ticker price_forecast $horizon $paths $seed $dt {} {}]
+    }
+    method statistical_from_feed_type {
+        ticker prediction_type horizon
+        {paths 4000} {seed 1} {dt 0.0027397260273972603}
+    } {
         set prices {}
         foreach datum [$feeds history price_tick] {
             if {![dict exists $datum payload]} { continue }
@@ -76,7 +86,29 @@ oo::class create ::stomach::Economy {
             lappend prices $price
         }
         if {[llength $prices] < 80} { error "insufficient_price_history" }
-        return [my statistical_query $prices $ticker $horizon $paths $seed $dt]
+
+        set pool_prices {}
+        set pool_liquidity {}
+        foreach datum [$feeds history dex_pool_state] {
+            if {![dict exists $datum payload]} { continue }
+            set payload [dict get $datum payload]
+            if {[catch {dict get $payload token_ticker} token]} { continue }
+            if {$token ne $ticker} { continue }
+            if {[catch {dict get $payload price} price]} { continue }
+            if {![string is double -strict $price] || $price <= 0} { continue }
+            set liquidity 1.0
+            if {![catch {dict get $payload liquidity} raw_liquidity] &&
+                [string is double -strict $raw_liquidity] && $raw_liquidity >= 0} {
+                set liquidity $raw_liquidity
+            }
+            lappend pool_prices $price
+            lappend pool_liquidity $liquidity
+        }
+
+        return [my statistical_query_type             $prices $ticker $prediction_type $horizon $paths $seed $dt             $pool_prices $pool_liquidity]
+    }
+    method statistical_from_feed {ticker horizon {paths 4000} {seed 1} {dt 0.0027397260273972603}} {
+        return [my statistical_from_feed_type             $ticker price_forecast $horizon $paths $seed $dt]
     }
     method query_predictions {trader_id sim_type} { return [$market predictions $trader_id $sim_type] }
     method sim_engines {} { return [$registry names] }
