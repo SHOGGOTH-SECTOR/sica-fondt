@@ -57,4 +57,21 @@ test m3b-insufficient-social-history-1.0 {M3b refuses calibration without aggreg
     list $code $msg
 } -result {1 insufficient_social_history}
 
+test m3b-bandit-population-evolves-1.0 {live population state evolves through bandit-replicator learning} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    seed_m3b $s EVOLVE
+    set first [$s sociological_from_feed EVOLVE strategy_distribution daily]
+
+    for {set i 30} {$i < 42} {incr i} {
+        set price [expr {110.0 * exp(0.008*($i-30))}]
+        $s feed_publish price_tick exchange [expr {$i*3600}]             [dict create token_ticker EVOLVE price $price] 9.5
+        $s feed_publish rss_news social [expr {$i*3600}]             [dict create token_ticker EVOLVE source_type social sentiment 0.95 engagement 0.98] 9.2
+    }
+
+    set second [$s sociological_from_feed EVOLVE strategy_distribution daily]
+    set out [list         [dict get $first population_model]         [dict get $first population_epoch]         [dict get $second population_epoch]         [expr {[dict get $first population_shares] ne [dict get $second population_shares]}]]
+    $s destroy
+    set out
+} -result {bandit_replicator 1 2 1}
+
 cleanupTests
