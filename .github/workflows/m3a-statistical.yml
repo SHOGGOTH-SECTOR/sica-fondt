@@ -35,4 +35,8 @@ jobs:
         run: Rscript core/src/economy/sims/statistical/tests.R
 
       - name: Run M2 → M3a → Hub integration
-        run: tclsh core/src/economy/sims/statistical/integration.test
+        shell: bash
+        run: |
+          set -euo pipefail
+          tclsh core/src/economy/sims/statistical/integration.test | tee /tmp/m3a-integration.out
+          grep -Eq 'Total[[:space:]]+3[[:space:]]+Passed[[:space:]]+3.*Failed[[:space:]]+0' /tmp/m3a-integration.out
