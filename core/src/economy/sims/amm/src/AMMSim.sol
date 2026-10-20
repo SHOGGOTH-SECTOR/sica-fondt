@@ -26,6 +26,34 @@ library AMMSim {
         int256 profitToken0;
     }
 
+    enum PredictionType {
+        ImpermanentLoss,
+        PoolReturn,
+        OptimalRange,
+        SlippageEstimate,
+        LpWithdrawalThreshold
+    }
+
+    struct PoolState {
+        uint256 x;
+        uint256 y;
+        uint256 feeBps;
+        uint256 volumeWad;
+        uint256 tvlWad;
+        uint256 priceRatioWad;
+        uint256 externalPriceWad;
+        uint256 volatilityWad;
+        uint256 tradeSizeWad;
+        uint256 uncertaintyBps;
+        uint256 horizonSeconds;
+    }
+
+    struct BoundedPrediction {
+        int256 value;
+        int256 lower;
+        int256 upper;
+    }
+
     function amountOut(uint256 x, uint256 y, uint256 dx, uint256 feeBps) internal pure returns (uint256 dy) {
         require(x > 0 && y > 0 && dx > 0 && feeBps < BPS, "bad pool");
         uint256 dxEff = dx * (BPS - feeBps) / BPS;
@@ -99,6 +127,207 @@ library AMMSim {
         return jitFeeIncomeWad(
             volumeWad, feeBps, ownLiquidity, totalLiquidity
         ) > entryExitCostWad;
+    }
+
+
+    function feeYieldWad(
+        uint256 volumeWad,
+        uint256 feeBps,
+        uint256 tvlWad
+    ) internal pure returns (uint256) {
+        require(tvlWad > 0 && feeBps < BPS, "yield");
+        uint256 fees = volumeWad * feeBps / BPS;
+        return fees * WAD / tvlWad;
+    }
+
+    function withdrawalUpperRatioWad(
+        uint256 feeIncomeWad
+    ) internal pure returns (uint256) {
+        require(feeIncomeWad < WAD, "fee income");
+        if (feeIncomeWad == 0) return WAD;
+
+        uint256 retained = WAD - feeIncomeWad;
+        uint256 discriminant =
+            WAD * WAD - retained * retained;
+        uint256 root = sqrt(discriminant);
+        uint256 sqrtRatioWad =
+            (WAD + root) * WAD / retained;
+        return sqrtRatioWad * sqrtRatioWad / WAD;
+    }
+
+    function _int(uint256 x) private pure returns (int256) {
+        require(x <= uint256(type(int256).max), "int overflow");
+        return int256(x);
+    }
+
+    function _min3(
+        int256 a, int256 b, int256 c0
+    ) private pure returns (int256) {
+        int256 m = a < b ? a : b;
+        return m < c0 ? m : c0;
+    }
+
+    function _max3(
+        int256 a, int256 b, int256 c0
+    ) private pure returns (int256) {
+        int256 m = a > b ? a : b;
+        return m > c0 ? m : c0;
+    }
+
+    function _scaledByUncertainty(
+        uint256 value,
+        uint256 uncertaintyBps,
+        bool upper
+    ) private pure returns (uint256) {
+        require(uncertaintyBps < BPS, "uncertainty");
+        uint256 factor = upper
+            ? BPS + uncertaintyBps
+            : BPS - uncertaintyBps;
+        return value * factor / BPS;
+    }
+
+    function _ilPrediction(
+        PoolState memory s
+    ) private pure returns (BoundedPrediction memory p) {
+        uint256 loRatio = _scaledByUncertainty(
+            s.priceRatioWad, s.uncertaintyBps, false
+        );
+        uint256 hiRatio = _scaledByUncertainty(
+            s.priceRatioWad, s.uncertaintyBps, true
+        );
+        int256 a = impermanentLossWad(loRatio);
+        int256 b = impermanentLossWad(s.priceRatioWad);
+        int256 c0 = impermanentLossWad(hiRatio);
+        p.value = b;
+        p.lower = _min3(a, b, c0);
+        p.upper = _max3(a, b, c0);
+        if (loRatio <= WAD && hiRatio >= WAD) {
+            p.upper = 0;
+        }
+    }
+
+    function _poolReturnPrediction(
+        PoolState memory s
+    ) private pure returns (BoundedPrediction memory p) {
+        BoundedPrediction memory il = _ilPrediction(s);
+        uint256 lowVolume = _scaledByUncertainty(
+            s.volumeWad, s.uncertaintyBps, false
+        );
+        uint256 highVolume = _scaledByUncertainty(
+            s.volumeWad, s.uncertaintyBps, true
+        );
+        int256 fee = _int(
+            feeYieldWad(s.volumeWad, s.feeBps, s.tvlWad)
+        );
+        int256 lowFee = _int(
+            feeYieldWad(lowVolume, s.feeBps, s.tvlWad)
+        );
+        int256 highFee = _int(
+            feeYieldWad(highVolume, s.feeBps, s.tvlWad)
+        );
+        p.value = fee + il.value;
+        p.lower = lowFee + il.lower;
+        p.upper = highFee + il.upper;
+    }
+
+    function _optimalRangePrediction(
+        PoolState memory s
+    ) private pure returns (BoundedPrediction memory p) {
+        require(
+            s.externalPriceWad > 0 && s.horizonSeconds > 0,
+            "range"
+        );
+        uint256 yearSeconds = 365 days;
+        uint256 fractionWad =
+            s.horizonSeconds * WAD / yearSeconds;
+        uint256 sqrtTimeWad = sqrt(fractionWad * WAD);
+        uint256 widthWad =
+            2 * s.volatilityWad * sqrtTimeWad / WAD;
+        if (widthWad > 9e17) widthWad = 9e17;
+
+        p.value = _int(s.externalPriceWad);
+        p.lower = _int(
+            s.externalPriceWad * (WAD - widthWad) / WAD
+        );
+        p.upper = _int(
+            s.externalPriceWad * (WAD + widthWad) / WAD
+        );
+    }
+
+    function _slippagePrediction(
+        PoolState memory s
+    ) private pure returns (BoundedPrediction memory p) {
+        uint256 lowTrade = _scaledByUncertainty(
+            s.tradeSizeWad, s.uncertaintyBps, false
+        );
+        uint256 highTrade = _scaledByUncertainty(
+            s.tradeSizeWad, s.uncertaintyBps, true
+        );
+        p.value = _int(
+            slippageWad(s.x, s.y, s.tradeSizeWad, s.feeBps)
+        );
+        p.lower = _int(
+            slippageWad(s.x, s.y, lowTrade, s.feeBps)
+        );
+        p.upper = _int(
+            slippageWad(s.x, s.y, highTrade, s.feeBps)
+        );
+    }
+
+    function _thresholdPrediction(
+        PoolState memory s
+    ) private pure returns (BoundedPrediction memory p) {
+        uint256 lowVolume = _scaledByUncertainty(
+            s.volumeWad, s.uncertaintyBps, false
+        );
+        uint256 highVolume = _scaledByUncertainty(
+            s.volumeWad, s.uncertaintyBps, true
+        );
+        uint256 fee = feeYieldWad(
+            s.volumeWad, s.feeBps, s.tvlWad
+        );
+        uint256 lowFee = feeYieldWad(
+            lowVolume, s.feeBps, s.tvlWad
+        );
+        uint256 highFee = feeYieldWad(
+            highVolume, s.feeBps, s.tvlWad
+        );
+        if (fee >= WAD) fee = WAD - 1;
+        if (lowFee >= WAD) lowFee = WAD - 1;
+        if (highFee >= WAD) highFee = WAD - 1;
+
+        p.value = _int(withdrawalUpperRatioWad(fee));
+        p.lower = _int(withdrawalUpperRatioWad(lowFee));
+        p.upper = _int(withdrawalUpperRatioWad(highFee));
+    }
+
+    function predict(
+        PredictionType predictionType,
+        PoolState memory s
+    ) internal pure returns (BoundedPrediction memory) {
+        require(
+            s.x > 0 && s.y > 0 &&
+            s.tvlWad > 0 &&
+            s.priceRatioWad > 0 &&
+            s.tradeSizeWad > 0 &&
+            s.feeBps < BPS &&
+            s.uncertaintyBps < BPS,
+            "bad state"
+        );
+
+        if (predictionType == PredictionType.ImpermanentLoss) {
+            return _ilPrediction(s);
+        }
+        if (predictionType == PredictionType.PoolReturn) {
+            return _poolReturnPrediction(s);
+        }
+        if (predictionType == PredictionType.OptimalRange) {
+            return _optimalRangePrediction(s);
+        }
+        if (predictionType == PredictionType.SlippageEstimate) {
+            return _slippagePrediction(s);
+        }
+        return _thresholdPrediction(s);
     }
 
 
