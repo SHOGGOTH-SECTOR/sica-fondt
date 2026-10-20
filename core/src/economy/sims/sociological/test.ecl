@@ -13,7 +13,7 @@ must(Name, Goal) :-
 run_tests :-
     must(replicator_normalizes,
         (replicator_step([0.5,0.5],[1.0,2.0],0.2,N),
-         N=[A,B], approx(A+B,1.0,1.0e-9), B > 0.5)),
+         N=[A,B], Sum is A+B, approx(Sum,1.0,1.0e-9), B > 0.5)),
 
     must(hk_clusters_local_neighbors,
         (hk_step([0.0,0.1,0.9,1.0],0.2,1.0,H),
@@ -59,6 +59,7 @@ run_tests :-
          Scores=[U1,U2],
          U2 > U1,
          N2 > N1,
-         approx(N1+N2,1.0,1.0e-9))),
+         SumN is N1+N2,
+         approx(SumN,1.0,1.0e-9))),
 
     writeln("SOCIOLOGICAL TESTS PASSED").
