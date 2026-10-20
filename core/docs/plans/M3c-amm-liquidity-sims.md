@@ -7,11 +7,16 @@ loss, and the non-cooperative game between liquidity providers and arbitrageurs*
 literature [1,2].
 
 ## 2. Status / certainty
-KERNEL IMPLEMENTED · Solidity/Foundry. `core/src/economy/sims/amm/src/AMMSim.sol`
-implements fee-adjusted constant-product swaps, fixed-point impermanent loss, nonlinear
-slippage, and an IL-vs-fee withdrawal decision; Foundry-native tests cover the invariants.
-Concentrated liquidity, multi-pool routing, and richer LP/arbitrage populations remain
-incremental. Mathematical foundations C5; implementation C2; parameterization C1.
+IMPLEMENTED · M3c V1 · Solidity/Foundry. `core/src/economy/sims/amm/src/AMMSim.sol`
+implements fee-adjusted constant-product swaps, exact fixed-point impermanent loss, nonlinear
+slippage, IL-derived withdrawal thresholds, active LP rebalance, just-in-time liquidity economics,
+deterministic backrun and sandwich populations, concentrated-liquidity position/range accounting,
+two-pool optimal split routing, and all five bounded M3c prediction types. `AMMQuery.sol` is a
+read-only EVM ABI bridge; `runner.tcl` calibrates from M2 `price_tick` + `dex_pool_state`,
+evaluates the Solidity engine via `eth_call`, and publishes the result into the M3 hub for
+Marketplace consumption. Dedicated Foundry CI verifies both native math and the M2→M3c→Hub
+boundary on an ephemeral local Anvil instance. Mathematical foundations C5; implementation C3;
+live-market parameterization remains data-dependent.
 
 ## 3. Language & location
 **Solidity** + **Foundry** (forge, anvil) · `src/economy/sims/amm/`. Foundry is hosted
@@ -49,9 +54,15 @@ execute, eliminating precision-mismatch bugs between sim and production contract
   `lp_withdrawal_threshold`.
 - Calibration: ingests `dex_pool_state` and `price_tick` from M2.
 
-## 6. Dependencies & stubs
-- M2 Data Feeds — pool state and price data; *stub:* canned pool snapshots.
-- M3 Sims hub — lifecycle management; *stub:* manual init.
+## 6. Dependencies & runtime boundary
+- M2 Data Feeds — normalized `dex_pool_state` supplies reserves, fee tier, volume, TVL and
+  representative trade size; `price_tick` supplies external price, realized movement and
+  volatility calibration.
+- M3 Sims hub — every M3c result is converted to the common bounded-prediction schema and
+  published as `amm_liquidity`; Traders read it through Marketplace.
+- Foundry — hosted separately by design. CI uses a fresh local Anvil chain and deploys only the
+  stateless/read-only `AMMQuery` bridge. M3c has no live-chain signer, broadcaster, approval,
+  transfer, or swap-execution surface.
 
 ## 7. Invariants / laws
 - **L1 (C5):** the **constant product invariant** $x \cdot y = k$ (adjusted for fees $\gamma$)
@@ -74,7 +85,14 @@ Invariant: every swap satisfies $(x + \gamma \Delta x)(y - \Delta y) = k$. IL fo
 closed-form for known price ratios. Slippage: large swaps produce greater slippage than small.
 LP threshold: LP withdraws when IL exceeds fee income. Bounds: all outputs bounded.
 
-## 10. Open items
-- Concentrated liquidity (>>>Uniswap v3 style<<<) — extends the base model significantly.
-- Multi-pool routing (split swaps across pools). >>>yes<<<
-- Which specific pools to simulate (>>>ETH<<</USDC? stablecoin pairs?). >>and other popular chains<< NOT STABLE/USDC/USDT etc.
+## 10. V1 decisions and future extensions
+- **Concentrated liquidity:** V1 implements the canonical liquidity-to-token amount equations,
+  one-sided out-of-range positions, and volatility/horizon-derived optimal ranges. Full
+  Uniswap-v3-style initialized-tick crossing and fee-growth accounting are a future fidelity
+  extension, not required by the V1 prediction contract.
+- **Multi-pool routing:** V1 implements deterministic optimal exact-input splitting across two
+  pools by marginal-output equalization. N-way routing is a future scaling extension.
+- **Pool universe:** the engine is chain- and pair-agnostic. M2 chooses the concrete pools;
+  the simulator does not hardcode ETH/USDC, stablecoins, or any particular chain.
+- **Execution boundary:** arbitrage and sandwich functions are simulation constructs only.
+  No native M3c API can submit a real swap.
