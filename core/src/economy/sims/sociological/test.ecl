@@ -10,6 +10,25 @@ must(Name, Goal) :-
         fail
     ).
 
+prediction_types([
+    sentiment_index,
+    herd_threshold,
+    strategy_distribution,
+    cascade_probability,
+    coordination_stability,
+    opinion_cluster_count,
+    pump_dump_phase,
+    mfg_equilibrium_stability,
+    narrative_regime
+]).
+
+check_prediction_types([], _, _).
+check_prediction_types([Type|Types], State, Horizon) :-
+    sociological_prediction(Type,State,Horizon,V,L,U,_),
+    number(V), number(L), number(U),
+    L =< V, V =< U,
+    check_prediction_types(Types,State,Horizon).
+
 run_tests :-
     must(replicator_normalizes,
         (replicator_step([0.5,0.5],[1.0,2.0],0.2,N),
@@ -111,5 +130,46 @@ run_tests :-
          ),
          Collapse=[_,_,CollapseMP],
          CollapseMP < 0.15)),
+
+
+    must(adaptive_hk_tightens_under_uncertainty,
+        (adaptive_confidence_bound(0.35,0.20,0.10,Loose),
+         adaptive_confidence_bound(0.35,0.90,0.50,Tight),
+         Tight < Loose,
+         Tight > 0.01)),
+
+    must(opinion_cluster_count_detects_groups,
+        (opinion_cluster_count([0.10,0.12,0.50,0.52,0.90],0.08,Clusters),
+         Clusters =:= 3)),
+
+    must(all_m3b_prediction_types_bounded,
+        (State=state(
+            0.70,
+            0.20,
+            0.08,
+            0.60,
+            0.65,
+            [0.40,0.20,0.15,0.15,0.10],
+            [0.70,0.15,0.15],
+            0.80,
+            [0.10,0.12,0.50,0.52,0.90]
+         ),
+         prediction_types(Types),
+         check_prediction_types(Types,State,weekly))),
+
+    must(categorical_predictions_keep_labels,
+        (State2=state(
+            0.85,0.15,0.10,0.50,0.75,
+            [0.45,0.15,0.10,0.10,0.20],
+            [0.70,0.10,0.20],
+            0.75,
+            [0.70,0.72,0.75,0.80]
+         ),
+         sociological_prediction(pump_dump_phase,State2,daily,PV,PL,PU,PLabel),
+         PL =< PV, PV =< PU,
+         PLabel = promotion,
+         sociological_prediction(narrative_regime,State2,monthly,NV,NL,NU,NLabel),
+         NL =< NV, NV =< NU,
+         NLabel = bullish)),
 
     writeln("SOCIOLOGICAL TESTS PASSED").
