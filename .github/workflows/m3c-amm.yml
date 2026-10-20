@@ -51,7 +51,7 @@ jobs:
           done
           test "$ready" = 1
 
-          wallet="$(cast wallet new)"
+          wallet="$(cast wallet new 2>&1)"
           key="$(printf '%s\n' "$wallet" | awk '/Private key:/ {print $3}')"
           addr="$(printf '%s\n' "$wallet" | awk '/Address:/ {print $2}')"
           test -n "$key"
