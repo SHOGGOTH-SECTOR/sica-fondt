@@ -95,6 +95,45 @@ contains
     propagated = shock + matmul(exposure, shock)
   end subroutine
 
+  subroutine liquidation_cascade(collateral, borrowed, ltv, exposure, iterations, losses)
+    real(8), intent(in) :: collateral(:), borrowed(:), ltv(:), exposure(:,:)
+    integer, intent(in) :: iterations
+    real(8), intent(out) :: losses(size(collateral))
+    real(8) :: initial(size(collateral)), next_losses(size(collateral))
+    integer :: step, n
+
+    n = size(collateral)
+    if (size(borrowed) /= n .or. size(ltv) /= n) error stop 'cascade vector shape'
+    if (size(exposure,1) /= n .or. size(exposure,2) /= n) error stop 'cascade matrix shape'
+    if (iterations < 0) error stop 'negative cascade iterations'
+    if (any(collateral < 0d0) .or. any(borrowed < 0d0)) error stop 'negative balance'
+    if (any(ltv < 0d0) .or. any(ltv > 1d0)) error stop 'invalid ltv'
+    if (any(exposure < 0d0)) error stop 'negative exposure'
+
+    initial = max(0d0, borrowed - collateral*ltv)
+    losses = initial
+    do step=1,iterations
+      next_losses = initial + matmul(exposure, losses)
+      losses = max(0d0, next_losses)
+    end do
+  end subroutine liquidation_cascade
+
+  subroutine var_impulse_response(a, shock, steps, response)
+    real(8), intent(in) :: a(:,:), shock(:)
+    integer, intent(in) :: steps
+    real(8), intent(out) :: response(size(shock),steps+1)
+    integer :: t, n
+
+    n = size(shock)
+    if (size(a,1) /= n .or. size(a,2) /= n) error stop 'var matrix shape'
+    if (steps < 0) error stop 'negative impulse steps'
+
+    response(:,1) = shock
+    do t=1,steps
+      response(:,t+1) = matmul(a, response(:,t))
+    end do
+  end subroutine var_impulse_response
+
   subroutine yield_weights(apy, vol, risk_aversion, weights)
     real(8), intent(in) :: apy(:),vol(:),risk_aversion
     real(8), intent(out) :: weights(size(apy))
