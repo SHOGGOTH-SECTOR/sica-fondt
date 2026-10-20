@@ -13,6 +13,9 @@ on:
   pull_request:
     paths:
       - "core/src/economy/sims/statistical/**"
+      - "core/src/economy/stomach.tcl"
+      - "core/src/economy/feeds.tcl"
+      - "core/src/economy/sims/hub.tcl"
       - ".github/workflows/m3a-statistical.yml"
   workflow_dispatch:
 
@@ -39,4 +42,4 @@ jobs:
         run: |
           set -euo pipefail
           tclsh core/src/economy/sims/statistical/integration.test | tee /tmp/m3a-integration.out
-          grep -Eq 'Total[[:space:]]+3[[:space:]]+Passed[[:space:]]+3.*Failed[[:space:]]+0' /tmp/m3a-integration.out
+          grep -Eq 'Total[[:space:]]+5[[:space:]]+Passed[[:space:]]+5.*Failed[[:space:]]+0' /tmp/m3a-integration.out
