@@ -233,4 +233,48 @@ stopifnot(abs(quality_state$correctness-quality_state$quality$correctness) < 1e-
 stopifnot(abs(quality_state$confidence-quality_state$quality$confidence) < 1e-12)
 stopifnot(abs(quality_state$certainty-quality_state$quality$certainty) < 1e-12)
 
+
+# Full M3a prediction-type contract + DEX pool calibration -------------------
+pool_prices <- c(99.8,100.1,100.0,100.2)
+pool_liquidity <- c(1.0e6,2.0e6,1.5e6,0.5e6)
+pool_state <- calibrate_market(
+  bt_prices,dt=1/365,ticker="POOL",
+  pool_prices=pool_prices,pool_liquidity=pool_liquidity,
+  quality_points=12
+)
+stopifnot(pool_state$pool$observations == 4)
+stopifnot(abs(pool_state$pool$spot-weighted.mean(pool_prices,pool_liquidity)) < 1e-10)
+stopifnot(all(c("price_tick","dex_pool_state") %in% pool_state$calibration_sources))
+
+typed <- c(
+  "price_forecast","volatility_surface","var_calculation",
+  "regime_state","rough_vol_estimate","jump_intensity"
+)
+for (prediction_type in typed) {
+  q <- statistical_prediction(
+    pool_state,prediction_type,horizon="daily",paths=800,seed=520
+  )
+  stopifnot(q$prediction_type == prediction_type)
+  stopifnot(is.numeric(q$value),length(q$value) == 1,is.finite(q$value))
+  stopifnot(q$lower_bound <= q$value,q$value <= q$upper_bound)
+  stopifnot(q$confidence >= 0,q$confidence <= 10)
+  stopifnot(q$correctness >= 0,q$correctness <= 10)
+  stopifnot(q$certainty >= 0,q$certainty <= 10)
+}
+regime_prediction <- statistical_prediction(
+  pool_state,"regime_state",horizon="current",paths=800,seed=521
+)
+stopifnot(regime_prediction$label %in% c("bear","neutral","bull"))
+stopifnot(regime_prediction$value >= 0,regime_prediction$value <= 1)
+
+cross_state <- pool_state
+cross_state$cross_asset <- cross
+corr_prediction <- statistical_prediction(
+  cross_state,"correlation_matrix",horizon="current",paths=800,seed=522
+)
+stopifnot(corr_prediction$prediction_type == "correlation_matrix")
+stopifnot(all(dim(corr_prediction$matrix) == c(3,3)))
+stopifnot(corr_prediction$lower_bound <= corr_prediction$value)
+stopifnot(corr_prediction$value <= corr_prediction$upper_bound)
+
 cat("STATISTICAL TESTS PASSED\n")
