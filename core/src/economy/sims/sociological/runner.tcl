@@ -26,7 +26,7 @@ oo::class create ::stomach::SociologicalRunner {
     method _list_fmt {xs} {
         set out {}
         foreach x $xs { lappend out [my _fmt $x] }
-        return "[[join $out ,]]"
+        return [format {[%s]} [join $out ,]]
     }
 
     method _prediction_type {name} {
