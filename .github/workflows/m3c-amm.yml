@@ -13,6 +13,9 @@ on:
   pull_request:
     paths:
       - "core/src/economy/sims/amm/**"
+      - "core/src/economy/stomach.tcl"
+      - "core/src/economy/feeds.tcl"
+      - "core/src/economy/sims/hub.tcl"
       - ".github/workflows/m3c-amm.yml"
   workflow_dispatch:
 
