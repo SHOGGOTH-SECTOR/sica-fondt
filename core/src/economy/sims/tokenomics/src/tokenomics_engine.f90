@@ -135,15 +135,59 @@ contains
   end subroutine var_impulse_response
 
   subroutine yield_weights(apy, vol, risk_aversion, weights)
-    real(8), intent(in) :: apy(:),vol(:),risk_aversion
+    real(8), intent(in) :: apy(:), vol(:), risk_aversion
     real(8), intent(out) :: weights(size(apy))
-    real(8) :: score(size(apy)), total
-    score = max(0d0, apy-risk_aversion*vol*vol)
-    total=sum(score)
-    if (total<=1d-15) then
-      weights = 1d0/real(size(apy),8)
+    real(8) :: denom(size(apy)), mu, inv_sum, return_sum
+    logical :: active(size(apy)), changed
+    integer :: i, iter, n, best
+
+    n = size(apy)
+    if (size(vol) /= n .or. n < 1) error stop 'yield vector shape'
+    if (risk_aversion < 0d0 .or. any(vol < 0d0)) error stop 'invalid yield risk'
+
+    weights = 0d0
+    if (risk_aversion <= 1d-15) then
+      best = maxloc(apy, dim=1)
+      weights(best) = 1d0
+      return
+    end if
+
+    denom = 2d0*risk_aversion*max(vol*vol,1d-12)
+    active = .true.
+
+    do iter=1,n
+      inv_sum = 0d0
+      return_sum = 0d0
+      do i=1,n
+        if (active(i)) then
+          inv_sum = inv_sum + 1d0/denom(i)
+          return_sum = return_sum + apy(i)/denom(i)
+        end if
+      end do
+      if (inv_sum <= 0d0) exit
+
+      mu = (return_sum-1d0)/inv_sum
+      changed = .false.
+      weights = 0d0
+      do i=1,n
+        if (active(i)) then
+          weights(i) = (apy(i)-mu)/denom(i)
+          if (weights(i) <= 0d0) then
+            active(i) = .false.
+            weights(i) = 0d0
+            changed = .true.
+          end if
+        end if
+      end do
+      if (.not. changed) exit
+    end do
+
+    if (sum(weights) <= 1d-15) then
+      best = maxloc(apy, dim=1)
+      weights = 0d0
+      weights(best) = 1d0
     else
-      weights = score/total
+      weights = weights/sum(weights)
     end if
   end subroutine
 
