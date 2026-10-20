@@ -148,7 +148,8 @@ contract AMMSimTest {
         AMMSim.PoolState memory low=_basePoolState();
         low.priceRatioWad=1e18;
         low.volatilityWad=2e17;
-        AMMSim.PoolState memory high=low;
+        AMMSim.PoolState memory high=_basePoolState();
+        high.priceRatioWad=1e18;
         high.volatilityWad=8e17;
         AMMSim.BoundedPrediction memory a=AMMSim.predict(
             AMMSim.PredictionType.OptimalRange, low
