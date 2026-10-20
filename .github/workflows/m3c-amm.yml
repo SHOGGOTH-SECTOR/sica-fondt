@@ -31,3 +31,10 @@ jobs:
 
       - name: Run M3c native tests
         run: forge test -vv
+
+      - name: Run M2 → M3c → Hub integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          tclsh integration.test | tee /tmp/m3c-integration.out
+          grep -Eq 'Total[[:space:]]+4[[:space:]]+Passed[[:space:]]+4.*Failed[[:space:]]+0' /tmp/m3c-integration.out
