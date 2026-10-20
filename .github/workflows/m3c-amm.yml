@@ -1,0 +1,33 @@
+name: M3c AMM CI
+
+on:
+  push:
+    branches:
+      - feat/stomach-economic-organ
+    paths:
+      - "core/src/economy/sims/amm/**"
+      - ".github/workflows/m3c-amm.yml"
+  pull_request:
+    paths:
+      - "core/src/economy/sims/amm/**"
+      - ".github/workflows/m3c-amm.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  m3c:
+    name: Solidity AMM engine
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: core/src/economy/sims/amm
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Run M3c native tests
+        run: forge test -vv
