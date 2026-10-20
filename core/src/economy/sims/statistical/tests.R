@@ -160,4 +160,40 @@ stopifnot(all(dim(cross$last_correlation) == c(3,3)))
 stopifnot(max(abs(diag(cross$last_correlation)-1)) < 1e-10)
 stopifnot(max(abs(cross$last_correlation-t(cross$last_correlation))) < 1e-10)
 
+
+# Heston characteristic-function pricing + option-surface calibration --------
+bs <- black_scholes_call(100,100,1,0.01,0,0.20)
+heston_bs <- heston_call_price(
+  spot=100,strike=100,maturity=1,rate=0.01,dividend=0,
+  kappa=2,theta=0.04,xi=0,rho=-0.5,v0=0.04
+)
+stopifnot(abs(bs-heston_bs) < 1e-8)
+
+true_heston <- list(kappa=1.8,theta=0.04,xi=0.35,rho=-0.55,v0=0.045)
+surface <- expand.grid(
+  strike=c(90,100,110),
+  maturity=c(0.25,0.75,1.25)
+)
+surface$price <- mapply(function(k,t) {
+  heston_call_price(
+    100,k,t,0.01,0,
+    true_heston$kappa,true_heston$theta,true_heston$xi,
+    true_heston$rho,true_heston$v0,
+    integration_points=768
+  )
+}, surface$strike, surface$maturity)
+start_heston <- c(kappa=0.8,theta=0.08,xi=0.18,rho=-0.1,v0=0.08)
+start_rmse <- heston_surface_rmse(
+  start_heston,surface,spot=100,rate=0.01,dividend=0,
+  integration_points=384
+)
+hcal <- calibrate_heston_surface(
+  surface,spot=100,rate=0.01,dividend=0,start=start_heston,
+  integration_points=384,maxit=120
+)
+stopifnot(is.finite(hcal$rmse), hcal$rmse < start_rmse*0.45)
+stopifnot(hcal$params$theta > 0, hcal$params$xi >= 0)
+stopifnot(hcal$params$rho < 0, abs(hcal$params$rho) <= 1)
+stopifnot(abs(hcal$params$theta-true_heston$theta) < 0.04)
+
 cat("STATISTICAL TESTS PASSED\n")
