@@ -5,6 +5,8 @@ program test_tokenomics
   real(8) :: collateral(4), borrowed(4), ltv(4), cascade_exposure(4,4), losses(4)
   real(8) :: var_a(3,3), impulse(3,4)
   real(8) :: opt_apy(3), opt_vol(3), opt_w(3), marginal(3)
+  real(8) :: est_mean, est_var, next_mean, next_var
+  integer :: est_i
   type(token_state) :: state0, state1
   real(8) :: e_before, e_half, e_quarter
   if (abs(lending_rate(0.80d0,0.02d0,0.04d0,0.60d0,0.80d0)-0.052d0) > 1d-9) error stop 'below kink'
@@ -64,5 +66,16 @@ program test_tokenomics
   if (minval(opt_w) <= 0d0) error stop 'expected active set'
   marginal = opt_apy - 4d0*opt_vol*opt_vol*opt_w
   if (maxval(marginal)-minval(marginal) > 1d-8) error stop 'yield KKT stationarity'
+
+
+  est_mean = 0d0
+  est_var = 100d0
+  do est_i=1,20
+    call kalman_scalar_update(est_mean,est_var,100d0,4d0,1d0,next_mean,next_var)
+    est_mean = next_mean
+    est_var = next_var
+  end do
+  if (abs(est_mean-100d0)>0.5d0) error stop 'state estimate convergence'
+  if (est_var >= 4d0) error stop 'state estimate uncertainty'
   print *, 'TOKENOMICS TESTS PASSED'
 end program
