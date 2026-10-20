@@ -109,4 +109,67 @@ contract AMMSimTest {
         require(s.victimOut < AMMSim.amountOut(1000e18,1000e18,100e18,30), "victim worsens");
     }
 
+    function _basePoolState() private pure returns (AMMSim.PoolState memory s) {
+        s.x=1000e18;
+        s.y=1000e18;
+        s.feeBps=100;
+        s.volumeWad=5000e18;
+        s.tvlWad=1000e18;
+        s.priceRatioWad=4e18;
+        s.externalPriceWad=1e18;
+        s.volatilityWad=5e17;
+        s.tradeSizeWad=10e18;
+        s.uncertaintyBps=500;
+        s.horizonSeconds=7 days;
+    }
+
+    function testWithdrawalThresholdIsDerivedFromIlFormula() public pure {
+        uint256 threshold=AMMSim.withdrawalUpperRatioWad(2e17);
+        uint256 d=threshold > 4e18 ? threshold-4e18 : 4e18-threshold;
+        require(d < 1e11, "20pct IL threshold");
+        int256 il=AMMSim.impermanentLossWad(threshold);
+        int256 target=-2e17;
+        int256 e=il-target; if (e<0) e=-e;
+        require(e < 1e10, "threshold reproduces IL");
+    }
+
+    function testPoolReturnCombinesFeesAndImpermanentLoss() public pure {
+        AMMSim.PoolState memory s=_basePoolState();
+        AMMSim.BoundedPrediction memory p=AMMSim.predict(
+            AMMSim.PredictionType.PoolReturn, s
+        );
+        int256 expected=-15e16;
+        int256 d=p.value-expected; if (d<0) d=-d;
+        require(d < 1e12, "fees minus IL");
+        require(p.lower <= p.value && p.value <= p.upper, "bounded");
+    }
+
+    function testOptimalRangeWidensWithVolatility() public pure {
+        AMMSim.PoolState memory low=_basePoolState();
+        low.priceRatioWad=1e18;
+        low.volatilityWad=2e17;
+        AMMSim.PoolState memory high=low;
+        high.volatilityWad=8e17;
+        AMMSim.BoundedPrediction memory a=AMMSim.predict(
+            AMMSim.PredictionType.OptimalRange, low
+        );
+        AMMSim.BoundedPrediction memory b=AMMSim.predict(
+            AMMSim.PredictionType.OptimalRange, high
+        );
+        require(b.upper-b.lower > a.upper-a.lower, "wider at high vol");
+        require(a.lower <= a.value && a.value <= a.upper, "a bounded");
+        require(b.lower <= b.value && b.value <= b.upper, "b bounded");
+    }
+
+    function testAllM3cPredictionKindsAreBounded() public pure {
+        AMMSim.PoolState memory s=_basePoolState();
+        for (uint256 i=0; i<5; ++i) {
+            AMMSim.BoundedPrediction memory p=AMMSim.predict(
+                AMMSim.PredictionType(i), s
+            );
+            require(p.lower <= p.value, "lower");
+            require(p.value <= p.upper, "upper");
+        }
+    }
+
 }
