@@ -38,3 +38,48 @@ pump_phase(PriceDelta, VolumeRatio, Sentiment, Phase) :-
      VolumeRatio > 2.0, PriceDelta < -0.05 -> Phase=collapse ;
      VolumeRatio > 1.5, PriceDelta >= 0 -> Phase=distribution ;
      Phase=accumulation).
+
+
+% V1 behavioral archetypes. These are abstract population roles, never literal
+% identities or profiles of real market participants.
+archetype_catalog([
+    retail_herd,
+    contrarian_whale,
+    mev_searcher,
+    passive_lp,
+    manipulator
+]).
+
+ucb_score(_, Count, _, _, 1.0e9) :-
+    Count =< 0, !.
+ucb_score(Mean, Count, Total, Explore, Score) :-
+    Count > 0,
+    ( Total =< 1 ->
+        Bonus = 0.0
+    ;
+        Bonus is Explore * sqrt(log(Total) / Count)
+    ),
+    Score is Mean + Bonus.
+
+ucb_scores([], [], _, _, []).
+ucb_scores([Reward|Rewards], [Count|Counts], Total, Explore, [Score|Scores]) :-
+    ( Count =< 0 ->
+        Mean = 0.0
+    ;
+        Mean is Reward / Count
+    ),
+    ucb_score(Mean, Count, Total, Explore, Score),
+    ucb_scores(Rewards, Counts, Total, Explore, Scores).
+
+bandit_replicator_step(
+    Shares,
+    RewardSums,
+    Counts,
+    Total,
+    Explore,
+    Dt,
+    Next,
+    Scores
+) :-
+    ucb_scores(RewardSums, Counts, Total, Explore, Scores),
+    replicator_step(Shares, Scores, Dt, Next).
