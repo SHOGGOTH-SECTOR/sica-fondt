@@ -11,6 +11,21 @@ library AMMSim {
         uint256 feeBps;
     }
 
+    struct ArbitrageResult {
+        bool zeroForOne;
+        uint256 amountIn;
+        uint256 amountOut;
+        int256 profitQuote;
+        uint256 postPriceWad;
+    }
+
+    struct SandwichResult {
+        uint256 frontOut;
+        uint256 victimOut;
+        uint256 backOut;
+        int256 profitToken0;
+    }
+
     function amountOut(uint256 x, uint256 y, uint256 dx, uint256 feeBps) internal pure returns (uint256 dy) {
         require(x > 0 && y > 0 && dx > 0 && feeBps < BPS, "bad pool");
         uint256 dxEff = dx * (BPS - feeBps) / BPS;
@@ -51,6 +66,172 @@ library AMMSim {
         return loss > feeIncomeWad;
     }
 
+
+    function lpShouldRebalance(
+        uint256 feeIncomeWad,
+        uint256 rebalanceCostWad,
+        uint256 ratioWad
+    ) internal pure returns (bool) {
+        int256 il = impermanentLossWad(ratioWad);
+        uint256 loss = il < 0 ? uint256(-il) : 0;
+        return loss > feeIncomeWad + rebalanceCostWad;
+    }
+
+    function jitFeeIncomeWad(
+        uint256 volumeWad,
+        uint256 feeBps,
+        uint256 ownLiquidity,
+        uint256 totalLiquidity
+    ) internal pure returns (uint256) {
+        require(feeBps < BPS, "fee");
+        require(totalLiquidity > 0 && ownLiquidity <= totalLiquidity, "liquidity");
+        uint256 grossFees = volumeWad * feeBps / BPS;
+        return grossFees * ownLiquidity / totalLiquidity;
+    }
+
+    function jitShouldProvide(
+        uint256 volumeWad,
+        uint256 feeBps,
+        uint256 ownLiquidity,
+        uint256 totalLiquidity,
+        uint256 entryExitCostWad
+    ) internal pure returns (bool) {
+        return jitFeeIncomeWad(
+            volumeWad, feeBps, ownLiquidity, totalLiquidity
+        ) > entryExitCostWad;
+    }
+
+
+
+    function _optimalInputForMarginal(
+        Pool memory pool,
+        uint256 targetMarginalWad
+    ) private pure returns (uint256) {
+        if (_marginalOutWad(
+            pool.x, pool.y, 0, pool.feeBps
+        ) <= targetMarginalWad) {
+            return 0;
+        }
+
+        uint256 lo = 0;
+        uint256 hi = pool.x;
+        for (uint256 i = 0; i < 8; ++i) {
+            if (_marginalOutWad(
+                pool.x, pool.y, hi, pool.feeBps
+            ) <= targetMarginalWad) break;
+            require(hi <= type(uint256).max / 2, "arb range");
+            hi *= 2;
+        }
+
+        for (uint256 i = 0; i < 64 && lo < hi; ++i) {
+            uint256 mid = lo + (hi - lo) / 2;
+            if (_marginalOutWad(
+                pool.x, pool.y, mid, pool.feeBps
+            ) > targetMarginalWad) {
+                lo = mid + 1;
+            } else {
+                hi = mid;
+            }
+        }
+        return lo;
+    }
+
+    function _signedDifference(
+        uint256 positive,
+        uint256 negative
+    ) private pure returns (int256) {
+        require(
+            positive <= uint256(type(int256).max) &&
+            negative <= uint256(type(int256).max),
+            "signed overflow"
+        );
+        return int256(positive) - int256(negative);
+    }
+
+    function backrunToPrice(
+        uint256 x,
+        uint256 y,
+        uint256 externalPriceWad,
+        uint256 feeBps
+    ) internal pure returns (ArbitrageResult memory r) {
+        require(
+            x > 0 && y > 0 && externalPriceWad > 0 && feeBps < BPS,
+            "bad arb"
+        );
+        uint256 poolPriceWad = y * WAD / x;
+        if (poolPriceWad == externalPriceWad) {
+            r.postPriceWad = poolPriceWad;
+            return r;
+        }
+
+        if (poolPriceWad > externalPriceWad) {
+            r.zeroForOne = true;
+            Pool memory pool = Pool({x: x, y: y, feeBps: feeBps});
+            r.amountIn = _optimalInputForMarginal(
+                pool, externalPriceWad
+            );
+            if (r.amountIn == 0) {
+                r.postPriceWad = poolPriceWad;
+                return r;
+            }
+            r.amountOut = amountOut(x, y, r.amountIn, feeBps);
+            uint256 newX = x + r.amountIn;
+            uint256 newY = y - r.amountOut;
+            r.postPriceWad = newY * WAD / newX;
+            uint256 externalCost = r.amountIn * externalPriceWad / WAD;
+            r.profitQuote = _signedDifference(
+                r.amountOut, externalCost
+            );
+            return r;
+        }
+
+        uint256 reciprocalPriceWad = WAD * WAD / externalPriceWad;
+        Pool memory reversePool = Pool({x: y, y: x, feeBps: feeBps});
+        r.amountIn = _optimalInputForMarginal(
+            reversePool, reciprocalPriceWad
+        );
+        if (r.amountIn == 0) {
+            r.postPriceWad = poolPriceWad;
+            return r;
+        }
+        r.amountOut = amountOut(y, x, r.amountIn, feeBps);
+        uint256 newY2 = y + r.amountIn;
+        uint256 newX2 = x - r.amountOut;
+        r.postPriceWad = newY2 * WAD / newX2;
+        uint256 externalValue = r.amountOut * externalPriceWad / WAD;
+        r.profitQuote = _signedDifference(
+            externalValue, r.amountIn
+        );
+    }
+
+    function simulateSandwich(
+        uint256 x,
+        uint256 y,
+        uint256 victimDx,
+        uint256 attackerDx,
+        uint256 feeBps
+    ) internal pure returns (SandwichResult memory r) {
+        require(
+            x > 0 && y > 0 && victimDx > 0 &&
+            attackerDx > 0 && feeBps < BPS,
+            "bad sandwich"
+        );
+
+        r.frontOut = amountOut(x, y, attackerDx, feeBps);
+        uint256 x1 = x + attackerDx;
+        uint256 y1 = y - r.frontOut;
+
+        r.victimOut = amountOut(x1, y1, victimDx, feeBps);
+        uint256 x2 = x1 + victimDx;
+        uint256 y2 = y1 - r.victimOut;
+
+        r.backOut = amountOut(
+            y2, x2, r.frontOut, feeBps
+        );
+        r.profitToken0 = _signedDifference(
+            r.backOut, attackerDx
+        );
+    }
 
     /// @notice Token amounts represented by concentrated liquidity L at a
     /// current sqrt-price. All sqrt-prices are WAD-scaled.
