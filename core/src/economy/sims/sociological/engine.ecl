@@ -57,7 +57,7 @@ ucb_score(Mean, Count, Total, Explore, Score) :-
     ( Total =< 1 ->
         Bonus = 0.0
     ;
-        Bonus is Explore * sqrt(log(Total) / Count)
+        Bonus is Explore * sqrt(ln(Total) / Count)
     ),
     Score is Mean + Bonus.
 
