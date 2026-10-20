@@ -327,7 +327,11 @@ hurst_rs <- function(x) {
 
 fgn_davies_harte <- function(n, H, seed=1L) {
   n <- as.integer(n)
-  stopifnot(n >= 2, H > 0, H < 1)
+  stopifnot(n >= 1, H > 0, H < 1)
+  if (n == 1) {
+    set.seed(seed)
+    return(rnorm(1))
+  }
   k <- 0:n
   gamma <- 0.5 * (
     abs(k-1)^(2*H) - 2*abs(k)^(2*H) + abs(k+1)^(2*H)
