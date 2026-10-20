@@ -1,0 +1,60 @@
+package require tcltest 2
+namespace import ::tcltest::*
+
+set here [file dirname [file normalize [info script]]]
+source [file join $here .. .. stomach.tcl]
+
+proc seed_m3b {s ticker} {
+    for {set i 0} {$i < 30} {incr i} {
+        set price [expr {100.0 * exp(0.0030*$i + 0.004*sin($i/4.0))}]
+        $s feed_publish price_tick exchange [expr {$i*3600}]             [dict create token_ticker $ticker price $price] 9.4
+    }
+
+    set sources {reddit social blog reddit social blog reddit social blog reddit social blog}
+    set i 0
+    foreach source_type $sources {
+        set sentiment [expr {0.68 + 0.04*sin($i)}]
+        set engagement [expr {0.78 + 0.05*cos($i)}]
+        $s feed_publish rss_news $source_type [expr {$i*7200}]             [dict create                 token_ticker $ticker                 source_type $source_type                 sentiment $sentiment                 engagement $engagement] 8.0
+        incr i
+    }
+}
+
+test m3b-runner-available-1.0 {ECLiPSe-backed sociological runner is available in M3b CI} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    set out [$s sociological_runner_available]
+    $s destroy
+    set out
+} -result 1
+
+test m2-to-m3b-to-hub-1.0 {social aggregate and price feeds publish a bounded sentiment state} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    $s register_trader trader-social sociological
+    seed_m3b $s TEST
+    set p [$s sociological_from_feed TEST sentiment_index daily]
+    set q [$s query_predictions trader-social sociological]
+    set out [list         [dict get $p sim_type]         [dict get $p prediction_type]         [expr {[dict get $p lower_bound] <= [dict get $p value]}]         [expr {[dict get $p value] <= [dict get $p upper_bound]}]         [dict get $q token_ticker]         [dict get $p time_horizon]         [dict get $p calibration_sources]]
+    $s destroy
+    set out
+} -result {sociological sentiment_index 1 1 TEST 24h rss_news,price_tick}
+
+test m3b-pump-phase-label-1.0 {aggregate promotion signature carries categorical phase label} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    seed_m3b $s PUMP
+    set p [$s sociological_from_feed PUMP pump_dump_phase daily]
+    set out [list         [dict get $p prediction_type]         [dict get $p label]         [expr {[dict get $p lower_bound] <= [dict get $p value] && [dict get $p value] <= [dict get $p upper_bound]}]]
+    $s destroy
+    set out
+} -result {pump_dump_phase promotion 1}
+
+test m3b-insufficient-social-history-1.0 {M3b refuses calibration without aggregate social evidence} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    for {set i 0} {$i < 20} {incr i} {
+        $s feed_publish price_tick exchange $i             [dict create token_ticker TEST price [expr {100.0+$i}]] 9.0
+    }
+    set code [catch {$s sociological_from_feed TEST sentiment_index daily} msg]
+    $s destroy
+    list $code $msg
+} -result {1 insufficient_social_history}
+
+cleanupTests
