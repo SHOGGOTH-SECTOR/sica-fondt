@@ -1,6 +1,68 @@
 module tokenomics_engine
   implicit none
+
+  type :: token_state
+    real(8) :: circulating
+    real(8) :: staked
+    real(8) :: locked
+    real(8) :: burned
+    real(8) :: total_minted
+  end type token_state
+
 contains
+
+  subroutine token_state_step(state, emission, burn, stake_delta, lock_delta, next_state)
+    type(token_state), intent(in) :: state
+    real(8), intent(in) :: emission, burn, stake_delta, lock_delta
+    type(token_state), intent(out) :: next_state
+    real(8) :: available
+
+    if (emission < 0d0 .or. burn < 0d0) error stop 'negative policy flow'
+
+    next_state = state
+    next_state%total_minted = state%total_minted + emission
+    next_state%circulating = state%circulating + emission
+
+    available = next_state%circulating
+    if (burn > available) error stop 'burn exceeds circulating'
+    next_state%circulating = next_state%circulating - burn
+    next_state%burned = state%burned + burn
+
+    if (stake_delta >= 0d0) then
+      if (stake_delta > next_state%circulating) error stop 'stake exceeds circulating'
+      next_state%circulating = next_state%circulating - stake_delta
+      next_state%staked = state%staked + stake_delta
+    else
+      if (-stake_delta > state%staked) error stop 'unstake exceeds staked'
+      next_state%staked = state%staked + stake_delta
+      next_state%circulating = next_state%circulating - stake_delta
+    end if
+
+    if (lock_delta >= 0d0) then
+      if (lock_delta > next_state%circulating) error stop 'lock exceeds circulating'
+      next_state%circulating = next_state%circulating - lock_delta
+      next_state%locked = state%locked + lock_delta
+    else
+      if (-lock_delta > state%locked) error stop 'unlock exceeds locked'
+      next_state%locked = state%locked + lock_delta
+      next_state%circulating = next_state%circulating - lock_delta
+    end if
+  end subroutine token_state_step
+
+  pure real(8) function halving_emission_rate(base_rate, time, interval) result(rate)
+    real(8), intent(in) :: base_rate, time, interval
+    integer :: halvings
+    if (base_rate <= 0d0) then
+      rate = 0d0
+      return
+    end if
+    if (interval <= 0d0) then
+      rate = base_rate
+      return
+    end if
+    halvings = int(floor(max(0d0,time) / interval))
+    rate = base_rate * 0.5d0**halvings
+  end function halving_emission_rate
   pure real(8) function lending_rate(utilization, r0, slope1, slope2, uopt) result(r)
     real(8), intent(in) :: utilization,r0,slope1,slope2,uopt
     real(8) :: u
