@@ -4,7 +4,7 @@ Seven native simulator engines live here behind the Tcl M3 hub.
 
 | ID | Engine | Native language | Implemented kernel |
 |---|---|---|---|
-| M3a | statistical | R | GBM, Merton, Heston, GARCH(1,1), Gaussian HMM/Viterbi, Davies–Harte rough vol, fitted DCC, t-copula tails, Bayesian calibration, ARIMA, VaR/ES, six-horizon forecasts |
+| M3a | statistical | R | V1 complete: GBM/Merton/Heston, CF option calibration, GARCH, HMM/Viterbi, fitted rough vol, DCC+t-copula, Bayesian+ARIMA, VaR/ES, empirical scoring, 7 typed predictions, price+DEX-pool calibration |
 | M3b | sociological | ECLiPSe Prolog | replicator dynamics, Hegselmann-Krause, complex contagion, pump/dump phase |
 | M3c | AMM/liquidity | Solidity + Foundry | fee-adjusted x*y=k, impermanent loss, slippage, IL-derived withdrawal |
 | M3d | MEV/adversarial | Fortran 2018 | all-pay PGA, block knapsack, cross-chain path comparison, sandwich score |
