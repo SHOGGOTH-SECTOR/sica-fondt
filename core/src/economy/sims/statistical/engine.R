@@ -433,8 +433,11 @@ fit_rough_volatility <- function(realized_variance_series,dt,max_lag=NULL) {
   eta <- sqrt(max(exp(intercept),eps))
   r2 <- summary(fit)$r.squared
   if (!is.finite(r2)) r2 <- 0
+  slope_se <- summary(fit)$coefficients["x","Std. Error"]
+  if (!is.finite(slope_se)) slope_se <- 0
   list(
     hurst=H,
+    hurst_se=max(slope_se/2,0),
     eta=eta,
     r_squared=clamp(r2,0,1),
     lags=lags[keep],
@@ -973,10 +976,44 @@ backtest_quality_scores <- function(
   )
 }
 
+pool_calibration <- function(pool_prices,pool_liquidity=NULL,reference_spot) {
+  px <- as.numeric(pool_prices)
+  if (!length(px)) {
+    return(list(
+      observations=0L,spot=NA_real_,basis=0,dispersion=0,
+      total_liquidity=0,agreement=1
+    ))
+  }
+  keep <- is.finite(px) & px > 0
+  px <- px[keep]
+  if (!length(px)) stop("invalid_pool_prices")
+  liq <- if (is.null(pool_liquidity) || !length(pool_liquidity)) {
+    rep(1,length(px))
+  } else {
+    raw <- as.numeric(pool_liquidity)
+    if (length(raw) != length(keep)) stop("pool_liquidity_length")
+    raw <- raw[keep]
+    ifelse(is.finite(raw) & raw > 0,raw,0)
+  }
+  if (sum(liq) <= 0) liq <- rep(1,length(px))
+  spot <- weighted.mean(px,liq)
+  dispersion <- sqrt(weighted.mean((px-spot)^2,liq))/spot
+  basis <- spot/reference_spot-1
+  list(
+    observations=length(px),
+    spot=spot,
+    basis=basis,
+    dispersion=dispersion,
+    total_liquidity=sum(liq),
+    agreement=exp(-20*abs(basis))
+  )
+}
+
 # --- Calibration state ------------------------------------------------------
 
 calibrate_market <- function(
-    prices,dt=1/365,ticker="ASSET",quality_points=16L) {
+    prices,dt=1/365,ticker="ASSET",quality_points=16L,
+    pool_prices=numeric(),pool_liquidity=numeric()) {
   p <- as.numeric(prices)
   stopifnot(length(p) >= 80, all(is.finite(p)), all(p > 0), dt > 0)
   r <- returns_from_prices(p)
@@ -1021,6 +1058,17 @@ calibrate_market <- function(
     p,dt,min_train=bt_min_train,
     max_points=max(5L,as.integer(quality_points))
   )
+  pool <- pool_calibration(
+    pool_prices,pool_liquidity,reference_spot=tail(p,1)
+  )
+  calibration_sources <- c(
+    "price_tick",
+    if (pool$observations > 0) "dex_pool_state" else NULL
+  )
+  pool_certainty_factor <- 0.75 + 0.25*pool$agreement
+  quality$certainty <- clamp(
+    quality$certainty*pool_certainty_factor,0,10
+  )
 
   list(
     ticker=ticker,
@@ -1038,6 +1086,8 @@ calibrate_market <- function(
     jump=jump,
     heston=heston,
     risk=historical_var_es(r,0.99),
+    pool=pool,
+    calibration_sources=calibration_sources,
     quality=quality,
     confidence=quality$confidence,
     correctness=quality$correctness,
@@ -1164,6 +1214,173 @@ bounded_price_prediction <- function(s0, mu, sigma, dt, steps,
   )
 }
 
+horizon_metadata <- function(horizon) {
+  if (horizon == "current") {
+    return(list(label="current",years=0,steps=0L))
+  }
+  specs <- m3a_horizon_specs()
+  row <- specs[specs$name == horizon,,drop=FALSE]
+  if (!nrow(row)) stop("unknown_horizon")
+  list(
+    label=row$label[1],
+    years=row$years[1],
+    steps=max(1L,min(365L,as.integer(ceiling(row$years[1]*365))))
+  )
+}
+
+bounded_scalar_prediction <- function(
+    state,prediction_type,value,lower,upper,horizon,
+    label=NULL,matrix=NULL,detail=NULL) {
+  if (!is.finite(value) || !is.finite(lower) || !is.finite(upper)) {
+    stop("nonfinite_prediction")
+  }
+  if (lower > value || value > upper) stop("prediction_out_of_bounds")
+  h <- horizon_metadata(horizon)
+  out <- list(
+    value=as.numeric(value),
+    lower_bound=as.numeric(lower),
+    upper_bound=as.numeric(upper),
+    confidence=clamp(state$confidence,0,10),
+    correctness=clamp(state$correctness,0,10),
+    certainty=clamp(state$certainty,0,10),
+    time_horizon=h$label,
+    sim_type="statistical",
+    token_ticker=state$ticker,
+    recent_shift=state$recent_shift,
+    prediction_type=prediction_type,
+    calibration_sources=paste(state$calibration_sources,collapse=",")
+  )
+  if (!is.null(label)) out$label <- label
+  if (!is.null(matrix)) out$matrix <- matrix
+  if (!is.null(detail)) out$detail <- detail
+  out
+}
+
+heston_variance_terminal <- function(
+    v0,kappa,theta,xi,dt,steps,paths,seed=1L) {
+  stopifnot(
+    v0 >= 0,kappa >= 0,theta >= 0,xi >= 0,
+    dt > 0,steps >= 1,paths >= 2
+  )
+  set.seed(seed)
+  v <- rep(v0,paths)
+  for (i in seq_len(steps)) {
+    vp <- pmax(v,0)
+    v <- pmax(
+      v + kappa*(theta-vp)*dt + xi*sqrt(vp*dt)*rnorm(paths),
+      0
+    )
+  }
+  v
+}
+
+statistical_prediction <- function(
+    state,prediction_type="price_forecast",
+    horizon="daily",paths=4000L,seed=1L) {
+  allowed <- c(
+    "price_forecast","volatility_surface","var_calculation",
+    "correlation_matrix","regime_state","rough_vol_estimate",
+    "jump_intensity"
+  )
+  if (!(prediction_type %in% allowed)) stop("unknown_prediction_type")
+
+  if (prediction_type == "price_forecast") {
+    p <- forecast_horizon(state,horizon,paths,seed)
+    p$prediction_type <- prediction_type
+    p$calibration_sources <- paste(state$calibration_sources,collapse=",")
+    return(p)
+  }
+
+  if (prediction_type == "volatility_surface") {
+    h <- horizon_metadata(horizon)
+    years <- max(h$years,state$dt)
+    steps <- max(1L,h$steps)
+    vars <- heston_variance_terminal(
+      max(state$heston$v0,eps),
+      max(state$heston$kappa,0),
+      max(state$heston$theta,eps),
+      max(state$heston$xi,0),
+      years/steps,steps,paths,seed
+    )
+    vols <- sqrt(pmax(vars,0))
+    q <- as.numeric(quantile(vols,c(.025,.5,.975),names=FALSE,type=8))
+    return(bounded_scalar_prediction(
+      state,prediction_type,q[2],q[1],q[3],horizon,
+      detail=sprintf("heston_vol;rho=%.6g",state$heston$rho)
+    ))
+  }
+
+  if (prediction_type == "var_calculation") {
+    h <- horizon_metadata(horizon)
+    scale <- sqrt(max(h$years/state$dt,1))
+    r95 <- historical_var_es(state$returns,0.95)
+    r99 <- state$risk
+    return(bounded_scalar_prediction(
+      state,prediction_type,
+      r99$var*scale,
+      min(r95$var,r99$var)*scale,
+      max(r99$expected_shortfall,r99$var)*scale,
+      horizon,
+      detail="historical_var_99"
+    ))
+  }
+
+  if (prediction_type == "regime_state") {
+    posterior <- tail(state$hmm$posterior,1)
+    p <- as.numeric(posterior[1,state$regime])
+    n_eff <- max(1,nrow(state$hmm$posterior))
+    se <- sqrt(max(p*(1-p)/n_eff,0))
+    lo <- clamp(p-1.96*se,0,1)
+    hi <- clamp(p+1.96*se,0,1)
+    return(bounded_scalar_prediction(
+      state,prediction_type,p,lo,hi,horizon,label=state$regime
+    ))
+  }
+
+  if (prediction_type == "rough_vol_estimate") {
+    h <- state$rough$hurst
+    se <- if (!is.null(state$rough$hurst_se)) state$rough$hurst_se else 0
+    return(bounded_scalar_prediction(
+      state,prediction_type,h,
+      clamp(h-1.96*se,0.001,0.999),
+      clamp(h+1.96*se,0.001,0.999),
+      horizon,
+      detail=sprintf("eta=%.6g;r2=%.6g",state$rough$eta,state$rough$r_squared)
+    ))
+  }
+
+  if (prediction_type == "jump_intensity") {
+    exposure <- length(state$returns)*state$dt
+    lambda <- state$jump$lambda
+    se <- sqrt(max(state$jump$count,1))/max(exposure,eps)
+    return(bounded_scalar_prediction(
+      state,prediction_type,lambda,
+      max(0,lambda-1.96*se),
+      lambda+1.96*se,
+      horizon,
+      detail=sprintf("jumps=%d",state$jump$count)
+    ))
+  }
+
+  if (prediction_type == "correlation_matrix") {
+    if (is.null(state$cross_asset)) stop("cross_asset_unavailable")
+    m <- state$cross_asset$last_correlation
+    if (!is.matrix(m) || nrow(m) < 2) stop("cross_asset_unavailable")
+    vals <- m[upper.tri(m)]
+    value <- mean(vals)
+    return(bounded_scalar_prediction(
+      state,prediction_type,value,min(vals),max(vals),horizon,
+      matrix=m,
+      detail=paste(
+        apply(m,1,function(row) paste(format(row,digits=8),collapse=",")),
+        collapse=";"
+      )
+    ))
+  }
+
+  stop("unreachable_prediction_type")
+}
+
 # --- Minimal hand-rolled JSON line protocol --------------------------------
 
 json_number <- function(line, key, default) {
@@ -1188,12 +1405,37 @@ json_number_array <- function(line, key) {
   as.numeric(strsplit(z[2],",",fixed=TRUE)[[1]])
 }
 
+json_escape <- function(x) {
+  x <- gsub("\\\\","\\\\\\\\",as.character(x))
+  gsub('"','\\\\"',x,fixed=TRUE)
+}
+
 emit_prediction <- function(p) {
-  cat(sprintf(
-    '{"value":%.10g,"lower_bound":%.10g,"upper_bound":%.10g,"confidence":%.4f,"correctness":%.4f,"certainty":%.4f,"time_horizon":"%s","sim_type":"statistical","token_ticker":"%s","recent_shift":%.10g}\n',
-    p$value,p$lower_bound,p$upper_bound,p$confidence,p$correctness,
-    p$certainty,p$time_horizon,p$token_ticker,p$recent_shift
-  ))
+  fields <- c(
+    sprintf('"value":%.10g',p$value),
+    sprintf('"lower_bound":%.10g',p$lower_bound),
+    sprintf('"upper_bound":%.10g',p$upper_bound),
+    sprintf('"confidence":%.4f',p$confidence),
+    sprintf('"correctness":%.4f',p$correctness),
+    sprintf('"certainty":%.4f',p$certainty),
+    sprintf('"time_horizon":"%s"',json_escape(p$time_horizon)),
+    '"sim_type":"statistical"',
+    sprintf('"token_ticker":"%s"',json_escape(p$token_ticker)),
+    sprintf('"recent_shift":%.10g',p$recent_shift),
+    sprintf('"prediction_type":"%s"',json_escape(
+      if (is.null(p$prediction_type)) "price_forecast" else p$prediction_type
+    )),
+    sprintf('"calibration_sources":"%s"',json_escape(
+      if (is.null(p$calibration_sources)) "price_tick" else p$calibration_sources
+    ))
+  )
+  if (!is.null(p$label)) {
+    fields <- c(fields,sprintf('"label":"%s"',json_escape(p$label)))
+  }
+  if (!is.null(p$detail)) {
+    fields <- c(fields,sprintf('"detail":"%s"',json_escape(p$detail)))
+  }
+  cat(sprintf("{%s}\n",paste(fields,collapse=",")))
 }
 
 main <- function() {
@@ -1205,10 +1447,18 @@ main <- function() {
     dt <- json_number(line,"dt",1/365)
     ticker <- json_string(line,"token_ticker","ASSET")
     horizon <- json_string(line,"horizon","daily")
+    prediction_type <- json_string(line,"prediction_type","price_forecast")
     paths <- as.integer(json_number(line,"paths",4000))
     seed <- as.integer(json_number(line,"seed",1))
-    state <- calibrate_market(prices,dt,ticker)
-    emit_prediction(forecast_horizon(state,horizon,paths,seed))
+    pool_prices <- json_number_array(line,"pool_prices")
+    pool_liquidity <- json_number_array(line,"pool_liquidity")
+    state <- calibrate_market(
+      prices,dt,ticker,
+      pool_prices=pool_prices,pool_liquidity=pool_liquidity
+    )
+    emit_prediction(statistical_prediction(
+      state,prediction_type,horizon,paths,seed
+    ))
   } else {
     p <- bounded_price_prediction(
       json_number(line,"spot",100),
@@ -1221,6 +1471,8 @@ main <- function() {
       json_string(line,"time_horizon","24h"),
       json_string(line,"token_ticker","ASSET")
     )
+    p$prediction_type <- "price_forecast"
+    p$calibration_sources <- "price_tick"
     emit_prediction(p)
   }
 }
