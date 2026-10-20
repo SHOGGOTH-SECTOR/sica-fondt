@@ -39,3 +39,10 @@ jobs:
       - name: Run M3b native tests
         working-directory: core/src/economy/sims/sociological
         run: eclipse -b test.ecl -e run_tests
+
+      - name: Run M2 → M3b → Hub integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          tclsh core/src/economy/sims/sociological/integration.test | tee /tmp/m3b-integration.out
+          grep -Eq 'Total[[:space:]]+4[[:space:]]+Passed[[:space:]]+4.*Failed[[:space:]]+0' /tmp/m3b-integration.out
