@@ -27,6 +27,10 @@ run_tests :-
         (complex_contagion([1,3],[4,4],[0.5,0.5],Ad),
          Ad=[0,1])),
 
+    must(complex_contagion_requires_multiple_exposures,
+        (complex_contagion([1,2,3],[1,2,4],[0.1,0.5,0.75],Multi),
+         Multi=[0,1,1])),
+
     must(pump_phase_promotion,
         pump_phase(0.10,2.5,0.8,promotion)),
 
