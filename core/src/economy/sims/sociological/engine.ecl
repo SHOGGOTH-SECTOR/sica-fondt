@@ -31,7 +31,8 @@ complex_contagion(Exposures, Degrees, Thresholds, Adoption) :- contagion_(Exposu
 contagion_([],[],[],[]).
 contagion_([E|Es],[D|Ds],[T|Ts],[A|As]) :-
     (D =< 0 -> Frac=0 ; Frac is E/D),
-    (Frac >= T -> A=1 ; A=0), contagion_(Es,Ds,Ts,As).
+    (E >= 2, Frac >= T -> A=1 ; A=0),
+    contagion_(Es,Ds,Ts,As).
 
 pump_phase(PriceDelta, VolumeRatio, Sentiment, Phase) :-
     (VolumeRatio > 2.0, Sentiment > 0.6, PriceDelta > 0.05 -> Phase=promotion ;
