@@ -325,6 +325,57 @@ hurst_rs <- function(x) {
   hurst_variogram(cumsum(as.numeric(x)-mean(x)))
 }
 
+fgn_davies_harte <- function(n, H, seed=1L) {
+  n <- as.integer(n)
+  stopifnot(n >= 2, H > 0, H < 1)
+  k <- 0:n
+  gamma <- 0.5 * (
+    abs(k-1)^(2*H) - 2*abs(k)^(2*H) + abs(k+1)^(2*H)
+  )
+  circulant <- c(gamma, rev(gamma[2:n]))
+  lambda <- Re(fft(circulant))
+  if (min(lambda) < -1e-8) stop("davies_harte_negative_eigenvalue")
+  lambda <- pmax(lambda,0)
+
+  set.seed(seed)
+  w <- complex(length=2*n)
+  w[1] <- sqrt(lambda[1]/(2*n))*rnorm(1)
+  w[n+1] <- sqrt(lambda[n+1]/(2*n))*rnorm(1)
+  if (n > 1) {
+    for (j in 2:n) {
+      z <- rnorm(2)
+      w[j] <- sqrt(lambda[j]/(4*n)) * (z[1] + 1i*z[2])
+      mirror <- 2*n-j+2
+      w[mirror] <- Conj(w[j])
+    }
+  }
+  Re(fft(w))[1:n]
+}
+
+rough_vol_terminal <- function(s0, mu, v0, H, eta, dt, steps, paths, seed=1L) {
+  stopifnot(
+    s0 > 0, v0 > 0, H > 0, H < 1, eta >= 0,
+    dt > 0, steps >= 1, paths >= 2
+  )
+  steps <- as.integer(steps)
+  paths <- as.integer(paths)
+  terminal <- numeric(paths)
+  for (p in seq_len(paths)) {
+    fgn <- fgn_davies_harte(steps,H,seed+p-1L)
+    set.seed(seed+100000L+p)
+    price_noise <- rnorm(steps)
+    logv <- log(v0)
+    logp <- log(s0)
+    for (i in seq_len(steps)) {
+      logv <- logv + eta*(dt^H)*fgn[i]
+      v <- max(exp(logv),eps)
+      logp <- logp + (mu-0.5*v)*dt + sqrt(v*dt)*price_noise[i]
+    }
+    terminal[p] <- exp(logp)
+  }
+  terminal
+}
+
 realized_variance <- function(returns, window=24L) {
   x <- as.numeric(returns)
   stopifnot(window >= 2, length(x) >= window)
@@ -350,63 +401,149 @@ rough_vol_state <- function(realized_variance_series) {
     hurst=H,
     persistence=phi,
     current_variance=tail(rv,1),
-    forecast_variance=exp(forecast_log)
+    forecast_variance=exp(forecast_log),
+    vol_of_log_vol=safe_sd(diff(logv))
   )
 }
 
 # --- DCC correlation + t-copula --------------------------------------------
 
-dcc_fit <- function(standardized_returns, a=0.02, b=0.97) {
+dcc_core <- function(standardized_returns, a, b) {
   z <- as.matrix(standardized_returns)
   stopifnot(nrow(z) >= 20, ncol(z) >= 2, a >= 0, b >= 0, a+b < 1)
   z[!is.finite(z)] <- 0
-  qbar <- cov(z)
-  qbar <- qbar + diag(eps,ncol(z))
+  qbar <- cov(z) + diag(1e-10,ncol(z))
   q <- qbar
   n <- nrow(z)
   p <- ncol(z)
-  history <- array(0, dim=c(p,p,n))
+  history <- array(0,dim=c(p,p,n))
+  nll <- 0
 
   for (t in seq_len(n)) {
     if (t >= 2) {
       q <- (1-a-b)*qbar + a*tcrossprod(z[t-1,]) + b*q
     }
     d <- sqrt(pmax(diag(q),eps))
-    r <- q / outer(d,d)
+    r <- q/outer(d,d)
     diag(r) <- 1
     history[,,t] <- r
+
+    if (t >= 2) {
+      det_r <- determinant(r,logarithm=TRUE)
+      if (det_r$sign <= 0) {
+        nll <- Inf
+      } else if (is.finite(nll)) {
+        solved <- tryCatch(solve(r,z[t,]),error=function(e) NULL)
+        if (is.null(solved)) {
+          nll <- Inf
+        } else {
+          quad <- sum(z[t,]*solved)
+          nll <- nll + 0.5*(as.numeric(det_r$modulus)+quad)
+        }
+      }
+    }
   }
 
-  if (p == 2) {
-    correlation <- as.numeric(history[1,2,])
+  list(z=z,qbar=qbar,history=history,nll=nll)
+}
+
+dcc_fit <- function(standardized_returns, a=0.02, b=0.97) {
+  core <- dcc_core(standardized_returns,a,b)
+  p <- dim(core$history)[1]
+  n <- dim(core$history)[3]
+  correlation <- if (p == 2) {
+    as.numeric(core$history[1,2,])
   } else {
-    correlation <- history
+    core$history
   }
   list(
     a=a,
     b=b,
-    qbar=cov2cor(qbar),
+    qbar=cov2cor(core$qbar),
     correlation=correlation,
-    last_correlation=history[,,n,drop=TRUE]
+    last_correlation=core$history[,,n,drop=TRUE],
+    loglik=-core$nll
   )
+}
+
+dcc_estimate <- function(standardized_returns, start=c(a=0.03,b=0.94)) {
+  z <- as.matrix(standardized_returns)
+  stopifnot(nrow(z) >= 20, ncol(z) >= 2)
+  a0 <- unname(start["a"])
+  b0 <- unname(start["b"])
+  if (!is.finite(a0) || !is.finite(b0) || a0 < 0 || b0 < 0 || a0+b0 >= 0.999) {
+    a0 <- 0.03
+    b0 <- 0.94
+  }
+  rest0 <- max(1-a0-b0,1e-4)
+  p0 <- log(c(a0/rest0,b0/rest0))
+
+  unpack <- function(p) {
+    p <- clamp(p,-30,30)
+    ea <- exp(p[1])
+    eb <- exp(p[2])
+    den <- 1+ea+eb
+    c(a=0.999*ea/den,b=0.999*eb/den)
+  }
+  objective <- function(p) {
+    q <- unpack(p)
+    dcc_core(z,q["a"],q["b"])$nll
+  }
+
+  opt <- tryCatch(
+    optim(p0,objective,method="BFGS",control=list(maxit=300,reltol=1e-8)),
+    error=function(e) NULL
+  )
+  if (is.null(opt) || !is.finite(opt$value)) {
+    q <- c(a=a0,b=b0)
+    convergence <- 1L
+  } else {
+    q <- unpack(opt$par)
+    convergence <- opt$convergence
+  }
+  fit <- dcc_fit(z,unname(q["a"]),unname(q["b"]))
+  fit$convergence <- convergence
+  fit
 }
 
 t_copula_tail_dependence <- function(rho, df=6) {
   stopifnot(df > 0)
   rho <- clamp(rho,-0.999999,0.999999)
-  2 * pt(-sqrt((df+1)*(1-rho)/(1+rho)), df=df+1)
+  2 * pt(-sqrt((df+1)*(1-rho)/(1+rho)),df=df+1)
 }
 
-calibrate_cross_asset <- function(return_matrix, a=0.02, b=0.97) {
+estimate_t_df <- function(x) {
+  x <- as.numeric(x)
+  x <- x[is.finite(x)]
+  stopifnot(length(x) >= 50)
+  centered <- x-mean(x)
+  m2 <- mean(centered^2)
+  if (m2 <= eps) return(50)
+  excess <- mean(centered^4)/(m2^2)-3
+  if (!is.finite(excess) || excess <= 0) return(50)
+  clamp(4+6/excess,4.1,100)
+}
+
+calibrate_cross_asset <- function(return_matrix, a=NULL, b=NULL) {
   x <- as.matrix(return_matrix)
   stopifnot(nrow(x) >= 20, ncol(x) >= 2)
   fits <- lapply(seq_len(ncol(x)), function(j) garch11_fit(x[,j]))
   z <- do.call(cbind,lapply(fits,function(f) f$standardized))
-  dcc <- dcc_fit(z,a,b)
+  dcc <- if (is.null(a) || is.null(b)) dcc_estimate(z) else dcc_fit(z,a,b)
+  df <- estimate_t_df(as.numeric(z))
+  tail_dependence <- matrix(0,ncol(z),ncol(z))
+  for (i in seq_len(ncol(z))) {
+    for (j in seq_len(ncol(z))) {
+      tail_dependence[i,j] <- if (i == j) 1 else
+        t_copula_tail_dependence(dcc$last_correlation[i,j],df)
+    }
+  }
   list(
     univariate=fits,
     standardized=z,
     dcc=dcc,
+    t_df=df,
+    tail_dependence=tail_dependence,
     last_correlation=dcc$last_correlation
   )
 }
@@ -532,6 +669,7 @@ calibrate_market <- function(prices, dt=1/365, ticker="ASSET") {
   rv_window <- min(24L,max(4L,floor(length(r)/10)))
   rv <- realized_variance(r,rv_window)
   rough <- rough_vol_state(rv)
+  rough$eta <- rough$vol_of_log_vol/(dt^rough$hurst)
 
   prior <- normal_inverse_gamma_prior(mu=0,kappa=1,alpha=2,beta=max(var(r),1e-6))
   posterior <- bayes_return_update(prior,r)
@@ -582,7 +720,7 @@ m3a_horizon_specs <- function() {
     name=c("tick_hourly","daily","weekly","monthly","annual","five_year"),
     label=c("1h","24h","7d","30d","1y","5y"),
     years=c(1/(24*365),1/365,7/365,30/365,1,5),
-    model=c("heston","heston","merton","merton","heston","gbm"),
+    model=c("rough","heston","merton","merton","heston","gbm"),
     stringsAsFactors=FALSE
   )
 }
@@ -630,6 +768,14 @@ forecast_horizon <- function(state, horizon_name, paths=4000L, seed=1L) {
 
   samples <- switch(
     model,
+    rough=rough_vol_terminal(
+      state$spot,
+      state$mu,
+      max(state$rough$current_variance/state$dt,eps),
+      state$rough$hurst,
+      max(state$rough$eta,0),
+      step_dt,steps,paths,seed
+    ),
     heston=heston_terminal(
       state$spot,
       max(state$heston$v0,eps),
