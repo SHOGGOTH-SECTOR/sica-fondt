@@ -196,4 +196,41 @@ stopifnot(hcal$params$theta > 0, hcal$params$xi >= 0)
 stopifnot(hcal$params$rho < 0, abs(hcal$params$rho) <= 1)
 stopifnot(abs(hcal$params$theta-true_heston$theta) < 0.04)
 
+
+# Rough-vol parameter calibration --------------------------------------------
+set.seed(480)
+rough_true_h <- 0.28
+rough_true_eta <- 0.55
+rough_dt <- 1/365
+rough_noise <- fgn_davies_harte(4096,rough_true_h,481)
+rough_logv <- log(0.04) +
+  rough_true_eta*(rough_dt^rough_true_h)*cumsum(rough_noise)
+rough_fit <- fit_rough_volatility(exp(rough_logv),rough_dt)
+stopifnot(abs(rough_fit$hurst-rough_true_h) < 0.08)
+stopifnot(abs(rough_fit$eta-rough_true_eta)/rough_true_eta < 0.35)
+stopifnot(rough_fit$r_squared > 0.80)
+
+# Walk-forward empirical quality scores --------------------------------------
+set.seed(482)
+bt_returns <- rnorm(420,0.0004,0.012)
+bt_prices <- 100*exp(cumsum(bt_returns))
+quality <- backtest_quality_scores(
+  bt_prices,dt=1/365,min_train=120,max_points=24
+)
+stopifnot(quality$source == "walk_forward")
+stopifnot(quality$observations >= 20)
+stopifnot(quality$coverage >= 0, quality$coverage <= 1)
+stopifnot(quality$median_relative_error >= 0)
+for (metric in c("confidence","correctness","certainty")) {
+  stopifnot(quality[[metric]] >= 0, quality[[metric]] <= 10)
+}
+
+quality_state <- calibrate_market(
+  bt_prices,dt=1/365,ticker="BACKTEST",quality_points=24
+)
+stopifnot(quality_state$quality$source == "walk_forward")
+stopifnot(abs(quality_state$correctness-quality_state$quality$correctness) < 1e-12)
+stopifnot(abs(quality_state$confidence-quality_state$quality$confidence) < 1e-12)
+stopifnot(abs(quality_state$certainty-quality_state$quality$certainty) < 1e-12)
+
 cat("STATISTICAL TESTS PASSED\n")
