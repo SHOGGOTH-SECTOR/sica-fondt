@@ -62,4 +62,31 @@ run_tests :-
          SumN is N1+N2,
          approx(SumN,1.0,1.0e-9))),
 
+
+    must(mfg_population_guard,
+        (not(mfg_valid_population(99)),
+         mfg_valid_population(100),
+         mfg_valid_population(1000))),
+
+    must(mfg_equilibrium_normalized_and_stable,
+        (mfg_equilibrium(
+            250,
+            [0.10,0.20,0.40,0.20,0.10],
+            0.12,
+            0.08,
+            0.35,
+            80,
+            Density,
+            Value,
+            Stability,
+            Residual
+         ),
+         Density=[D1,D2,D3,D4,D5],
+         SumD is D1+D2+D3+D4+D5,
+         approx(SumD,1.0,1.0e-6),
+         D1 >= 0.0, D2 >= 0.0, D3 >= 0.0, D4 >= 0.0, D5 >= 0.0,
+         length(Value,5),
+         Stability >= 0.0, Stability =< 1.0,
+         Residual >= 0.0, Residual < 0.25)),
+
     writeln("SOCIOLOGICAL TESTS PASSED").
