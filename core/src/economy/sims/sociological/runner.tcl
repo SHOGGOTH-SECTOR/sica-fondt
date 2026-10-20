@@ -211,9 +211,7 @@ oo::class create ::stomach::SociologicalRunner {
             printf("BANDIT %%w %%w %%w %%w %%w%%n",[A,B,C,D,E])
         } [my _list_fmt $shares] [my _list_fmt $reward_sums]           [my _list_fmt $counts] $total]
         set output [exec $runtime -b $engine -e $goal]
-        if {![regexp {
-            BANDIT[[:space:]]+([-+0-9.eE]+)[[:space:]]+([-+0-9.eE]+)[[:space:]]+([-+0-9.eE]+)[[:space:]]+([-+0-9.eE]+)[[:space:]]+([-+0-9.eE]+)
-        } $output -> a b cc d e]} {
+        if {![regexp {BANDIT[[:space:]]+([-+0-9.eE]+)[[:space:]]+([-+0-9.eE]+)[[:space:]]+([-+0-9.eE]+)[[:space:]]+([-+0-9.eE]+)[[:space:]]+([-+0-9.eE]+)}                 $output -> a b cc d e]} {
             error "invalid_bandit_output"
         }
         set next [my _normalize [list             [expr {double($a)}] [expr {double($b)}] [expr {double($cc)}]             [expr {double($d)}] [expr {double($e)}]]]
