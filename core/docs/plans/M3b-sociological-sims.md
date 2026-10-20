@@ -10,11 +10,17 @@ pressure across **six concurrent time horizons**. Grounded in evolutionary conse
 MFG theory (Lasry & Lions 2007), and crypto manipulation ABMs.
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. Evolutionary game theory C4 (Cornell [8]). Hegselmann-Krause bounded
-confidence C5 (established 2002). Complex contagion C4 (Centola & Macy 2007; crypto applications
-C3). Bandit-replicator hybrid C3 (emerging). Mean-Field Games C4 (Lasry & Lions 2007; tensor-train
-solvers C3). Crypto pump-and-dump ABM C3 (3-agent protocol validated on historical data).
-Pop behavioral models C1.
+IMPLEMENTED · M3b V1 · ECLiPSe Prolog. `core/src/economy/sims/sociological/engine.ecl`
+implements five abstract behavioral archetypes, replicator dynamics, Hegselmann–Krause bounded
+confidence, heterogeneous complex contagion with a multiple-exposure requirement, UCB
+bandit-replicator learning, a large-population HJB/Fokker–Planck mean-field equilibrium solver
+with damped Newton updates, bounded-rationality pump/dump population dynamics, adaptive
+confidence bounds, opinion clustering, and all nine bounded prediction types. The Tcl runner
+calibrates from M2 `rss_news` + `price_tick`, preserves per-ticker population state across
+queries, advances that state through the native bandit-replicator kernel, evaluates native MFG
+stability, and scores correctness by walk-forward social→price agreement. Dedicated CI verifies
+both the ECLiPSe kernel and M2→M3b→Hub boundary. Foundations C4/C5; implementation C3;
+population parameterization remains evidence-driven rather than hardcoded to literal persons.
 
 ## 3. Language & location
 **ECLiPSe Prolog 7.2** · `src/economy/sims/sociological/`. Libraries: **ic** (interval
@@ -77,9 +83,14 @@ mutation, PDE solvers for MFG (HJB + Fokker-Planck), and bandit algorithms (UCB/
   `pump_dump_phase`, `mfg_equilibrium_stability`, `narrative_regime`.
 - Calibration: ingests `rss_news` (sentiment signal) and `price_tick` (realized behavior) from M2.
 
-## 6. Dependencies & stubs
-- M2 Data Feeds — sentiment and price data for calibration; *stub:* canned sentiment series.
-- M3 Sims hub — lifecycle management; *stub:* manual init.
+## 6. Dependencies & runtime boundary
+- M2 Data Feeds — normalized `rss_news` carries aggregate source type, sentiment, engagement
+  and confidence; `price_tick` supplies realized behavioral response.
+- M3 Sims hub — every M3b result is published as the common bounded-prediction schema and read
+  by Traders through Marketplace. Categorical phase/regime results retain a label beside their
+  bounded numeric code.
+- ECLiPSe CLP — installed by the repo toolchain hook and exercised directly by dedicated CI.
+  M3b has no individual-profile ingestion and no trading/execution surface.
 
 ## 7. Invariants / laws
 - **L1 (C5):** pops are **archetypal individuals, not literal living persons** — no attempt to model or track real
@@ -116,10 +127,20 @@ produces adapting populations. MFG: equilibrium converges for large N; matches d
 small N. Pump-dump: 4-phase cycle detected on synthetic manipulation data. Bounds: all outputs
 include upper/lower.
 
-## 10. Open items
-- Pop archetype catalog (which behavioral types? how many?).
-- Network topology for sentiment contagion (small-world? scale-free?).
-- Calibration from real market data — how to infer pop distribution from observable price action. >>>We actually use blogs, reddit, and social networks to infer pops<<<
-- MFG tensor-train rank $r$ (>>>accuracy<<< vs. compute tradeoff).
-- Hegselmann-Krause confidence bound $d$ — fixed or >>>adaptive<<<?
-- Cross-sim interaction: do sociological predictions feed into M3c (AMM) or M3d (MEV)? [conditional on prediction accuracy over time]
+## 10. V1 decisions and future extensions
+- **Archetypes:** V1 canonically uses retail herd, contrarian whale, MEV searcher, passive LP,
+  and manipulator populations. These are abstract strategy populations, never real-person
+  profiles.
+- **Social evidence:** M2 source types such as blog, Reddit and social-network aggregates infer
+  population pressures. The runner combines engagement/confidence-weighted sentiment with
+  realized price response and keeps state per ticker.
+- **Network topology:** V1 complex contagion consumes heterogeneous exposure/degree evidence
+  without committing to one universal graph topology. Explicit small-world/scale-free graph
+  reconstruction is a future fidelity layer.
+- **MFG dimensionality:** V1 uses a one-dimensional finite-difference HJB/FP equilibrium with
+  damped Newton iteration. Tensor-train compression and rank selection become relevant only
+  when adding genuinely high-dimensional MFG state.
+- **Confidence bound:** adaptive in V1; volatility and opinion dispersion tighten the bound.
+- **Cross-sim use:** M3b now emits empirical walk-forward `correctness`, so downstream
+  cross-sim coupling can be gated by measured accuracy. Automatic M3b→M3c/M3d intervention is
+  intentionally a future hub-policy decision, not embedded inside the sociological engine.

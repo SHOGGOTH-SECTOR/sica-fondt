@@ -12,13 +12,15 @@ organism are TBD and out of scope.
 Brain for permission to trade.
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. A `Stomach` primitive exists in Ichor (`src/ichor/envelope.pony:20`) with
-one smoke-test wire (`main.pony:29`), but no dedicated organ code. Role C4; implementation C1.
+SCAFFOLD · EXECUTABLE. The existing Ichor `Stomach` primitive now has a dedicated
+M0–M7 simulation scaffold under `core/src/economy/`. M0 composes the component facades and
+emits Ada-bound secretion metadata; external execution and the Pony↔Tcl runtime bridge remain
+separate integration work. Role C4; scaffold implementation C2.
 
 ## 3. Language & location
-TBD · new location e.g. `src/economy/`. The organ is polyglot by nature: trading infrastructure
-(APIs, wallets) may differ in language from simulations (numerical computing) and the conductor
-(AI supervision). Pony actors provide the Ichor-facing facade.
+**Tcl 8.6 scaffold** · `core/src/economy/`. M0 orchestration is Tcl and preserves the
+existing polyglot plan for later component engines. Pony remains the Ichor-facing transport layer;
+the runtime bridge between Ichor and this scaffold is still open.
 
 ## 4. Does / does-not
 - **Does:** host crypto/NFT trading via the Marketplace (M1); run always-on market prediction
@@ -67,8 +69,13 @@ TBD · new location e.g. `src/economy/`. The organ is polyglot by nature: tradin
 4. Implement tax stub and Verschwörern Veregeister transfer last.
 
 ## 9. Tests
-Hub smoke: Marketplace reachable; Sims running and queryable; Wallet bound to Trader; Conductor
-receives SAE reports; tax stub logs transfer. Ichor: outbound envelope reaches Ada stub.
+Executable contract suite: `tclsh core/src/economy/tests/stomach.test`. The current 17
+tests cover admission ordering, 1:1 binding, simulation-only execution, monitor logging,
+supervisor pause/resume, bounded predictions, feed backpressure, exposure limits, tax staging,
+Ada-bound secretion, all seven M3 engine registrations, source presence, the six horizon clocks,
+and the running scheduler. Native simulator tests are driven by
+`tclsh core/src/economy/sims/run_tests.tcl`. Ichor runtime bridging remains a separate
+integration test.
 
 ## 10. Open items
 - Reward signal protocol from economy organ to organism (TBD, out of scope).

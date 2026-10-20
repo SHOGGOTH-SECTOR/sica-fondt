@@ -1,0 +1,54 @@
+package require tcltest 2
+namespace import ::tcltest::*
+
+set here [file dirname [file normalize [info script]]]
+source [file join $here .. .. stomach.tcl]
+
+proc seed_m3c {s ticker} {
+    for {set i 0} {$i < 24} {incr i} {
+        set price [expr {100.0 * exp(0.0008*$i + 0.01*sin($i/4.0))}]
+        $s feed_publish price_tick synthetic [expr {$i*3600}]             [dict create token_ticker $ticker price $price] 9.2
+        set r0 [expr {1000.0 + 2.0*$i}]
+        set r1 [expr {$r0 * $price / 100.0}]
+        $s feed_publish dex_pool_state dex [expr {$i*3600}]             [dict create                 token_ticker $ticker                 reserve0 $r0                 reserve1 $r1                 fee_bps 30                 volume 5000.0                 tvl 2000.0                 trade_size 10.0] 8.8
+    }
+}
+
+test m3c-runner-available-1.0 {Foundry-backed AMM runner is available in M3c CI} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    set out [$s amm_runner_available]
+    $s destroy
+    set out
+} -result 1
+
+test m2-to-m3c-to-hub-1.0 {pool and price feeds produce bounded pool return in M3 hub} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    $s register_trader trader-amm amm_liquidity
+    seed_m3c $s TEST
+    set p [$s amm_from_feed TEST pool_return weekly]
+    set q [$s query_predictions trader-amm amm_liquidity]
+    set out [list         [dict get $p sim_type]         [dict get $p prediction_type]         [expr {[dict get $p lower_bound] <= [dict get $p value]}]         [expr {[dict get $p value] <= [dict get $p upper_bound]}]         [dict get $q token_ticker]         [dict get $p time_horizon]]
+    $s destroy
+    set out
+} -result {amm_liquidity pool_return 1 1 TEST 7d}
+
+test m3c-optimal-range-1.0 {volatility range is exposed as a bounded M3c prediction} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    seed_m3c $s RANGE
+    set p [$s amm_from_feed RANGE optimal_range monthly]
+    set out [list         [dict get $p prediction_type]         [expr {[dict get $p lower_bound] < [dict get $p value]}]         [expr {[dict get $p value] < [dict get $p upper_bound]}]         [dict get $p calibration_sources]]
+    $s destroy
+    set out
+} -result {optimal_range 1 1 price_tick,dex_pool_state}
+
+test m3c-insufficient-pool-history-1.0 {M3c refuses a query without pool state} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    for {set i 0} {$i < 24} {incr i} {
+        $s feed_publish price_tick synthetic $i             [dict create token_ticker TEST price [expr {100.0+$i}]] 9.0
+    }
+    set code [catch {$s amm_from_feed TEST pool_return weekly} msg]
+    $s destroy
+    list $code $msg
+} -result {1 insufficient_pool_history}
+
+cleanupTests

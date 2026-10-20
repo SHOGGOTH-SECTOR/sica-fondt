@@ -8,12 +8,18 @@ stochastic volatility, regime detection, and cross-asset correlation**. The math
 **stochastic sample paths**, not behavioral agents.
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. Core quant methods C5 (GBM, GARCH, ARIMA — textbook). Heston stochastic
-volatility C5 (closed-form characteristic function; industry standard since 1993). Rough
-volatility C4 (Gatheral et al. 2018, heavily cited; crypto implementations exist). HMM regime
-detection C4 (established; crypto-specific copula hybrids emerging 2023–2024). Almgren-Chriss
-execution C5 (industry standard since 2001). Jump-diffusion C5 (Merton 1976). Parameterization
-for crypto markets C1.
+IMPLEMENTED · M3a V1 · R. `core/src/economy/sims/statistical/engine.R` now
+implements the complete V1 statistical stack: GBM, Merton jump-diffusion, full-truncation Heston
+simulation, GARCH(1,1) QMLE, three-state Gaussian HMM training + Viterbi decoding,
+Davies–Harte fractional Gaussian noise and fitted rough volatility, fitted DCC dynamic
+correlation, t-copula tail dependence with degrees-of-freedom estimation, conjugate Bayesian
+return calibration, base-R ARIMA forecasting, historical VaR/Expected Shortfall, jump-intensity
+estimation, Heston characteristic-function option pricing + surface calibration, empirical
+walk-forward confidence/correctness/certainty scoring, and six concurrent bounded forecast
+horizons. All seven declared prediction types are implemented. A Tcl runner provides tested
+`M2 price_tick + dex_pool_state → R M3a → M3 hub → Marketplace` integration. Native R CI and
+the boundary integration suite are green. Core methods C4/C5; implementation C3; live-market
+parameterization remains data-dependent rather than hardcoded.
 
 ## 3. Language & location
 **R 4.x** (apt `r-base-core`) · `src/economy/sims/statistical/`. Vital CRAN packages only:
@@ -66,8 +72,13 @@ the Hub stdin/stdout protocol is hand-rolled.
 - Calibration: ingests `price_tick` and `dex_pool_state` from M2 Data Feeds.
 
 ## 6. Dependencies & stubs
-- M2 Data Feeds — price history for calibration; *stub:* canned price series.
-- M3 Sims hub — lifecycle management; *stub:* manual init.
+- M2 Data Feeds — normalized `price_tick` and `dex_pool_state` histories are consumed by
+  the Tcl→R calibration path. Pool observations contribute liquidity-weighted reference price,
+  dispersion, basis, and certainty calibration.
+- M3 Sims hub — typed M3a predictions are published as bounded scalar predictions. Categorical
+  regime state is carried as a label plus a bounded posterior probability; correlation matrices
+  retain the matrix as detail while the bounded scalar value is the mean off-diagonal
+  correlation, preserving the hub's scalar-bound invariant.
 
 ## 7. Invariants / laws
 - **L1 (C5):** bounds are **statistical confidence intervals** — derived from the model's
@@ -105,9 +116,14 @@ synthetic regime-switching data. Copula: tail dependence captured (BTC crash →
 correlation spike). Jump-diffusion: fat tails reproduced. Calibration: new data shifts parameter
 estimates. Multi-horizon: all six horizons produce concurrent outputs.
 
-## 10. Open items
-- Heston calibration method (characteristic function inversion? particle filter?).
-- Rough vol computational cost (fBM generation is O(N²) naively; FFT methods needed).
-- HMM state count (3 sufficient? 4+ for crypto with "mania" regime?).
-- Which copula family for tail dependence ($t$-copula? Clayton? Joe?).
-- Computational budget per horizon (GPU for Monte Carlo paths?).
+## 10. V1 decisions and future extensions
+- **Heston calibration:** resolved with characteristic-function inversion and numerical
+  option-surface calibration; realized-price proxy calibration remains available when no option
+  surface exists.
+- **Rough-vol cost:** resolved with Davies–Harte circulant embedding / FFT rather than the
+  O(N²) naive generator.
+- **HMM states:** three states (bear / neutral / bull) are canonical for V1. A fourth "mania"
+  state is an optional future experiment, not a V1 dependency.
+- **Tail copula:** Student-t copula is canonical for V1, with fitted degrees of freedom.
+- **Compute budget:** Monte Carlo path count is explicit per query and CPU-native in V1.
+  GPU acceleration is an optional optimization; it is not required for correctness.

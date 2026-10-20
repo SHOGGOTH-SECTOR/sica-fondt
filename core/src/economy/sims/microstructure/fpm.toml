@@ -1,0 +1,8 @@
+name = "sica-microstructure-sim"
+version = "0.1.0"
+[library]
+source-dir = "src"
+[[test]]
+name = "microstructure"
+source-dir = "test"
+main = "test_microstructure.f90"

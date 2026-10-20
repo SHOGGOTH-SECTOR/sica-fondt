@@ -13,10 +13,12 @@ frameworks [6], Aave/Compound kinked interest rate models (industry standard), a
 inter-protocol credit propagation (Matzakos et al. 2025).
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. SDE state-space framework C4 (Vienna [7]); stock-flow modeling C4
-(ResearchGate [6]); kinked interest rate model C5 (Aave/Compound production standard);
-DeXposure inter-protocol credit propagation C3 (emerging, 2025 — high DeFi specificity);
-composable yield optimization C4 (Yearn v3, Beefy, production-validated). Specific parameters C1.
+KERNEL IMPLEMENTED · Fortran 2018. `core/src/economy/sims/tokenomics/` implements
+Euler-Maruyama state evolution, stock-flow conservation checks, kinked lending curves,
+directional exposure propagation, risk-adjusted yield allocation, and liquidation shortfall.
+Native tests compile cleanly under strict gfortran flags. Full state estimation, calibrated VAR
+impulse response, and policy-event orchestration remain incremental. Foundations C4/C5;
+implementation C2; specific parameters C1.
 
 ## 3. Language & location
 **Fortran 2018** (gfortran) · `src/economy/sims/tokenomics/`. Build: **fpm**. Dependencies:

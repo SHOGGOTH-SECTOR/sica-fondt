@@ -1,0 +1,45 @@
+name: M3a Statistical CI
+
+on:
+  push:
+    branches:
+      - feat/stomach-economic-organ
+    paths:
+      - "core/src/economy/sims/statistical/**"
+      - "core/src/economy/stomach.tcl"
+      - "core/src/economy/feeds.tcl"
+      - "core/src/economy/sims/hub.tcl"
+      - ".github/workflows/m3a-statistical.yml"
+  pull_request:
+    paths:
+      - "core/src/economy/sims/statistical/**"
+      - "core/src/economy/stomach.tcl"
+      - "core/src/economy/feeds.tcl"
+      - "core/src/economy/sims/hub.tcl"
+      - ".github/workflows/m3a-statistical.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  m3a:
+    name: R statistical engine
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - name: Run M3a native tests
+        run: Rscript core/src/economy/sims/statistical/tests.R
+
+      - name: Run M2 → M3a → Hub integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          tclsh core/src/economy/sims/statistical/integration.test | tee /tmp/m3a-integration.out
+          grep -Eq 'Total[[:space:]]+5[[:space:]]+Passed[[:space:]]+5.*Failed[[:space:]]+0' /tmp/m3a-integration.out

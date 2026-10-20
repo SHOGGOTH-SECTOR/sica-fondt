@@ -11,9 +11,10 @@ Extends the F2 (SAE monitor) pattern to the economy organ's internal domain. F2 
 subagents at the organism level; M7 watches traders at the stomach level.
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. F2 SAE monitor provides the architectural pattern (watch the machinery,
-never the homunculus — F2-L1). M7 adapts this: watch the **traders** (the machinery), never the
-**Conductor** (the stomach's judgment). Role C3; implementation C1.
+SCAFFOLD · PARTIAL. `core/src/economy/sae.tcl` records Marketplace-level trader calls and
+constructs alert envelopes consumed by M6. Sparse-autoencoder inference/training remains open.
+F2 still provides the architectural pattern: watch traders, never the Conductor. Role C3;
+scaffold C2.
 
 ## 3. Language & location
 TBD · `src/economy/sae/`. ML interpretability (sparse autoencoder over trader action embeddings).

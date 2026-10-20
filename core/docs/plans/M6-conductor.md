@@ -8,8 +8,9 @@ organism's Brain for trade-level decisions. It supervises; the deterministic law
 constrains; together they form the multi-layered braking system.
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. Role C4 (supervision architecture is clear); implementation C1 (model
-selection, training, authority scope).
+SCAFFOLD · EXECUTABLE SUPERVISION. `core/src/economy/conductor.tcl` implements veto ordering,
+pause/resume, alert intake, and an in-memory decision log. Specialist inference and persistent
+audit storage remain open. Role C4; scaffold C2.
 
 ## 3. Language & location
 TBD · `src/economy/conductor/`. The Conductor is an AI actor — likely a fine-tuned LLM with

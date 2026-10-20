@@ -3,6 +3,7 @@
 # in Claude Code on the web:
 #   * R (Rscript)      -> the Drive-Box drivers + tests  (src/endocrine/*.R)
 #   * GNU Octave       -> the ETR torus + tests          (src/endocrine/etr/*.m)
+#   * GNU Fortran      -> M3d/M3e/M3g numerical sims    (core/src/economy/sims/*)
 #
 # Synchronous + idempotent (safe to re-run; installs only what's missing).
 # Ada/Alire (mafiabot_core) is intentionally NOT installed here: it is not an apt
@@ -20,6 +21,7 @@ export DEBIAN_FRONTEND=noninteractive
 pkgs=()
 command -v Rscript >/dev/null 2>&1 || pkgs+=(r-base-core)
 command -v octave  >/dev/null 2>&1 || pkgs+=(octave)
+command -v gfortran >/dev/null 2>&1 || pkgs+=(gfortran)
 
 if [ "${#pkgs[@]}" -gt 0 ]; then
   sudo apt-get update -qq
@@ -29,3 +31,4 @@ fi
 # Surface versions in the session log (non-fatal).
 command -v Rscript    >/dev/null 2>&1 && Rscript --version 2>&1 | head -1 || true
 command -v octave-cli >/dev/null 2>&1 && octave-cli --version 2>&1 | head -1 || true
+command -v gfortran   >/dev/null 2>&1 && gfortran --version 2>&1 | head -1 || true

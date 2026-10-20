@@ -1,0 +1,68 @@
+package require tcltest 2
+namespace import ::tcltest::*
+
+set here [file dirname [file normalize [info script]]]
+source [file join $here .. .. stomach.tcl]
+
+test m3a-runner-available-1.0 {R-backed statistical runner is available in M3a CI} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    set out [$s statistical_runner_available]
+    $s destroy
+    set out
+} -result 1
+
+test m2-to-m3a-to-hub-1.0 {price ticks calibrate M3a and publish a bounded prediction into the hub} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    $s register_trader trader-a statistical
+    set base 100.0
+    for {set i 0} {$i < 120} {incr i} {
+        set price [expr {$base * exp(0.0005*$i + 0.01*sin($i/7.0))}]
+        $s feed_publish price_tick synthetic $i             [dict create token_ticker TEST price $price] 9.0
+    }
+    set p [$s statistical_from_feed TEST daily 1200 77]
+    set q [$s query_predictions trader-a statistical]
+    set out [list         [dict get $p sim_type]         [expr {[dict get $p lower_bound] <= [dict get $p value]}]         [expr {[dict get $p value] <= [dict get $p upper_bound]}]         [dict get $q token_ticker]         [dict get $q time_horizon]]
+    $s destroy
+    set out
+} -result {statistical 1 1 TEST 24h}
+
+test m3a-insufficient-history-1.0 {M3a refuses calibration from a too-short M2 price history} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    for {set i 0} {$i < 20} {incr i} {
+        $s feed_publish price_tick synthetic $i             [dict create token_ticker TEST price [expr {100.0+$i}]] 9.0
+    }
+    set code [catch {$s statistical_from_feed TEST daily 500 1} msg]
+    $s destroy
+    list $code $msg
+} -result {1 insufficient_price_history}
+
+test m2-pool-to-m3a-1.0 {DEX pool state participates in M3a calibration} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    $s register_trader trader-a statistical
+    for {set i 0} {$i < 120} {incr i} {
+        set price [expr {100.0 * exp(0.0003*$i + 0.006*sin($i/9.0))}]
+        $s feed_publish price_tick synthetic $i             [dict create token_ticker TEST price $price] 9.0
+    }
+    foreach {ts price liq} {100 103.1 1000000 101 103.3 1500000 102 103.2 2000000} {
+        $s feed_publish dex_pool_state dex $ts             [dict create token_ticker TEST price $price liquidity $liq] 8.5
+    }
+    set p [$s statistical_from_feed_type TEST volatility_surface daily 700 91]
+    set out [list [dict get $p prediction_type] [dict get $p calibration_sources]]
+    $s destroy
+    set out
+} -result {volatility_surface price_tick,dex_pool_state}
+
+test m3a-regime-query-1.0 {categorical regime is carried as label on a bounded numeric posterior} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    $s register_trader trader-a statistical
+    for {set i 0} {$i < 120} {incr i} {
+        set price [expr {100.0 * exp(-0.0008*$i + 0.003*sin($i/5.0))}]
+        $s feed_publish price_tick synthetic $i             [dict create token_ticker TEST price $price] 9.0
+    }
+    set p [$s statistical_from_feed_type TEST regime_state current 700 92]
+    set out [list         [dict get $p prediction_type]         [expr {[lsearch -exact {bear neutral bull} [dict get $p label]] >= 0}]         [expr {[dict get $p lower_bound] <= [dict get $p value] && [dict get $p value] <= [dict get $p upper_bound]}]]
+    $s destroy
+    set out
+} -result {regime_state 1 1}
+
+cleanupTests

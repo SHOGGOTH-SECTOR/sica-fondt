@@ -13,10 +13,11 @@ dynamics (non-linear Fokker-Planck with WENO shock capturing), and DSMFG bilevel
 (leader policy + follower MFG equilibrium).
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. PGA-as-all-pay-auction C4 (ACM [3]); knapsack formulation C4 (Cornell
-[4,5]); cross-chain arbitrage C4 (ACM SIGMETRICS 2025, 5.5x growth since Dencun); DSMFG bilevel
-optimization C3 (emerging — SMFRL solvers); Kolokoltsov adversarial C3 (non-linear Fokker-Planck;
-WENO discretization established but crypto application novel). Parameterization C1.
+KERNEL IMPLEMENTED · Fortran 2018. `core/src/economy/sims/mev/` implements the all-pay
+PGA payoff model, exact 0/1 block-building knapsack selection, dual-path cross-chain profit
+comparison, sandwich-risk scoring, and aggregate all-pay cost. Native tests compile cleanly
+under strict gfortran flags. WENO/Kolokoltsov and DSMFG bilevel solvers remain incremental.
+Core game/knapsack foundations C4; implementation C2; parameterization C1.
 
 ## 3. Language & location
 **Fortran 2018** (gfortran) · `src/economy/sims/mev/`. Build: **fpm**. Dependencies: **OpenBLAS**

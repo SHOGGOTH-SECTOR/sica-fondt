@@ -8,10 +8,11 @@ financial incentives. Grounded in Cornell evolutionary consensus [8,9], ACM stak
 theorems [10], and Monash dynamic PBFT modeling [11].
 
 ## 2. Status / certainty
-DESIGN-FIRST · ABSENT. Evolutionary PoS game theory C4 (Cornell [8]); staking pool Nash
-equilibrium proofs C4 (ACM [10]); Markov chain throughput models C4 (Monash [11]); MFG for
-validator populations C4 (Lasry & Lions 2007; validator-specific application C3);
-simulation parameterization C1.
+KERNEL IMPLEMENTED · ECLiPSe Prolog. `core/src/economy/sims/consensus/engine.ecl`
+implements evolutionary honesty updates, validator-state Markov transitions, an explicit
+incentive-compatibility slashing threshold, and liveness degradation below an honesty threshold.
+Native tests live beside the engine. The large-population HJB/Fokker-Planck MFG layer remains
+incremental. Foundations C4; implementation C2; protocol parameterization C1.
 
 ## 3. Language & location
 **ECLiPSe Prolog 7.2** · `src/economy/sims/consensus/`. Libraries: **ic** (interval

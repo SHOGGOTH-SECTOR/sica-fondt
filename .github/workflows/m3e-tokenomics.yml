@@ -1,0 +1,35 @@
+name: M3e Tokenomics CI
+
+on:
+  push:
+    branches:
+      - feat/stomach-economic-organ
+    paths:
+      - "core/src/economy/sims/tokenomics/**"
+      - ".github/workflows/m3e-tokenomics.yml"
+  pull_request:
+    paths:
+      - "core/src/economy/sims/tokenomics/**"
+      - ".github/workflows/m3e-tokenomics.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  m3e:
+    name: Fortran tokenomics engine
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: core/src/economy/sims/tokenomics
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile M3e native tests
+        run: |
+          mkdir -p /tmp/sica-m3e
+          gfortran -std=f2018 -Wall -Wextra -Werror -pedantic             -J /tmp/sica-m3e src/tokenomics_engine.f90 test/test_tokenomics.f90             -o /tmp/sica-m3e/test_tokenomics
+
+      - name: Run M3e native tests
+        run: /tmp/sica-m3e/test_tokenomics
