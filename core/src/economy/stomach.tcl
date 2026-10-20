@@ -7,14 +7,14 @@ set ::stomach::root $__stomach_dir
 foreach __stomach_file {
     traders.tcl wallets.tcl sae.tcl conductor.tcl feeds.tcl
     sims/registry.tcl sims/scheduler.tcl sims/hub.tcl
-    marketplace.tcl
+    sims/statistical/runner.tcl marketplace.tcl
 } {
     source [file join $__stomach_dir $__stomach_file]
 }
 unset __stomach_file
 
 oo::class create ::stomach::Economy {
-    variable traders wallets sae conductor feeds sims registry clock market taxes
+    variable traders wallets sae conductor feeds sims registry clock statistical_runner market taxes
     constructor {args} {
         set cap 256
         if {[llength $args] % 2 != 0} { error "options must be key/value pairs" }
@@ -33,11 +33,12 @@ oo::class create ::stomach::Economy {
         set registry [::stomach::EngineRegistry new [file join $::stomach::root sims]]
         set clock [::stomach::HorizonClock new]
         $clock start
+        set statistical_runner [::stomach::StatisticalRunner new             [file join $::stomach::root sims statistical engine.R]]
         set market [::stomach::Marketplace new $traders $wallets $conductor $sae $sims]
         set taxes {}
     }
     destructor {
-        foreach obj [list $market $clock $registry $sims $feeds $conductor $sae $wallets $traders] {
+        foreach obj [list $market $statistical_runner $clock $registry $sims $feeds $conductor $sae $wallets $traders] {
             catch {$obj destroy}
         }
     }
@@ -57,6 +58,26 @@ oo::class create ::stomach::Economy {
     method feed_publish {args} { return [$feeds publish {*}$args] }
     method feed_history {feed_type} { return [$feeds history $feed_type] }
     method sim_publish {sim_type prediction} { return [$sims publish $sim_type $prediction] }
+    method statistical_runner_available {} { return [$statistical_runner available] }
+    method statistical_query {prices ticker horizon {paths 4000} {seed 1} {dt 0.0027397260273972603}} {
+        set p [$statistical_runner query $prices $ticker $horizon $paths $seed $dt]
+        $sims publish statistical $p
+        return $p
+    }
+    method statistical_from_feed {ticker horizon {paths 4000} {seed 1} {dt 0.0027397260273972603}} {
+        set prices {}
+        foreach datum [$feeds history price_tick] {
+            if {![dict exists $datum payload]} { continue }
+            set payload [dict get $datum payload]
+            if {[catch {dict get $payload token_ticker} token]} { continue }
+            if {$token ne $ticker} { continue }
+            if {[catch {dict get $payload price} price]} { continue }
+            if {![string is double -strict $price] || $price <= 0} { continue }
+            lappend prices $price
+        }
+        if {[llength $prices] < 80} { error "insufficient_price_history" }
+        return [my statistical_query $prices $ticker $horizon $paths $seed $dt]
+    }
     method query_predictions {trader_id sim_type} { return [$market predictions $trader_id $sim_type] }
     method sim_engines {} { return [$registry names] }
     method sim_engine_status {} { return [$registry status] }
