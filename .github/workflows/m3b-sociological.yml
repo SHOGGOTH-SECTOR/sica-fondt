@@ -1,0 +1,41 @@
+name: M3b Sociological CI
+
+on:
+  push:
+    branches:
+      - feat/stomach-economic-organ
+    paths:
+      - "core/src/economy/sims/sociological/**"
+      - "core/src/economy/stomach.tcl"
+      - "core/src/economy/feeds.tcl"
+      - "core/src/economy/sims/hub.tcl"
+      - ".claude/hooks/install-toolchains.sh"
+      - ".github/workflows/m3b-sociological.yml"
+  pull_request:
+    paths:
+      - "core/src/economy/sims/sociological/**"
+      - "core/src/economy/stomach.tcl"
+      - "core/src/economy/feeds.tcl"
+      - "core/src/economy/sims/hub.tcl"
+      - ".claude/hooks/install-toolchains.sh"
+      - ".github/workflows/m3b-sociological.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  m3b:
+    name: ECLiPSe sociological engine
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ECLiPSe CLP
+        env:
+          SICA_INSTALL_TOOLCHAINS: "true"
+        run: bash .claude/hooks/install-toolchains.sh
+
+      - name: Run M3b native tests
+        working-directory: core/src/economy/sims/sociological
+        run: eclipse -b test.ecl -e run_tests
