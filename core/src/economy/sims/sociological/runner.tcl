@@ -1,11 +1,13 @@
 namespace eval ::stomach {}
 
 oo::class create ::stomach::SociologicalRunner {
-    variable engine runtime
+    variable engine runtime populations epochs
 
     constructor {engine_path {runtime_cmd eclipse}} {
         set engine [file normalize $engine_path]
         set runtime $runtime_cmd
+        set populations {}
+        set epochs {}
     }
 
     method available {} {
@@ -182,6 +184,49 @@ oo::class create ::stomach::SociologicalRunner {
         my _clamp [expr {$total/double([llength $items])}] 0.0 10.0
     }
 
+    method _bandit_update {
+        ticker initial_shares sentiment price_shift volatility exposure evidence_count
+    } {
+        if {![my available]} { error "eclipse_runtime_unavailable" }
+
+        if {[dict exists $populations $ticker]} {
+            set shares [dict get $populations $ticker]
+        } else {
+            set shares $initial_shares
+        }
+
+        set n [expr {max(1,int($evidence_count))}]
+        set positive [expr {max(0.0,$sentiment)}]
+        set aligned [expr {max(0.0,$sentiment*$price_shift)}]
+        set payoffs [list             [expr {0.75+1.20*$aligned+0.35*$exposure}]             [expr {0.80+0.60*abs($sentiment-$price_shift)}]             [expr {0.70+1.40*$volatility}]             [expr {1.15-0.65*$volatility}]             [expr {0.45+1.60*$positive*$exposure+0.80*max(0.0,$price_shift)}]]
+        set reward_sums {}
+        foreach payoff $payoffs {
+            lappend reward_sums [expr {$payoff*$n}]
+        }
+        set counts [lrepeat 5 $n]
+        set total [expr {5*$n}]
+
+        set goal [format {
+            bandit_replicator_step(%s,%s,%s,%d,0.6,0.25,[A,B,C,D,E],_),
+            printf("BANDIT %%w %%w %%w %%w %%w%%n",[A,B,C,D,E])
+        } [my _list_fmt $shares] [my _list_fmt $reward_sums]           [my _list_fmt $counts] $total]
+        set output [exec $runtime -b $engine -e $goal]
+        if {![regexp {
+            BANDIT[[:space:]]+([-+0-9.eE]+)[[:space:]]+([-+0-9.eE]+)[[:space:]]+([-+0-9.eE]+)[[:space:]]+([-+0-9.eE]+)[[:space:]]+([-+0-9.eE]+)
+        } $output -> a b cc d e]} {
+            error "invalid_bandit_output"
+        }
+        set next [my _normalize [list             [expr {double($a)}] [expr {double($b)}] [expr {double($cc)}]             [expr {double($d)}] [expr {double($e)}]]]
+        dict set populations $ticker $next
+
+        set epoch 1
+        if {[dict exists $epochs $ticker]} {
+            set epoch [expr {[dict get $epochs $ticker]+1}]
+        }
+        dict set epochs $ticker $epoch
+        return [list $next $epoch]
+    }
+
     method _mfg_stability {shares} {
         if {![my available]} { error "eclipse_runtime_unavailable" }
         set density [my _list_fmt $shares]
@@ -224,7 +269,8 @@ oo::class create ::stomach::SociologicalRunner {
         lassign [my _horizon $horizon] horizon_atom horizon_label
         lassign [my _weighted_social $social] sentiment dispersion exposure
         lassign [my _price_stats $prices] price_shift volatility
-        set shares [my _shares $sentiment $volatility $exposure]
+        set initial_shares [my _shares $sentiment $volatility $exposure]
+        lassign [my _bandit_update             $ticker $initial_shares $sentiment $price_shift             $volatility $exposure [llength $social]] shares population_epoch
         set pump_shares [my _pump_shares $sentiment $exposure]
         set stability [my _mfg_stability $shares]
 
@@ -256,6 +302,6 @@ oo::class create ::stomach::SociologicalRunner {
         set source_count [array size source_seen]
         set correctness [my _clamp [expr {4.0+1.5*min($source_count,4)}] 0.0 10.0]
 
-        return [dict create             value $value             lower_bound $lower             upper_bound $upper             confidence $confidence             correctness $correctness             certainty $certainty             time_horizon $horizon_label             sim_type sociological             token_ticker $ticker             recent_shift $price_shift             prediction_type $prediction_type             label [dict get $native label]             calibration_sources rss_news,price_tick             timestamp [clock seconds]]
+        return [dict create             value $value             lower_bound $lower             upper_bound $upper             confidence $confidence             correctness $correctness             certainty $certainty             time_horizon $horizon_label             sim_type sociological             token_ticker $ticker             recent_shift $price_shift             prediction_type $prediction_type             label [dict get $native label]             calibration_sources rss_news,price_tick             population_model bandit_replicator             population_epoch $population_epoch             population_shares [join $shares ,]             timestamp [clock seconds]]
     }
 }
