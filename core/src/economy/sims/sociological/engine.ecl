@@ -216,3 +216,42 @@ mfg_equilibrium(
     mfg_iter(Iterations, M0, U0, Diffusion, Coupling, Damping,
              Density, Value, Residual),
     Stability is 1.0 / (1.0 + 10.0*Residual).
+
+
+% --- Pump/dump three-population ABM ----------------------------------------
+
+pump_phase_payoffs(accumulation, [1.00,1.10,1.30]).
+pump_phase_payoffs(promotion,    [1.15,1.35,2.00]).
+pump_phase_payoffs(distribution, [0.85,1.20,1.45]).
+pump_phase_payoffs(collapse,     [0.70,1.40,0.20]).
+
+satisficing_payoff(Payoff, Aspiration, Limit, Effective) :-
+    Gap is Payoff - Aspiration,
+    ( Gap > Limit ->
+        Bounded = Limit
+    ; Gap < -Limit ->
+        Bounded is -Limit
+    ;
+        Bounded = Gap
+    ),
+    Effective is Aspiration + Bounded.
+
+satisficing_payoffs([], _, _, []).
+satisficing_payoffs([P|Ps], Aspiration, Limit, [E|Es]) :-
+    satisficing_payoff(P, Aspiration, Limit, E),
+    satisficing_payoffs(Ps, Aspiration, Limit, Es).
+
+pump_abm_step(
+    Shares,
+    PriceDelta,
+    VolumeRatio,
+    Sentiment,
+    Dt,
+    Next,
+    Phase
+) :-
+    Shares = [_,_,_],
+    pump_phase(PriceDelta, VolumeRatio, Sentiment, Phase),
+    pump_phase_payoffs(Phase, RawPayoffs),
+    satisficing_payoffs(RawPayoffs, 1.0, 0.75, Payoffs),
+    replicator_step(Shares, Payoffs, Dt, Next).
