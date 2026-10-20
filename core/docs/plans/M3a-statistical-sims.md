@@ -8,12 +8,19 @@ stochastic volatility, regime detection, and cross-asset correlation**. The math
 **stochastic sample paths**, not behavioral agents.
 
 ## 2. Status / certainty
-KERNEL IMPLEMENTED · R. `core/src/economy/sims/statistical/engine.R` contains GBM Monte
-Carlo, Merton jump-diffusion, Heston full-truncation simulation, GARCH(1,1) QMLE, a rolling
-Hurst estimator, regime classification, bounded Monte Carlo price predictions, and hand-rolled
-JSON stdin/stdout. Native tests are in `tests.R`. Full HMM Viterbi, DCC/t-copula, and live
-Bayesian recalibration remain incremental. Core quant methods C5; implementation C2;
-live-market parameterization C1.
+SUBSTANTIAL ENGINE IMPLEMENTED · R. `core/src/economy/sims/statistical/engine.R`
+now implements GBM, Merton jump-diffusion, full-truncation Heston simulation, GARCH(1,1) QMLE,
+three-state Gaussian HMM training + Viterbi decoding, Davies–Harte fractional Gaussian noise,
+rough-volatility paths with estimated Hurst exponent, fitted DCC dynamic correlation, t-copula
+tail-dependence with degrees-of-freedom estimation, conjugate Bayesian return calibration,
+base-R ARIMA forecasting, historical VaR/Expected Shortfall, jump-intensity estimation, fitted
+Heston proxy parameters including rho, cross-asset calibration, and six concurrent bounded
+forecast horizons. A Tcl runner provides tested `M2 price_tick → R M3a → M3 hub → Marketplace`
+integration. Native R CI and the boundary integration suite are green. Remaining research-depth
+work is Heston characteristic-function/option-surface calibration, richer rough-vol parameter
+estimation, historical backtest calibration of the three quality scores, and live multi-source
+M2 adapters beyond normalized price history. Core methods C4/C5; implementation C3;
+live-market parameterization remains C1/C2.
 
 ## 3. Language & location
 **R 4.x** (apt `r-base-core`) · `src/economy/sims/statistical/`. Vital CRAN packages only:
@@ -66,8 +73,10 @@ the Hub stdin/stdout protocol is hand-rolled.
 - Calibration: ingests `price_tick` and `dex_pool_state` from M2 Data Feeds.
 
 ## 6. Dependencies & stubs
-- M2 Data Feeds — price history for calibration; *stub:* canned price series.
-- M3 Sims hub — lifecycle management; *stub:* manual init.
+- M2 Data Feeds — normalized `price_tick` history is now consumed by the Tcl→R
+  integration path; RSS and DEX-pool cross-source calibration remain open.
+- M3 Sims hub — M3a predictions are now published into the live hub and subsequently queried by
+  Traders through Marketplace.
 
 ## 7. Invariants / laws
 - **L1 (C5):** bounds are **statistical confidence intervals** — derived from the model's
