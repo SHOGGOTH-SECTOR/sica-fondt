@@ -10,6 +10,24 @@ processes them through the same pathway.
 Extends the F2 (SAE monitor) pattern to the economy organ's internal domain. F2 watches
 subagents at the organism level; M7 watches traders at the stomach level.
 
+## 1A. Operational doctrine
+- **Purpose:** M7 is an evidence-producing anomaly sensor and memory feeder, not a guilt engine.
+- **Signal taxonomy:** unusualness, danger, suspected compromise, suspected deception,
+  strategy/identity incoherence, and recurrence are distinct signals. They must not be collapsed
+  into one undifferentiated anomaly score.
+- **Anomaly is legitimate until interpreted:** a Trader may intentionally behave unusually because
+  its specialization or market regime demands it. M7 reports the deviation and evidence; M6 decides
+  whether the behavior is dangerous, adaptive, profitable, compromised, or benign.
+- **Repetition matters:** recurring deviations, repeated failed predictions, repeated source/
+  behavior couplings, and recurring precursors accumulate as durable economic memory. Frequency
+  and recurrence are evidence, not automatic enforcement.
+- **Separation of roles:** M7 detects and records; M6 interprets and restricts; M1/M4 enforce hard
+  boundaries. M7 must not become a shadow policy engine.
+- **Completion criterion:** trained M7 is complete only when observations are instrumented,
+  embeddings/features are attributable, recurrence is represented, signal classes are separable,
+  alert evidence is inspectable, feedback from M6/outcomes updates memory, and false-positive /
+  false-negative behavior is measured over time.
+
 ## 2. Status / certainty
 SCAFFOLD · PARTIAL. `core/src/economy/sae.tcl` records Marketplace-level trader calls and
 constructs alert envelopes consumed by M6. Sparse-autoencoder inference/training remains open.
