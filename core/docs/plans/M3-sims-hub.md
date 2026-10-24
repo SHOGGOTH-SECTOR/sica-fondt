@@ -75,11 +75,17 @@ wire protocol on every native engine. Current bridges are deliberately native:
 - `publish(sim_type, BoundedPrediction)` validates and stores the latest bounded result for one
   of `statistical`, `sociological`, `amm_liquidity`, `mev_adversarial`,
   `tokenomics_macro`, `consensus_staking`, or `market_microstructure`.
-- `BoundedPrediction { value, lower_bound, upper_bound, confidence, correctness, certainty,
+- Current V1 minimum:
+  `BoundedPrediction { value, lower_bound, upper_bound, confidence, correctness, certainty,
   time_horizon, sim_type, timestamp, token_ticker, recent_shift, ...metadata }`.
-  Every hub-facing numeric result obeys `lower_bound ≤ value ≤ upper_bound`; each quality metric
-  is in `[0,10]`. Native engines may preserve extra metadata such as M3b population state,
-  M3c range/routing detail, or M3e yield-allocation weights.
+  Every numeric result obeys `lower_bound ≤ value ≤ upper_bound`; quality metrics are in
+  `[0,10]`.
+- **Required next schema revision for meaningful correctness:**
+  `PredictionScope { target, prediction_type, horizon, conditioning, regime, calibration_window }`
+  travels with every result. A `correctness` value without that scope metadata is insufficient
+  for durable cross-time comparison.
+- Native engines may preserve extra metadata such as M3b population state, M3c range/routing
+  detail, or M3e yield-allocation weights.
 - `Marketplace.predictions(trader_id, sim_type)` is the Trader-facing read path. Traders never
   receive the raw hub object or native runtime handle.
 - Current calibrated facade methods on `::stomach::Economy`:
@@ -123,8 +129,11 @@ wire protocol on every native engine. Current bridges are deliberately native:
 2. **Done:** seven-engine registry and six-horizon live scheduler.
 3. **Done for M3a/M3b/M3c/M3e:** M2 history → native calibration/query → M3 publish.
 4. **Kernel done, bridge open for M3d/M3f/M3g:** add the same process/query boundary.
-5. **Open:** scheduler-driven automatic refresh/publish loop independent of Trader queries.
-6. **Open:** persistent calibration/history storage beyond the in-session M2 buffers.
+5. **Next:** add common `PredictionScope` metadata and realization linkage so correctness is
+   explicitly target/horizon/regime scoped.
+6. **Next:** persist per-Sim longitudinal calibration-loss summaries into M0 economic memory.
+7. **Open:** scheduler-driven automatic refresh/publish loop independent of Trader queries.
+8. **Open:** persistent calibration/history storage beyond the in-session M2 buffers.
 
 ## 9. Tests
 - `tclsh core/src/economy/sims/tests/hub_runtime.test` verifies the registry and six-horizon clock.
@@ -137,8 +146,11 @@ wire protocol on every native engine. Current bridges are deliberately native:
 
 ## 10. Open items
 - Native runtime/query bridges for M3d, M3f, and M3g.
+- Common `PredictionScope` + realization-reference schema.
+- Regime-conditioned longitudinal calibration-loss persistence.
 - Scheduler-driven automatic engine refresh and bounded republishing.
-- Per-sim calibration cadence and failure/degraded-state policy.
-- Cross-sim aggregation or meta-prediction, if added at all.
+- Per-Sim calibration cadence and failure/degraded-state policy.
+- No default cross-Sim voting/averaging layer; any future synthesis must preserve source scopes
+  and remain a Trader/M6 interpretation aid rather than declaring a winner.
 - Persistent history/calibration state beyond the in-session M2 buffer.
 - Explicit CPU/GPU budgets and admission/backpressure for expensive native queries.
