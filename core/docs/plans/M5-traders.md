@@ -55,6 +55,16 @@ Implemented Tcl registry/state surface:
 The future AI Trader layer must produce Marketplace `MarketAction` requests and consume
 Marketplace predictions; no native model/inference interface is implemented in V1.
 
+Target decision/outcome records:
+- `TraderDecision { decision_id, trader_id, regime, forecast_refs, declared_uncertainty,
+  action, capital_at_risk, rationale_digest, created_at }`.
+- `TraderOutcome { decision_id, realization_refs, realized_pnl, calibration_loss,
+  realized_at }`.
+
+`calibration_loss` is the longitudinal diagnostic: it measures realized outcome against the
+Trader's own prediction and declared uncertainty within the active regime. P&L remains the local
+objective; calibration loss explains whether wins/losses were expected or surprising.
+
 ## 6. Dependencies & stubs
 - M1 Marketplace — implemented action/prediction boundary.
 - M4 Wallets — implemented 1:1 binding + exposure brakes; custody/signing absent.
@@ -76,8 +86,11 @@ Marketplace predictions; no native model/inference interface is implemented in V
 2. **Done:** mechanical pause/resume state owned by M6.
 3. **Done:** M1 rejects paused Traders and M1 prediction reads reject paused Traders.
 4. **Done:** M4 enforces permanent wallet binding independently.
-5. **Open:** AI inference/action-generation runtime and specialization-specific decision logic.
-6. **Open:** any lower-level deterministic helper-bot framework subordinate to Traders.
+5. **Next:** define/persist `TraderDecision` and `TraderOutcome` records.
+6. **Next:** compute regime-conditioned calibration-loss rate and P&L rate over rolling windows.
+7. **Next:** expose M6 uncertainty-regime admission to the Trader before M1 submission.
+8. **Open:** AI inference/action-generation runtime and specialization-specific decision logic.
+9. **Open:** any lower-level deterministic helper-bot framework subordinate to Traders.
 
 ## 9. Tests
 Current tests verify identity existence, wallet binding through M1, pause blocking action
