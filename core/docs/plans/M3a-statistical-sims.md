@@ -7,6 +7,20 @@ stochastic volatility, regime detection, and cross-asset correlation**. The math
 (tick/hourly → daily → weekly → monthly → annual → 5-year). Pops in this sim represent
 **stochastic sample paths**, not behavioral agents.
 
+## 1A. Measurement contract
+This Sim inherits the M3 common epistemic contract. Its scope is **price, volatility, tail risk, correlation, regime, roughness, and jump behavior**.
+- Every prediction must identify `target`, `prediction_type`, `horizon`, relevant
+  `conditioning`, and `regime` before its `correctness` score is meaningful.
+- `confidence` describes evidential/model support; `certainty` describes stability under
+  perturbation/model uncertainty; `correctness` is empirical accuracy after realization. These
+  are not synonyms.
+- Correctness is compared longitudinally only within compatible scopes. It is not a universal
+  leaderboard against other M3 domains.
+- Every prediction family must eventually link to a realization and accumulate
+  regime-conditioned calibration loss. Repeated bias or repeated out-of-bound realizations feed
+  M0 durable economic memory.
+- This Sim does not need to agree with another Sim. Cross-domain interpretation belongs to M5/M6.
+
 ## 2. Status / certainty
 IMPLEMENTED · M3a V1 · R. `core/src/economy/sims/statistical/engine.R` now
 implements the complete V1 statistical stack: GBM, Merton jump-diffusion, full-truncation Heston
@@ -22,7 +36,7 @@ the boundary integration suite are green. Core methods C4/C5; implementation C3;
 parameterization remains data-dependent rather than hardcoded.
 
 ## 3. Language & location
-**R 4.x** (apt `r-base-core`) · `src/economy/sims/statistical/`. Vital CRAN packages only:
+**R 4.x** (apt `r-base-core`) · `core/src/economy/sims/statistical/`. Vital CRAN packages only:
 `HiddenMarkov` (Viterbi filter, forward-backward, Baum-Welch), `rugarch` (univariate GARCH
 volatility — GJR/EGARCH families, ML fitting), `rmgarch` (DCC-GARCH cross-asset correlation).
 Everything else is hand-rolled with base R primitives (`optim`, `fft`, `arima`, matrix ops):

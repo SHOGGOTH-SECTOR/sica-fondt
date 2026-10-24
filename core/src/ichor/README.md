@@ -24,8 +24,10 @@ the `Barrier` first (**L2**); every envelope carries **provenance** (**L3**).
 - `broker.pony` — the outer `Broker` (register + route; forces Ada-bound traffic
   through the barrier).
 - `organ.pony` — `OrganReceiver` interface + a `StubOrgan` for tests.
-- `main.pony` — smoke wiring: stomach digests → inbound to Ada (admitted); raw
-  external → Ada (rejected); outer organ→organ (direct).
+- `main.pony` — **transport smoke stub**, not the executable economy runtime: stomach-shaped
+  test traffic → Ada (admitted); raw external → Ada (rejected); outer organ→organ (direct).
+  The real M0 Tcl/polyglot economy facade lives under `core/src/economy/` and is not yet bridged
+  into this Pony process.
 - `ichor_ada_shim.c` — **STUB** C/Fortran seam to the Ada border (not yet wired).
 
 ## Build / run
@@ -40,5 +42,6 @@ is ephemeral; toolchain is per-session, reinstalled by the SessionStart hook).
 ## Status
 Provisional **outer-bus** scaffold — compiles and runs. The `Barrier` is a
 **stand-in**, not the real safety screen; the real screen is Ada `Trust_Guard`
-+ the E1 invariant laws, reached over the seam (transport TBD — IPC vs in-proc
-is an open decision). Nothing here reaches the inner brain directly.
++ the E1 invariant laws. Two runtime seams remain explicit: Pony↔Ada for the real D1 screen, and
+Pony↔Tcl for the executable M0 economy facade. IPC vs in-process/FFI transport is still open.
+Nothing here reaches the inner brain directly.

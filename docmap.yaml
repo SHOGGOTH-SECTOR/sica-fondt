@@ -41,9 +41,9 @@ organs:
     build: "src/endocrine/run_tests.sh ; src/endocrine/etr/run_etr_tests.sh"
   - path: core/src/economy
     agents_md: core/src/economy/AGENTS.md
-    lang: tcl
-    role: M0 stomach/economy organ scaffold — M1–M7 simulation and Ada-bound secretion
-    build: "tclsh core/src/economy/tests/stomach.test"
+    lang: [tcl, r, eclipse_prolog, solidity, fortran]
+    role: M0 stomach/economy outer-organ scaffold — M1–M7; M3a/b/c/e runtime-wired; M3d/f/g native kernels; Ada-bound secretion contract
+    build: "tclsh core/src/economy/tests/stomach.test ; tclsh core/src/economy/sims/tests/hub_runtime.test ; tclsh core/src/economy/sims/run_tests.tcl"
   - path: core
     agents_md: core/AGENTS.md
     lang: [ada, cobol]
