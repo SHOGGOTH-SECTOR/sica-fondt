@@ -12,6 +12,20 @@ Grounded in Vienna complex-systems token modeling [7], ResearchGate engineering 
 frameworks [6], Aave/Compound kinked interest rate models (industry standard), and DeXposure
 inter-protocol credit propagation (Matzakos et al. 2025).
 
+## 1A. Measurement contract
+This Sim inherits the M3 common epistemic contract. Its scope is **supply, inflation, staking, velocity, policy discontinuity, treasury runway, lending utilization, liquidation, contagion, and yield allocation**.
+- Every prediction must identify `target`, `prediction_type`, `horizon`, relevant
+  `conditioning`, and `regime` before its `correctness` score is meaningful.
+- `confidence` describes evidential/model support; `certainty` describes stability under
+  perturbation/model uncertainty; `correctness` is empirical accuracy after realization. These
+  are not synonyms.
+- Correctness is compared longitudinally only within compatible scopes. It is not a universal
+  leaderboard against other M3 domains.
+- Every prediction family must eventually link to a realization and accumulate
+  regime-conditioned calibration loss. Repeated bias or repeated out-of-bound realizations feed
+  M0 durable economic memory.
+- This Sim does not need to agree with another Sim. Cross-domain interpretation belongs to M5/M6.
+
 ## 2. Status / certainty
 IMPLEMENTED · M3e V1 · Fortran 2018. `core/src/economy/sims/tokenomics/`
 implements conserved aggregate token state, Euler–Maruyama stochastic evolution, scalar Kalman
