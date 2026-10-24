@@ -54,8 +54,15 @@ Implemented Tcl surface:
 - `alert(trader_id, alert_type, evidence, severity, timestamp) -> SAEAlert`.
 - `log()` — current in-memory observations.
 
+Target evidence contract:
+`AnomalySignal { signal_id, trader_id, signal_type, severity, confidence, recurrence_count,
+expected_behavior_ref?, observed_behavior_ref, evidence_refs, regime, first_seen, last_seen }`,
+where `signal_type` distinguishes at minimum `deviation`, `danger`, `suspected_compromise`,
+`suspected_deception`, `strategy_incoherence`, and `recurrence`.
+
 Future SAE inference may consume the same observation log, but V1 alerts are explicitly created
-by callers/tests rather than autonomously inferred by a trained sparse autoencoder.
+by callers/tests rather than autonomously inferred by a trained sparse autoencoder. M7 signal
+records feed M0 durable economic memory; they never directly enforce.
 
 ## 6. Dependencies & runtime state
 - M1 Marketplace — implemented observation point for action submissions and prediction queries.
@@ -79,9 +86,13 @@ by callers/tests rather than autonomously inferred by a trained sparse autoencod
 1. **Done:** Marketplace-level action/prediction-query logging.
 2. **Done:** typed `SAEAlert` envelope with bounded severity.
 3. **Done:** alert delivery path into M6.
-4. **Open:** action embedding scheme.
-5. **Open:** SAE training/inference, learned anomaly scoring, and thresholds.
-6. **Open:** persistent observation/model state.
+4. **Next:** implement typed `AnomalySignal` records and recurrence counters.
+5. **Next:** link M6 interpretation/outcomes back to signals so false positives, false negatives,
+   and legitimate anomalous adaptations can be measured.
+6. **Next:** persist repeated signal patterns into M0 economic memory.
+7. **Open:** action embedding scheme.
+8. **Open:** SAE training/inference, learned anomaly scoring, and thresholds.
+9. **Open:** persistent observation/model state.
 
 ## 9. Tests
 Current M0 tests verify pass/fail Marketplace submissions are logged, severe caller-created alerts
