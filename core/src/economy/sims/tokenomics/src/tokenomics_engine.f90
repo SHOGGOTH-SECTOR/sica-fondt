@@ -243,7 +243,7 @@ contains
       value = 100d0*emission*365.25d0/max(circulating,1d-12)
       width = max(1d-9,uncertainty*max(abs(value),0.1d0))
     case ('staking_ratio')
-      denom = max(total_minted-burned,1d-12)
+      denom = max(circulating+staked+locked,1d-12)
       value = clamp_real(staked/denom,0d0,1d0)
       width = max(1d-6,uncertainty)
       unit_interval = .true.
