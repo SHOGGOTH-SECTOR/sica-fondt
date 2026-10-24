@@ -4,6 +4,27 @@
 The economy organ's hands: **specialized AI instances** that buy, sell, and mint cryptocurrency and
 NFTs. Each trader is bound to a Wallet (M4), operates through the Marketplace (M1), queries Market to receive predictions (M3), and are monitored by the SAE (M7) via Marketplace. Multiple traders operate concurrently with **different heuristics and specializations**.
 
+## 1A. Operational doctrine
+- **Purpose:** Traders are genuinely agentic economic entities with persistent identity, goals,
+  learning, judgment under uncertainty, specialization, and responsibility for independently
+  assigned capital. Their local objective is profitable deployment of that capital.
+- **Independence:** Traders need not converge or agree. Their funding stores are independent;
+  disagreement matters only through realized performance, capital allocation, shared market
+  effects, or M6 systemic risk.
+- **Uncertainty:** each Trader chooses how declared uncertainty affects an individual action,
+  position size, evidence gathering, or abstention - but only inside the uncertainty regime and
+  broader boundaries assigned by M6. Actions outside the allowed regime are unavailable.
+- **Performance:** raw P&L is the local objective; **loss relative to prediction** is the primary
+  diagnostic metric. A loss that was correctly anticipated is categorically different from a
+  confident unanticipated loss.
+- **Longitudinal metric:** each Trader accumulates regime-conditioned prediction/calibration loss
+  over time rather than being judged by isolated wins or losses. Repetition changes capital trust.
+- **Memory:** durable Trader memory should preserve its own forecasts, declared uncertainty,
+  realized outcomes, recurring failure modes, regime-specific competence, and intervention history.
+- **Completion criterion:** a Trader runtime is not complete until it can form a prediction,
+  declare uncertainty, choose a lawful action, use only its assigned capital, record the decision
+  basis, receive realization, update memory, and expose longitudinal calibration/P&L metrics.
+
 ## 2. Status / certainty
 SCAFFOLD · PARTIAL. `core/src/economy/traders.tcl` implements trader identity,
 specialization labels, and mechanical pause/resume state. Trader inference remains open.
