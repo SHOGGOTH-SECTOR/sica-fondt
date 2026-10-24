@@ -45,20 +45,28 @@ Marketplace predictions; no native model/inference interface is implemented in V
 - **L1 (C5):** **all trades go through the Marketplace** — a trader cannot interact with
   any chain or protocol except via Marketplace (M1). Enforced by architecture (no direct RPC access), not just policy.
 - **L3 (C4):** **wallet binding is permanent** — a trader's wallet cannot be reassigned to another trader at any time.
-- **L4 (C4):** **Conductor can pause** — a paused trader cannot submit actions, query sims, or read feeds until resumed by the Conductor (M6). This is mechanical.
+- **L4 (C4):** **Conductor can pause** — a paused Trader cannot submit Marketplace actions or
+  query Marketplace predictions until resumed by M6. M2 does not currently expose a direct
+  Trader feed-read facade.
 - **L5 (C3):** trader specialization constrains strategy but not the interface — all traders use the same vocabulary regardless of specialization.
 
-## 8. Build steps
-1. Make the real build order.
+## 8. Build status
+1. **Done:** unique Trader registry + specialization labels.
+2. **Done:** mechanical pause/resume state owned by M6.
+3. **Done:** M1 rejects paused Traders and M1 prediction reads reject paused Traders.
+4. **Done:** M4 enforces permanent wallet binding independently.
+5. **Open:** AI inference/action-generation runtime and specialization-specific decision logic.
+6. **Open:** any lower-level deterministic helper-bot framework subordinate to Traders.
 
 ## 9. Tests
-Marketplace-only: trader cannot call chain RPC directly. 
-Wallet binding: trader uses only its bound wallet. 
-Pause: paused trader does not change state. 
-Specialization: different specializations produce different action patterns on identical market state.
+Current tests verify identity existence, wallet binding through M1, pause blocking action
+submission, resume restoring submission, and Marketplace-only prediction access. There is no test
+for specialization-dependent action patterns because Trader inference is not implemented.
 
 ## 10. Open items
-- Trader architecture
-- Number of concurrent traders and resource allocation per trader.
-- Specialization catalog (which types, and how do they differ in strategy?).
-- Inter-trader coordination (necessary for high end maneuvers including rugpulls)
+- Trader inference architecture and model/runtime choice.
+- Number of concurrent Traders and resource allocation.
+- Specialization catalog and training/conditioning semantics.
+- Safe coordination semantics between Traders, if any; no direct execution bypass may emerge
+  from coordination.
+- Helper-bot interfaces that remain deterministic and subordinate to the owning Trader.
