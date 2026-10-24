@@ -8,21 +8,27 @@ the Marketplace (M1). Wallets hold keys, sign transactions, and enforce wallet-l
 Tax is collected on trader income and routed to the Verschwörern Veregeister wallets (stub — M0).
 
 ## 1A. Operational doctrine
-- **Purpose:** M4 is the final physical/economic brake around assigned capital. It protects the
-  organism from a Trader, a Trader from itself, the assigned funding from other Traders, and the
-  capital base from catastrophic loss.
-- **Authority:** hard M4 ceilings are absolute at action time. Trader, M6, and Brain veto authority
-  may narrow what happens but may not override an M4 ceiling for an individual action.
-- **Change semantics:** higher authority may change future M4 configuration only through an
-  explicit reconfiguration/version transition; there is no per-trade "override the wallet" path.
-- **Funding isolation:** each Trader's capital is independently bounded and attributed. One
-  Trader's loss, conviction, or disagreement does not silently consume another Trader's funding.
-- **Performance role:** M4 is not judged by profit. It succeeds when forbidden exposure is
-  physically unavailable and when every admitted spend can be attributed to one Trader, one
-  configured ceiling set, and one Marketplace action.
-- **Completion criterion:** custody is complete only when binding, ceilings, local key custody,
-  signer authorization, recovery/rotation, transaction attribution, and tamper-resistant limit
-  versioning are all tested. A working signature primitive alone is insufficient.
+- **Purpose:** provide the final capability boundary around assigned capital: protect the organism
+  from a Trader, the Trader from itself, one Trader's funding from another, and the capital base
+  from catastrophic loss.
+- **Authority:** M4 hard ceilings are absolute at action time. Trader, M6, and Brain authority may
+  further restrict activity but may not override an active M4 ceiling for one action.
+- **Evidence:** Trader↔wallet binding, active limit version, proposed action/notional, cumulative
+  spend/exposure, and eventual chain/custody state.
+- **Permitted decisions:** bind identity, calculate exposure, admit/reject against hard ceilings,
+  record spend, and eventually sign only Marketplace-authorized transactions.
+- **Prohibited decisions:** choose strategy, infer opportunity, lend one Trader another Trader's
+  capital, accept a per-action override, or delegate custody to a third party.
+- **Memory:** persist limit versions, binding history, capital-at-risk, spend history, signer
+  attribution, and any future custody/recovery event.
+- **Performance:** zero ceiling bypasses, exact attribution of every admitted spend, isolation
+  between Trader capital stores, and recoverable/auditable custody state.
+- **Failure:** any action exceeds the active ceiling, a wallet is reassigned without an explicit
+  versioned transition, another component can override a brake, or key custody escapes the
+  sovereign boundary.
+- **Completion criterion:** custody is complete only when binding, versioned hard ceilings, local
+  key custody, signer authorization, recovery/rotation, transaction attribution, and persistence
+  are all tested. A working signature primitive alone is insufficient.
 
 ## 2. Status / certainty
 SCAFFOLD · PARTIAL. `core/src/economy/wallets.tcl` implements permanent 1:1 binding and
