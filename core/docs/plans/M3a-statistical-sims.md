@@ -22,7 +22,7 @@ the boundary integration suite are green. Core methods C4/C5; implementation C3;
 parameterization remains data-dependent rather than hardcoded.
 
 ## 3. Language & location
-**R 4.x** (apt `r-base-core`) · `src/economy/sims/statistical/`. Vital CRAN packages only:
+**R 4.x** (apt `r-base-core`) · `core/src/economy/sims/statistical/`. Vital CRAN packages only:
 `HiddenMarkov` (Viterbi filter, forward-backward, Baum-Welch), `rugarch` (univariate GARCH
 volatility — GJR/EGARCH families, ML fitting), `rmgarch` (DCC-GARCH cross-asset correlation).
 Everything else is hand-rolled with base R primitives (`optim`, `fft`, `arima`, matrix ops):
