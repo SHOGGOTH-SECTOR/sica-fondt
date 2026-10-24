@@ -12,22 +12,25 @@ The academic foundations span AMM mechanism design [1,2], MEV game theory [3,4,5
 tokenomics via SDEs [6,7], and evolutionary consensus games [8–11].
 
 ## 1A. Operational doctrine
-- **Purpose:** Sims are complementary mathematical senses over different scopes of the same
-  environment. They are not contestants trying to become one canonical market oracle.
-- **No forced reconciliation:** apparent disagreement is first treated as a question of scope,
-  horizon, conditioning, or resolution. Traders interpret local implications; M6 interprets
-  portfolio/system implications. M3 itself does not vote, average, or choose a winner.
-- **Scoped correctness:** `correctness` means empirical accuracy with respect to a Sim's declared
-  target, horizon, conditioning assumptions, and regime. Scores from different Sim types are not
-  directly comparable unless their scopes are explicitly aligned.
-- **Calibration metric:** every prediction family should accumulate longitudinal calibration loss
-  against realization and declared uncertainty, conditioned on regime:
-  `L(prediction, realization, declared_uncertainty | scope, regime)`.
-- **Memory:** repeated calibration failures, regime-specific strengths, and persistent bias become
-  durable economic memory. A single miss is evidence; repetition changes trust.
-- **Completion criterion:** a native Sim is runtime-complete only when calibration input,
-  native execution, bounded publication, realization capture, longitudinal scoring, degraded-state
-  handling, and replayable tests all exist. Source presence alone is never completion.
+- **Purpose:** provide complementary mathematical senses over different scopes of the same market
+  environment. Sims are not contestants for one canonical oracle.
+- **Authority:** M3 may model, calibrate, forecast, and report uncertainty. It may not trade,
+  enforce policy, select a winning Sim, or compel a Trader action.
+- **Evidence:** normalized M2 observations plus Sim-specific calibration state, always with enough
+  target/horizon/conditioning/regime metadata to interpret a result.
+- **Permitted decisions:** run native models, publish bounded predictions, declare degraded state,
+  score realized predictions, and retain per-Sim calibration history.
+- **Prohibited decisions:** vote/average heterogeneous Sims into truth by default, hide scope,
+  compare correctness across incompatible targets, or reinterpret another Sim's result.
+- **Memory:** repeated bias, out-of-bound realizations, regime-specific strength, and calibration
+  loss persist into M0 economic memory. A single miss is evidence; repetition changes trust.
+- **Performance:** longitudinal calibration loss against realization and declared uncertainty,
+  conditioned on `target × horizon × conditioning × regime`.
+- **Failure:** unscoped correctness, hidden degraded state, stale prediction presented as current,
+  or forced reconciliation that destroys the distinct information carried by different scopes.
+- **Completion criterion:** a native Sim is runtime-complete only when calibration input, native
+  execution, `PredictionScope`, bounded publication, realization capture, longitudinal scoring,
+  degraded-state handling, persistence, and replayable tests all exist.
 
 ## 2. Status / certainty
 MIXED · EXECUTABLE HUB + FOUR V1 RUNTIME BRIDGES + THREE NATIVE KERNELS.
