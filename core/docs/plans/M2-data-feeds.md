@@ -38,38 +38,43 @@ and persistent storage remain separate ingress work.
   `confidence` ∈ [0.0, 10.0] — data source reliability per position produced (exchange-reported
   price = high; RSS sentiment = lower). Sims produce even finer-grained confidence.
 
-## 6. Dependencies & stubs
-- External data sources (price APIs, RSS, RPC nodes) — *stub:* canned market data replay.
-- M1 Marketplace — execution data source (fills, positions); *stub:* canned fills.
-- M3 Sims — primary consumer; *stub:* print data points.
-- M5 Traders — secondary consumer; *stub:* print data points.
+## 6. Dependencies & runtime state
+- External data adapters — open; callers/tests currently provide normalized data directly.
+- M1 Marketplace execution feedback — open; live fills/portfolio state do not exist yet.
+- M3a/M3b/M3c/M3e — active history consumers through their Tcl runners.
+- M3d/M3f/M3g — native kernels exist; no feed-query bridge yet.
+- M5 Traders — no direct feed-reader facade is currently exposed.
 
 ## 7. Invariants / laws
 - **L1 (C4):** data feeds are **raw and unnormalized in meaning** — the pipeline normalizes
   *format* (schema, timestamps, units) but never interprets, filters, or editorialize content.
-- **L2 (C4):** **bidirectional flow** — external data flows in (market → sims/traders), and
-  internal execution data flows back (marketplace → sims). Both directions use the same
-  `NormalizedDatum` shape.
+- **L2 (C4 target):** **bidirectional flow** — external observations and internal execution
+  feedback use the same normalized datum shape. **Current implementation:** normalized ingress
+  to history is live; execution-fill/portfolio feedback is reserved because execution is
+  simulation-only and no feedback adapter exists yet.
 - **L3 (C3):** **backpressure, not drop** — if a consumer is slow, buffer up to a cap, then
   apply backpressure to the source. Never silently drop data points.
 - **L4 (C3):** every datum carries a **source and timestamp** — consumers can always trace
   where data came from and when.
 
-## 8. Build steps
-1. Define `NormalizedDatum` and `FeedType` shapes.
-2. Implement the pub/sub pipeline (subscribe, publish, distribute).
-3. Wire external source adapters (start with one price API + one RSS feed).
-4. Wire M1 execution data feedback loop.
-5. Implement session-scoped time-series history (ring buffer).
+## 8. Build status
+1. **Done:** normalized datum storage shape.
+2. **Done:** per-feed ordered in-session history.
+3. **Done:** explicit capacity backpressure with no silent eviction.
+4. **Done:** M3a/M3b/M3c/M3e calibrated history consumers.
+5. **Open:** external source adapters and provider normalization.
+6. **Open:** subscriptions/fan-out, time-range queries, persistence, and execution feedback.
 
 ## 9. Tests
-Normalization: heterogeneous inputs produce uniform `NormalizedDatum` output. Pub/sub: subscriber
-receives published data. History: query returns correct time range. Backpressure: slow consumer
-does not cause data loss. Bidirectional: marketplace fills reach sims via the feed.
+The M0 suite verifies accepted publishes, capacity backpressure, preserved buffered history, and
+source/timestamp/confidence retention. Dedicated M3 integration suites prove real consumers for
+`price_tick`, `rss_news`, `dex_pool_state`, and `on_chain_event`. Subscription, provider
+normalization, persistence, and execution-feedback tests do not exist because those surfaces are
+not implemented.
 
 ## 10. Open items
-- Which price APIs / RSS sources to support initially (CoinGecko? DeFiLlama? specific DEX
-  subgraphs?).
-- History buffer size / eviction policy.
-- Whether feeds need authentication / rate limiting management.
-- Latency requirements (how fresh must data be for each consumer type?).
+- External source/adaptor set and credentials/rate-limit handling.
+- Per-feed capacity and persistence policy beyond the current configured in-session cap.
+- Subscription/fan-out semantics if push delivery is added.
+- Freshness/latency contracts per consumer.
+- Execution-fill / portfolio-state feedback once a real execution layer exists.
