@@ -12,17 +12,20 @@ action ingress, deterministic admission ordering, supervisor veto, monitor loggi
 simulation-only execution. The full law-script loader remains open. Role C4; scaffold C2.
 
 ## 3. Language & location
-TBD · `src/economy/marketplace/`. Needs to interface with blockchain APIs (RPC/REST), wallet
-signing (M4), and the Conductor (M6). Deterministic law script must be auditable and non-Turing
-(no unbounded loops — it's a constitution, not a program).
+**Tcl 8.6** · `core/src/economy/marketplace.tcl`. The implemented surface is deterministic,
+simulation-only, and has no RPC, signer, key, approval, or broadcaster. A future live execution
+adapter may be added only after M4 custody is ratified and must remain downstream of the same
+auditable admission ordering.
 
 ## 4. Does / does-not
-- **Does:** receive trade requests from Traders (M5); validate against the deterministic law
-  script (scoped invariants); check Conductor veto (M6); verify trader-wallet binding (no wallet
-  = no access); execute approved actions on-chain via the bound wallet's API; record all actions
-  for SAE (M7) monitoring; collect tax on realized income → Verschwörern Veregeister stub (M0).
-- **Does-not:** decide *what* to trade (Traders decide); predict markets (Sims do); hold keys
-  (Wallets do); supervise behavior (Conductor + SAE do).
+- **Does now:** receive `MarketAction` requests; record every submission for M7; reject paused
+  Traders; require exact M4 Trader↔wallet binding; apply deterministic action/chain/notional law;
+  apply M4 exposure limits independently; consult M6 veto only after deterministic law passes;
+  return a deterministic simulated `simtx-*` receipt for admitted actions; expose the latest M3
+  prediction for a Trader.
+- **Does not now:** contact a chain, sign, broadcast, hold keys, move assets, or collect real tax.
+- **Does not conceptually:** decide what to trade; predict markets; supervise Traders; or let M6
+  legalize an action rejected by deterministic law.
 
 ## 5. Interface contract
 - `submit_action(trader_id, action: MarketAction, wallet_id) -> { succeeded | failed }`.
@@ -30,9 +33,10 @@ signing (M4), and the Conductor (M6). Deterministic law script must be auditable
   (M6) for upstream output. Immune system is a separate organ (out of scope here).
   `MarketAction` ∈ { `buy`, `sell`, `mint`, `provide_liquidity`, `withdraw_liquidity`, `claim_rewards`, … }.
 - `query_predictions(sim_type: SimType) -> [BoundedPrediction]` — traders read per-sim-type
-  predictions through the Marketplace. Predictions are published continuously by the sim hub
-  (M3) via M2 Data Feeds. The Marketplace holds the latest predictions from each sim type.
-  Traders see individual sim results (not aggregated) and decide how to weight them.
+  predictions through the Marketplace. The hub stores the latest published result per sim type.
+  M3a/M3b/M3c/M3e currently publish when their calibrated facade query runs; a scheduler-driven
+  continuous refresh loop is still open. Traders see individual sim results and decide how to
+  weight them.
 - `law_check(action: MarketAction) -> { pass | violation(rule_id, reason) }` — deterministic,
   pure function. The law script is loaded at startup and **immutable at runtime** (mirrors S3 /
   the COBOL vault pattern).
