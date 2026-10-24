@@ -10,28 +10,36 @@ specialization labels, and mechanical pause/resume state. Trader inference remai
 Role C3; scaffold C2.
 
 ## 3. Language & location
-TBD · `src/economy/traders/`. Traders are AI agents.All use the same `MarketAction` interface through the Marketplace regardless of implementation. Traders are the agentic entities, the determininistic bots are subservient to them.
+**Tcl 8.6 identity/state scaffold** · `core/src/economy/traders.tcl`. The implemented object is
+not an AI inference runtime: it registers Trader identity/specialization and maintains mechanical
+pause state. Future Trader cognition may be implemented separately, but every implementation must
+still use the same Marketplace-only `MarketAction` surface. Deterministic helper bots remain
+subservient to Traders rather than becoming independent market actors.
 
 ## 4. Does / does-not
-- **Does:** read sim predictions from the Marketplace (M1) (bounded, multi-domain, per-sim-type);
-  formulate trade decisions based on predictions + market state + specialization; submit
-  `MarketAction` requests to the Marketplace (M1) only bound wallet (M4); operate with **scoped
-  autonomy** — trades within law/budget constraints don't need Brain or Conductor approval; manage lower level bot goals.
-- **Does-not:** execute on-chain directly (Marketplace does); hold keys (Wallet does); supervise
-  other traders (Conductor does); modify the law script (immutable — M1-L2); bypass the
-  Marketplace (M1-L1) - this must be due to literal lack of surface.
+- **Does now:** register unique Trader IDs with specialization labels; expose existence/count;
+  enter and leave mechanical pause state under M6 control.
+- **Future Trader runtime:** read bounded predictions through Marketplace, formulate actions from
+  specialization + market state, and submit `MarketAction` through M1 using its bound M4 wallet.
+- **Does not:** execute on-chain directly; hold keys; supervise other Traders; modify Marketplace
+  law; bypass Marketplace; or currently perform AI inference.
 
 ## 5. Interface contract
-  
-- [somehow this was a literal mess]
+Implemented Tcl registry/state surface:
+- `register(trader_id, specialization)`.
+- `exists(trader_id)`.
+- `pause(trader_id)`, `resume(trader_id)`, `is_paused(trader_id)`.
+- `count()`, `paused_count()`.
 
+The future AI Trader layer must produce Marketplace `MarketAction` requests and consume
+Marketplace predictions; no native model/inference interface is implemented in V1.
 
 ## 6. Dependencies & stubs
-- M1 Marketplace — trade verification; *stub:* none, must make marketplace first.
-- M1 Marketplace — predictions (from sims via M2) and action submission; *stub:* see above
-- M4 Wallet — bound 1:1; *stub:* see above
-- M6 Conductor — supervision; *stub:* ... need i state
-- M7 SAE — Out of scope
+- M1 Marketplace — implemented action/prediction boundary.
+- M4 Wallets — implemented 1:1 binding + exposure brakes; custody/signing absent.
+- M6 Conductor — implemented mechanical pause/veto supervision; specialist inference absent.
+- M7 SAE — implemented Marketplace-level logging/alert envelopes; SAE inference absent.
+- AI Trader inference runtime — open.
 
 ## 7. Invariants / laws
 - **L1 (C5):** **all trades go through the Marketplace** — a trader cannot interact with
