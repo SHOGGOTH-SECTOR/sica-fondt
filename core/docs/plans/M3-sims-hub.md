@@ -11,6 +11,24 @@ hub directly. This is the hub spec; individual sim types have dedicated sub-spec
 The academic foundations span AMM mechanism design [1,2], MEV game theory [3,4,5], macro
 tokenomics via SDEs [6,7], and evolutionary consensus games [8–11].
 
+## 1A. Operational doctrine
+- **Purpose:** Sims are complementary mathematical senses over different scopes of the same
+  environment. They are not contestants trying to become one canonical market oracle.
+- **No forced reconciliation:** apparent disagreement is first treated as a question of scope,
+  horizon, conditioning, or resolution. Traders interpret local implications; M6 interprets
+  portfolio/system implications. M3 itself does not vote, average, or choose a winner.
+- **Scoped correctness:** `correctness` means empirical accuracy with respect to a Sim's declared
+  target, horizon, conditioning assumptions, and regime. Scores from different Sim types are not
+  directly comparable unless their scopes are explicitly aligned.
+- **Calibration metric:** every prediction family should accumulate longitudinal calibration loss
+  against realization and declared uncertainty, conditioned on regime:
+  `L(prediction, realization, declared_uncertainty | scope, regime)`.
+- **Memory:** repeated calibration failures, regime-specific strengths, and persistent bias become
+  durable economic memory. A single miss is evidence; repetition changes trust.
+- **Completion criterion:** a native Sim is runtime-complete only when calibration input,
+  native execution, bounded publication, realization capture, longitudinal scoring, degraded-state
+  handling, and replayable tests all exist. Source presence alone is never completion.
+
 ## 2. Status / certainty
 MIXED · EXECUTABLE HUB + FOUR V1 RUNTIME BRIDGES + THREE NATIVE KERNELS.
 `core/src/economy/sims/` contains all seven native engine trees, a seven-engine registry, the
