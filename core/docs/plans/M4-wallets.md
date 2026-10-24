@@ -7,6 +7,23 @@ handles multiple chains internally (EVM, Solana, etc.). A trader without a walle
 the Marketplace (M1). Wallets hold keys, sign transactions, and enforce wallet-level trade limits.
 Tax is collected on trader income and routed to the Verschwörern Veregeister wallets (stub — M0).
 
+## 1A. Operational doctrine
+- **Purpose:** M4 is the final physical/economic brake around assigned capital. It protects the
+  organism from a Trader, a Trader from itself, the assigned funding from other Traders, and the
+  capital base from catastrophic loss.
+- **Authority:** hard M4 ceilings are absolute at action time. Trader, M6, and Brain veto authority
+  may narrow what happens but may not override an M4 ceiling for an individual action.
+- **Change semantics:** higher authority may change future M4 configuration only through an
+  explicit reconfiguration/version transition; there is no per-trade "override the wallet" path.
+- **Funding isolation:** each Trader's capital is independently bounded and attributed. One
+  Trader's loss, conviction, or disagreement does not silently consume another Trader's funding.
+- **Performance role:** M4 is not judged by profit. It succeeds when forbidden exposure is
+  physically unavailable and when every admitted spend can be attributed to one Trader, one
+  configured ceiling set, and one Marketplace action.
+- **Completion criterion:** custody is complete only when binding, ceilings, local key custody,
+  signer authorization, recovery/rotation, transaction attribution, and tamper-resistant limit
+  versioning are all tested. A working signature primitive alone is insufficient.
+
 ## 2. Status / certainty
 SCAFFOLD · PARTIAL. `core/src/economy/wallets.tcl` implements permanent 1:1 binding and
 independent exposure limits for the simulation scaffold. Custody/signing implementation remains
