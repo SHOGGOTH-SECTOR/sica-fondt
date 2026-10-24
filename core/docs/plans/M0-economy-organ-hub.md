@@ -11,6 +11,28 @@ organism are TBD and out of scope.
 **scoped autonomy** and **multiple layers of failsafe braking** — it does not ask the organism's
 Brain for permission to trade.
 
+## 1A. Operational doctrine
+- **Local objective:** maximize durable profit. Profit is the stomach's terminal local objective;
+  the organism interprets the resulting surplus as a **metabolic signal and resource flow**,
+  especially additional compute budget.
+- **Success is not raw P&L alone:** a successful stomach compounds capital, survives regime
+  changes, learns from prediction error, preserves optionality, improves capital allocation,
+  develops competent Traders, avoids ruin, and produces surplus sufficient to further the
+  organism's compute capacity.
+- **Authority:** autonomy is constitutional rather than permissive. Routine trade-level judgment
+  remains inside the stomach. The Brain may set broad prohibitions, risk posture, capital/budget
+  envelopes, and in exceptional cases veto an individual trade; ordinary supervision belongs to
+  M6. Brain directives must enter through the organism boundary and may not bypass M1/M4/M6.
+- **Hard hierarchy:** M1 constitutional law and M4 capability ceilings are non-overridable at
+  action time. M6 may narrow what is allowed, never widen it beyond M1/M4.
+- **Memory:** the stomach must form durable economic memory from repetition: source reliability,
+  regime behavior, Trader calibration, recurring protocol precursors, intervention outcomes, and
+  repeated anomaly patterns. Raw observations remain attributable to M2 provenance; learned
+  assessments remain separate derived records.
+- **Failure condition:** architectural failure includes ruin, repeated uncorrected miscalibration,
+  inability to preserve scoped autonomy, or any path that obtains profit by bypassing M1/M4/M6/M7
+  or the organism boundary.
+
 ## 2. Status / certainty
 EXECUTABLE OUTER-ORGAN SCAFFOLD. `core/src/economy/` composes M1–M7, exposes normalized
 feed/history surfaces, runs the M3 horizon clock, wires M3a/M3b/M3c/M3e through native runtimes,
