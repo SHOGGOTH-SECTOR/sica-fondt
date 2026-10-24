@@ -55,6 +55,10 @@ auditable admission ordering.
 - Implemented deterministic gate: required fields, action allowlist, chain allowlist, and numeric
   notional validation. The full startup-loaded S-expression constitution is **designed but not
   implemented**; see `M1-law-script-design.md`.
+- Target law result:
+  `LawDecision { action_id, law_version, pass, violation_id?, proof_trace, evaluated_at }`.
+  This record must be stable enough for replay and audit; M6 veto state is deliberately outside
+  the law proof.
 - Implemented M4 brake: exact Trader↔wallet binding plus exposure checks.
 - Implemented M6 gate: one-shot veto is consumed only after deterministic law and wallet checks.
 - Implemented execution result: `{ status succeeded execution simulated tx_id simtx-* }`.
@@ -89,8 +93,9 @@ auditable admission ordering.
 3. **Done:** M6 veto ordering after deterministic law.
 4. **Done:** M7 logging for pass/fail submissions.
 5. **Done:** simulation-only execution receipts.
-6. **Designed, not implemented:** signed fixed-combinator S-expression constitution.
-7. **Open by design:** signer/RPC/broadcast execution and realized-income tax calculation.
+6. **Next:** implement `LawDecision` with versioned proof/violation traces.
+7. **Next:** implement the signed fixed-combinator S-expression constitution against those traces.
+8. **Open by design:** signer/RPC/broadcast execution and realized-income tax calculation.
 
 ## 9. Tests
 The M0 contract suite verifies walletless rejection, wrong-wallet rejection, deterministic law
