@@ -1,0 +1,68 @@
+package require tcltest 2
+namespace import ::tcltest::*
+
+set here [file dirname [file normalize [info script]]]
+source [file join $here .. .. stomach.tcl]
+
+proc seed_m3e {s ticker} {
+    for {set i 0} {$i < 18} {incr i} {
+        set minted [expr {1000000.0 + 1000.0*$i}]
+        set burned [expr {10000.0 + 25.0*$i}]
+        set staked [expr {300000.0 + 800.0*$i}]
+        set locked [expr {100000.0 - 200.0*$i}]
+        set circulating [expr {$minted-$burned-$staked-$locked}]
+        $s feed_publish on_chain_event chain [expr {$i*86400}] [dict create             token_ticker $ticker             total_minted $minted             circulating $circulating             staked $staked             locked $locked             burned $burned             supplied [expr {500000.0+1000.0*$i}]             borrowed [expr {280000.0+1500.0*$i}]             collateral [expr {420000.0+700.0*$i}]             ltv 0.80             treasury [expr {250000.0-1200.0*$i}]             treasury_burn_rate 1200.0             velocity [expr {2.0+0.02*$i}]             base_emission_rate 1000.0             halving_interval 1000.0             policy_time [expr {900.0+10.0*$i}]             exposure_factor 0.35             yield_apy {0.06 0.08 0.07}             yield_vol {0.10 0.12 0.08}] 9.0
+    }
+}
+
+test m3e-runner-available-1.0 {Fortran-backed tokenomics runner is available in M3e CI} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    set out [$s tokenomics_runner_available]
+    $s destroy
+    set out
+} -result 1
+
+test m2-to-m3e-to-hub-1.0 {on-chain state produces bounded tokenomics prediction in M3 hub} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    $s register_trader trader-macro tokenomics_macro
+    seed_m3e $s TEST
+    set p [$s tokenomics_from_feed TEST supply_trajectory weekly]
+    set q [$s query_predictions trader-macro tokenomics_macro]
+    set out [list         [dict get $p sim_type]         [dict get $p prediction_type]         [expr {[dict get $p lower_bound] <= [dict get $p value]}]         [expr {[dict get $p value] <= [dict get $p upper_bound]}]         [dict get $q token_ticker]         [dict get $p calibration_sources]         [dict get $p state_estimator]]
+    $s destroy
+    set out
+} -result {tokenomics_macro supply_trajectory 1 1 TEST on_chain_event kalman}
+
+test m3e-all-types-bounded-1.0 {all ten tokenomics prediction types honor hub bounds} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    seed_m3e $s TYPES
+    set types {
+        supply_trajectory inflation_rate staking_ratio velocity_estimate
+        halving_impact treasury_runway utilization_rate
+        liquidation_cascade_risk systemic_contagion_index
+        optimal_yield_allocation
+    }
+    set ok 1
+    foreach type $types {
+        set p [$s tokenomics_from_feed TYPES $type monthly]
+        if {[dict get $p lower_bound] > [dict get $p value] ||
+            [dict get $p value] > [dict get $p upper_bound] ||
+            [dict get $p confidence] < 0 || [dict get $p confidence] > 10 ||
+            [dict get $p correctness] < 0 || [dict get $p correctness] > 10 ||
+            [dict get $p certainty] < 0 || [dict get $p certainty] > 10} {
+            set ok 0
+            break
+        }
+    }
+    $s destroy
+    set ok
+} -result 1
+
+test m3e-insufficient-history-1.0 {M3e refuses queries without on-chain observations} -body {
+    set s [::stomach::Economy new -history_cap 256]
+    set code [catch {$s tokenomics_from_feed TEST inflation_rate annual} msg]
+    $s destroy
+    list $code $msg
+} -result {1 insufficient_on_chain_history}
+
+cleanupTests

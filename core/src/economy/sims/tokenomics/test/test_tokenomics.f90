@@ -6,6 +6,7 @@ program test_tokenomics
   real(8) :: var_a(3,3), impulse(3,4)
   real(8) :: opt_apy(3), opt_vol(3), opt_w(3), marginal(3)
   real(8) :: est_mean, est_var, next_mean, next_var
+  real(8) :: em_shocks(1000), em_path(1001), em_mean, em_var, em_inc
   integer :: est_i
   type(token_state) :: state0, state1
   real(8) :: e_before, e_half, e_quarter
@@ -77,5 +78,28 @@ program test_tokenomics
   end do
   if (abs(est_mean-100d0)>0.5d0) error stop 'state estimate convergence'
   if (est_var >= 4d0) error stop 'state estimate uncertainty'
+
+
+  do est_i=1,1000
+    if (mod(est_i,2) == 0) then
+      em_shocks(est_i) = 1d0
+    else
+      em_shocks(est_i) = -1d0
+    end if
+  end do
+  call euler_maruyama(10d0,0.03d0,0.20d0,0.01d0,em_shocks,em_path)
+  em_mean = 0d0
+  do est_i=1,1000
+    em_mean = em_mean + (em_path(est_i+1)-em_path(est_i))
+  end do
+  em_mean = em_mean/1000d0
+  em_var = 0d0
+  do est_i=1,1000
+    em_inc = em_path(est_i+1)-em_path(est_i)
+    em_var = em_var + (em_inc-em_mean)**2
+  end do
+  em_var = em_var/1000d0
+  if (abs(em_mean-0.0003d0)>1d-12) error stop 'sde mean law'
+  if (abs(em_var-0.0004d0)>1d-10) error stop 'sde variance law'
   print *, 'TOKENOMICS TESTS PASSED'
 end program

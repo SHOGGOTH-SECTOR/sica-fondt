@@ -13,12 +13,16 @@ frameworks [6], Aave/Compound kinked interest rate models (industry standard), a
 inter-protocol credit propagation (Matzakos et al. 2025).
 
 ## 2. Status / certainty
-KERNEL IMPLEMENTED · Fortran 2018. `core/src/economy/sims/tokenomics/` implements
-Euler-Maruyama state evolution, stock-flow conservation checks, kinked lending curves,
-directional exposure propagation, risk-adjusted yield allocation, and liquidation shortfall.
-Native tests compile cleanly under strict gfortran flags. Full state estimation, calibrated VAR
-impulse response, and policy-event orchestration remain incremental. Foundations C4/C5;
-implementation C2; specific parameters C1.
+IMPLEMENTED · M3e V1 · Fortran 2018. `core/src/economy/sims/tokenomics/`
+implements conserved aggregate token state, Euler–Maruyama stochastic evolution, scalar Kalman
+state estimation, discrete halving and burn policy flows, kinked lending curves, iterative
+liquidation cascades, directional DeXposure propagation, VAR impulse responses, exact constrained
+quadratic yield allocation, and all ten bounded prediction types. `tokenomics_query.f90` reads
+normalized M2 `on_chain_event` history, rejects stock-flow violations, calibrates the aggregate
+state natively, scores walk-forward innovation accuracy, and returns a bounded result to the Tcl
+runner; `runner.tcl` publishes that result into M3 as `tokenomics_macro`. Strict gfortran CI
+verifies the numerical kernel and the M2→Fortran→Hub boundary. Foundations C4/C5; implementation
+C3; live-token parameterization remains data-driven.
 
 ## 3. Language & location
 **Fortran 2018** (gfortran) · `src/economy/sims/tokenomics/`. Build: **fpm**. Dependencies:
@@ -78,9 +82,15 @@ across the heaviest numerical sims.
 - Calibration: ingests `on_chain_event` (supply metrics, staking data, lending protocol state,
   TVL) from M2.
 
-## 6. Dependencies & stubs
-- M2 Data Feeds — on-chain supply/staking/lending data; *stub:* canned supply snapshots.
-- M3 Sims hub — lifecycle management; *stub:* manual init.
+## 6. Dependencies & runtime boundary
+- M2 Data Feeds — normalized `on_chain_event` supplies aggregate stock/flow state, lending
+  balances, treasury state, policy parameters, directional exposure summary, and candidate
+  yield APY/volatility observations.
+- Native query runtime — `tokenomics_query.f90` consumes the complete ticker history and
+  applies Kalman updates before prediction. Stock-flow conservation is checked for every row.
+- M3 Sims hub — every M3e result is published in the common bounded schema as
+  `tokenomics_macro`; Traders read it only through Marketplace.
+- M3e has no wallet, signer, strategy-execution, transaction, or live-chain broadcast surface.
 
 ## 7. Invariants / laws
 - **L1 (C5):** the SDE framework is the **canonical representation** — all token dynamics are
@@ -114,10 +124,19 @@ collateral; isolated protocols unaffected. Yield: optimizer rebalances toward hi
 APY. Calibration: state estimate converges to observed data. Bounds: SDE confidence bands cover
 realized paths on backtest. Speed: sim tick-advances at 90:1.
 
-## 10. Open items
-- Which tokens to model initially (ETH? BTC? a specific alt?).
-- State vector dimensionality (how many state variables per token model?).
-- Behavioral policy function $u(X_t, t)$ — how to parameterize aggregate cohort behavior.
-- Multi-token interactions (correlated diffusions across tokens?).
-- DeXposure graph granularity (how many protocols? top-10 by TVL?).
-- Lending model extensions (Morpho AdaptiveCurveIRM? variable kink parameters?).
+## 10. V1 decisions and future extensions
+- **Token universe:** V1 is token-agnostic. M2 chooses the ticker and supplies its policy/state
+  observations; M3e does not hardcode ETH, BTC, or any chain.
+- **State vector:** V1 calibrates total minted, circulating, staked, locked, burned, supplied,
+  borrowed, collateral, treasury, and velocity, with latest policy/network/yield parameters.
+  Additional token-specific state can extend the observation schema later.
+- **Behavioral policy:** V1 represents aggregate behavior through observed state drift/diffusion,
+  staking/locking flows, utilization, treasury burn, yield candidates and exposure pressure.
+  Cohort-specific structural policy functions are a future fidelity layer.
+- **Multi-token interaction:** V1 operates one ticker per query. Correlated multi-token
+  diffusions are a future cross-asset extension rather than a V1 dependency.
+- **DeXposure granularity:** V1 accepts a directional aggregate exposure factor at the query
+  boundary while the native engine retains full directional matrix and VAR kernels. Explicit
+  protocol-graph ingestion can extend M2 without changing the M3 contract.
+- **Lending curves:** the canonical kinked curve is V1. Morpho-style adaptive curves and other
+  protocol-specific IRMs are optional later models.

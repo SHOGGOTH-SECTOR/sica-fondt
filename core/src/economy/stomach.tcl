@@ -8,14 +8,14 @@ foreach __stomach_file {
     traders.tcl wallets.tcl sae.tcl conductor.tcl feeds.tcl
     sims/registry.tcl sims/scheduler.tcl sims/hub.tcl
     sims/statistical/runner.tcl sims/amm/runner.tcl
-    sims/sociological/runner.tcl marketplace.tcl
+    sims/sociological/runner.tcl sims/tokenomics/runner.tcl marketplace.tcl
 } {
     source [file join $__stomach_dir $__stomach_file]
 }
 unset __stomach_file
 
 oo::class create ::stomach::Economy {
-    variable traders wallets sae conductor feeds sims registry clock statistical_runner amm_runner sociological_runner market taxes
+    variable traders wallets sae conductor feeds sims registry clock statistical_runner amm_runner sociological_runner tokenomics_runner market taxes
     constructor {args} {
         set cap 256
         if {[llength $args] % 2 != 0} { error "options must be key/value pairs" }
@@ -37,11 +37,12 @@ oo::class create ::stomach::Economy {
         set statistical_runner [::stomach::StatisticalRunner new             [file join $::stomach::root sims statistical engine.R]]
         set amm_runner [::stomach::AMMRunner new]
         set sociological_runner [::stomach::SociologicalRunner new             [file join $::stomach::root sims sociological engine.ecl]]
+        set tokenomics_runner [::stomach::TokenomicsRunner new]
         set market [::stomach::Marketplace new $traders $wallets $conductor $sae $sims]
         set taxes {}
     }
     destructor {
-        foreach obj [list $market $sociological_runner $amm_runner $statistical_runner $clock $registry $sims $feeds $conductor $sae $wallets $traders] {
+        foreach obj [list $market $tokenomics_runner $sociological_runner $amm_runner $statistical_runner $clock $registry $sims $feeds $conductor $sae $wallets $traders] {
             catch {$obj destroy}
         }
     }
@@ -64,6 +65,12 @@ oo::class create ::stomach::Economy {
     method statistical_runner_available {} { return [$statistical_runner available] }
     method amm_runner_available {} { return [$amm_runner available] }
     method sociological_runner_available {} { return [$sociological_runner available] }
+    method tokenomics_runner_available {} { return [$tokenomics_runner available] }
+    method tokenomics_from_feed {ticker prediction_type horizon} {
+        set p [$tokenomics_runner query_history             $ticker $prediction_type $horizon             [$feeds history on_chain_event]]
+        $sims publish tokenomics_macro $p
+        return $p
+    }
     method sociological_from_feed {ticker prediction_type horizon} {
         set p [$sociological_runner query_history             $ticker $prediction_type $horizon             [$feeds history price_tick]             [$feeds history rss_news]]
         $sims publish sociological $p

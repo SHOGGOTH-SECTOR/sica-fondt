@@ -6,6 +6,9 @@ on:
       - feat/stomach-economic-organ
     paths:
       - "core/src/economy/sims/tokenomics/**"
+      - "core/src/economy/stomach.tcl"
+      - "core/src/economy/feeds.tcl"
+      - "core/src/economy/sims/hub.tcl"
       - ".github/workflows/m3e-tokenomics.yml"
   pull_request:
     paths:
@@ -29,7 +32,21 @@ jobs:
       - name: Compile M3e native tests
         run: |
           mkdir -p /tmp/sica-m3e
-          gfortran -std=f2018 -Wall -Wextra -Werror -pedantic             -J /tmp/sica-m3e src/tokenomics_engine.f90 test/test_tokenomics.f90             -o /tmp/sica-m3e/test_tokenomics
+          gfortran -std=f2018 -Wall -Wextra -Werror -pedantic \
+            -J /tmp/sica-m3e src/tokenomics_engine.f90 test/test_tokenomics.f90 \
+            -o /tmp/sica-m3e/test_tokenomics
+          gfortran -std=f2018 -Wall -Wextra -Werror -pedantic \
+            -J /tmp/sica-m3e src/tokenomics_engine.f90 src/tokenomics_query.f90 \
+            -o /tmp/sica-m3e/tokenomics_query
+          echo "M3E_QUERY_BIN=/tmp/sica-m3e/tokenomics_query" >> "$GITHUB_ENV"
 
       - name: Run M3e native tests
         run: /tmp/sica-m3e/test_tokenomics
+
+      - name: Run M2 → M3e → Hub integration
+        shell: bash
+        working-directory: .
+        run: |
+          set -euo pipefail
+          tclsh core/src/economy/sims/tokenomics/integration.test | tee /tmp/m3e-integration.out
+          grep -Eq 'Total[[:space:]]+4[[:space:]]+Passed[[:space:]]+4.*Failed[[:space:]]+0' /tmp/m3e-integration.out
