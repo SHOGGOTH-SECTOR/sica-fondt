@@ -23,7 +23,7 @@ both the ECLiPSe kernel and M2→M3b→Hub boundary. Foundations C4/C5; implemen
 population parameterization remains evidence-driven rather than hardcoded to literal persons.
 
 ## 3. Language & location
-**ECLiPSe Prolog 7.2** · `src/economy/sims/sociological/`. Libraries: **ic** (interval
+**ECLiPSe Prolog 7.2** · `core/src/economy/sims/sociological/`. Libraries: **ic** (interval
 constraints — bounds propagation for BoundedPrediction ranges), **eplex** (LP/MIP via COIN-OR
 CLP/CBC — Nash equilibrium computation). Game-theoretic equilibria, replicator dynamics, and
 strategy evolution are naturally expressed as logical relations over population states; Nash
