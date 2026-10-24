@@ -6,6 +6,21 @@ must route**. No trader may buy, sell, mint, or interact with any on-chain proto
 the Marketplace. Enforces a **deterministic law script** (scoped invariants — the marketplace's
 own constitution) and integrates the **Conductor's veto** (M6) before execution.
 
+## 1A. Operational doctrine
+- **Purpose:** M1 is a constitution and execution harness, not a strategy engine. It makes some
+  actions structurally unavailable; it does not decide which lawful action is economically wise.
+- **Authority:** deterministic law is above Trader judgment, M6 judgment, and exceptional Brain
+  vetoes. M6/Brain may further restrict lawful action but may not legalize a constitutional
+  violation.
+- **Scope of law:** encode catastrophic/constitutional prohibitions, capability boundaries,
+  identity/binding requirements, and hard action constraints. Ordinary economic doctrine,
+  opportunity selection, and uncertainty judgment belong to M5/M6.
+- **Auditability:** every decision must be reproducible from the action, law version, M4 brake
+  state, M6 veto state, and logged evidence. A future law DSL must produce a proof/violation trace.
+- **Completion criterion:** M1 is complete for live execution only when the signed immutable law
+  evaluator, M4-authorized signer path, M7 logging, M6 restriction ordering, and simulation/live
+  parity tests all exist. Adding RPC alone is not completion.
+
 ## 2. Status / certainty
 SCAFFOLD · EXECUTABLE SIMULATION. `core/src/economy/marketplace.tcl` implements the single
 action ingress, deterministic admission ordering, supervisor veto, monitor logging, and
