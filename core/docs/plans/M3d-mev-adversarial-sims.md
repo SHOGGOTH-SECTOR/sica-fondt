@@ -20,7 +20,7 @@ under strict gfortran flags. WENO/Kolokoltsov and DSMFG bilevel solvers remain i
 Core game/knapsack foundations C4; implementation C2; parameterization C1.
 
 ## 3. Language & location
-**Fortran 2018** (gfortran) · `src/economy/sims/mev/`. Build: **fpm**. Dependencies: **OpenBLAS**
+**Fortran 2018** (gfortran) · `core/src/economy/sims/mev/`. Build: **fpm**. Dependencies: **OpenBLAS**
 (LAPACK/BLAS via native Fortran interfaces). Hand-rolled: Box-Muller RNG, WENO stencils, SDE
 solvers, knapsack, JSON I/O against fixed schemas. Dense numerical loops for PDE solvers (WENO
 shock-capturing), knapsack combinatorics, and continuous-time auction modeling at the throughput

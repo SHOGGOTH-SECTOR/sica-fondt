@@ -17,36 +17,62 @@ F2 still provides the architectural pattern: watch traders, never the Conductor.
 scaffold C2.
 
 ## 3. Language & location
-TBD · `src/economy/sae/`. ML interpretability (sparse autoencoder over trader action embeddings).
-Shares the architectural pattern with F2 but is a separate instance scoped to the economy organ.
+**Tcl 8.6 observation scaffold** · `core/src/economy/sae.tcl`. V1 records Marketplace tool-call
+events and constructs typed alert envelopes for M6. Sparse-autoencoder embeddings, inference,
+training, learned anomaly thresholds, and model persistence remain future work.
 
 ## 4. Does / does-not
-- **Does:** intercept and log **every trader action at the Marketplace level** — the Marketplace
-  is the only interface traders can act through, so monitoring it captures everything; embed trader
-  action sequences; run SAE anomaly detection over action embeddings; flag suspicious patterns
-  (unusual trading frequency, outsized positions, repeated failed actions); report alerts to the Conductor (M6) with evidence; format alerts **identically to Brain messages** (same structure, same signatures).
-- **Does-not:** block actions directly (Conductor decides); watch the Conductor (the stomach's "homunculus" — echoes F2-L1); correct trader behavior (detection only — F2-L2: no closed elimination loop); trade or access wallets.
+- **Does now:** record every Marketplace submission at the single action ingress; preserve Trader,
+  tool, payload/result metadata in the monitor log; construct `SAEAlert` envelopes with Trader,
+  alert type, evidence, severity, and timestamp for M6.
+- **Does not now:** embed actions, run a sparse autoencoder, learn anomaly thresholds, or infer
+  suspiciousness autonomously.
+- **Does not conceptually:** block actions directly, watch the Conductor, correct Trader behavior,
+  trade, or access wallets. Enforcement remains M6/M1/M4.
 
 ## 5. Interface contract
+Implemented Tcl surface:
+- `record_tool_call(trader_id, tool, payload, result, timestamp)` — append observation.
+- `alert(trader_id, alert_type, evidence, severity, timestamp) -> SAEAlert`.
+- `log()` — current in-memory observations.
 
+Future SAE inference may consume the same observation log, but V1 alerts are explicitly created
+by callers/tests rather than autonomously inferred by a trained sparse autoencoder.
 
-## 6. Dependencies & stubs
-- 
+## 6. Dependencies & runtime state
+- M1 Marketplace — implemented observation point for action submissions and prediction queries.
+- M6 Conductor — implemented alert consumer.
+- Trader-action embedding model / trained SAE — absent.
+- Persistent observation store — absent; V1 log is in-memory.
 
 ## 7. Invariants / laws
-- **L1 (C5):** the SAE watches everyone in the orgab.
-- **L2 (C5):** **every tool call is logged** — no trader action escapes monitoring. This is enforced architecturally (tool call interception), not by policy.
+- **L1 (C5 scope):** M7 watches Trader activity at the stomach's Marketplace boundary; it does
+  not watch the Conductor or unrelated organism processes.
+- **L2 (C5 within current surface):** every Marketplace submission and Marketplace prediction
+  query is logged. Future Trader tools must either route through an instrumented boundary or add
+  equivalent M7 observation before this can truthfully extend to "every tool call."
 - **L3 (C4):** **detection only, no enforcement** — the SAE reports to the Conductor; it never blocks, pauses, or modifies trader actions itself. Echoes F2-L2 (no closed elimination loop).
-- **L4 (C4):** **alert format = Brain message format** — structurally identical, same signatures. This is not coincidental; it ensures the Conductor can be supervised by the Brain using the same protocol if the organism ever needs to override stomach autonomy.
-- **L5 (C3):** the SAE model is **trained on normal trader behavior** — anomalies are deviations from the learned normal, not violations of predefined rules (those are the law script's job in M1).
+- **L4 (C4 target):** M7 alert structure should remain compatible with any future Brain oversight
+  protocol. V1 implements the shared semantic fields, not cryptographic signature equivalence.
+- **L5 (C3 target):** a future SAE model should learn normal Trader behavior and detect deviations
+  rather than duplicate M1 law. No trained SAE exists in V1.
 
-## 8. Build steps
-1. Implement action interception at the Marketplace level (M1).
-2. Define the action embedding scheme (how tool calls are vectorized).
-3. Train the SAE on normal trader behavior (bootstrapped from simulated trading).
-4. Implement anomaly scoring and alert threshold.
-5. Wire alerts to Conductor (M6) in Brain-compatible message format.
+## 8. Build status
+1. **Done:** Marketplace-level action/prediction-query logging.
+2. **Done:** typed `SAEAlert` envelope with bounded severity.
+3. **Done:** alert delivery path into M6.
+4. **Open:** action embedding scheme.
+5. **Open:** SAE training/inference, learned anomaly scoring, and thresholds.
+6. **Open:** persistent observation/model state.
 
 ## 9. Tests
+Current M0 tests verify pass/fail Marketplace submissions are logged, severe caller-created alerts
+reach M6 and pause the target Trader, and severity is bounded. There is no learned-anomaly test
+because no SAE inference exists.
 
 ## 10. Open items
+- Action-sequence embedding representation.
+- SAE architecture/training data and evaluation protocol.
+- Learned anomaly threshold calibration.
+- Persistent observation/model storage.
+- Instrumentation contract for any future Trader tools outside the current Marketplace methods.

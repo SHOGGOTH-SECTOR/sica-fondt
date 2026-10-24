@@ -25,7 +25,7 @@ verifies the numerical kernel and the M2→Fortran→Hub boundary. Foundations C
 C3; live-token parameterization remains data-driven.
 
 ## 3. Language & location
-**Fortran 2018** (gfortran) · `src/economy/sims/tokenomics/`. Build: **fpm**. Dependencies:
+**Fortran 2018** (gfortran) · `core/src/economy/sims/tokenomics/`. Build: **fpm**. Dependencies:
 **OpenBLAS** (LAPACK/BLAS via native Fortran interfaces). Hand-rolled: Box-Muller RNG, SDE
 solvers, JSON I/O against fixed schemas. SDE solvers (Euler-Maruyama, Milstein), state-space
 estimation, and VAR impulse responses are dense matrix-heavy loops where Fortran's array
@@ -105,24 +105,39 @@ across the heaviest numerical sims.
 - **L5 (C4):** DeXposure contagion is **directional** — protocol A's exposure to protocol B
   is not symmetric. The exposure matrix $E_{ij}$ is not assumed symmetric.
 
-## 8. Build steps
-1. Implement Euler-Maruyama SDE solver for a simple token model (supply + staking).
-2. Define the state vector $X_t$ and drift/diffusion functions for a reference token.
-3. Add stock-flow accounting (verify conservation).
-4. Implement kinked lending rate model (Aave-style) with liquidation cascade simulation.
-5. Implement DeXposure credit propagation network with VAR impulse responses.
-6. Implement composable yield optimizer (risk-adjusted return maximization).
-7. Wire M2 on-chain data → state estimation / calibration.
-8. Add monetary policy events (halving, burn) as drift discontinuities.
+## 8. Build status
+1. **Done:** Euler–Maruyama SDE solver and moment-law characterization.
+2. **Done:** conserved aggregate token state with circulating/staked/locked/burned/minted stocks.
+3. **Done:** discrete halving/emission and burn policy flows.
+4. **Done:** kinked lending curve plus iterative liquidation cascade simulation.
+5. **Done:** directional exposure propagation and VAR impulse-response kernels.
+6. **Done:** exact constrained quadratic yield optimizer with active-set/KKT solution.
+7. **Done:** M2 `on_chain_event` → native Kalman state estimation/calibration.
+8. **Done:** ten bounded prediction types → Tcl runner → M3 hub → Marketplace.
+9. **Future fidelity:** explicit multi-protocol graph ingestion, multi-token correlated state, and
+   protocol-specific lending curves.
 
-## 9. Tests
-SDE: sample paths have correct mean (matches drift) and variance (matches diffusion). Stock-flow:
-conservation holds across all time steps. Halving: supply growth rate drops at halving event.
-Lending: rate curve exhibits kink at $U_{\text{opt}}$; liquidation cascades triggered when
-collateral ratio breached. DeXposure: shock to protocol A propagates to protocol B through shared
-collateral; isolated protocols unaffected. Yield: optimizer rebalances toward highest risk-adjusted
-APY. Calibration: state estimate converges to observed data. Bounds: SDE confidence bands cover
-realized paths on backtest. Speed: sim tick-advances at 90:1.
+## 9. Verification
+Dedicated `M3e Tokenomics CI` compiles both native binaries with
+`gfortran -std=f2018 -Wall -Wextra -Werror -pedantic`.
+
+Native tests cover:
+- Euler–Maruyama mean and variance laws.
+- stock-flow conservation and token-state transitions.
+- halving discontinuities.
+- kinked lending behavior.
+- multi-hop liquidation contagion with isolated-protocol control.
+- directional VAR impulse propagation.
+- yield-allocation normalization and KKT stationarity.
+- Kalman convergence and uncertainty reduction.
+
+The Tcl boundary suite covers runner availability, M2 `on_chain_event` → Fortran → M3
+publication, all ten prediction types satisfying hub bounds/quality ranges, and explicit failure
+on insufficient history. The current final-head contract is `4 passed / 0 failed`.
+
+Backtest coverage calibration of forecast intervals against long external histories remains a
+future empirical-validation task; V1 verifies structural bounds rather than claiming calibrated
+frequentist coverage.
 
 ## 10. V1 decisions and future extensions
 - **Token universe:** V1 is token-agnostic. M2 chooses the ticker and supplies its policy/state

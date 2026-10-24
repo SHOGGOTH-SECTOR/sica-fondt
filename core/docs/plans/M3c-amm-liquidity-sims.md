@@ -19,7 +19,7 @@ boundary on an ephemeral local Anvil instance. Mathematical foundations C5; impl
 live-market parameterization remains data-dependent.
 
 ## 3. Language & location
-**Solidity** + **Foundry** (forge, anvil) · `src/economy/sims/amm/`. Foundry is hosted
+**Solidity** + **Foundry** (forge, anvil) · `core/src/economy/sims/amm/`. Foundry is hosted
 separately from the session container — not a session-start install. M3c's output enters the
 system through Hub like every other sim, same `BoundedPrediction` schema, same M2 path.
 On-chain-equivalent fixed-point arithmetic reproduces the exact invariant calculations DEXs

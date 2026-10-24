@@ -12,36 +12,43 @@ organism are TBD and out of scope.
 Brain for permission to trade.
 
 ## 2. Status / certainty
-SCAFFOLD · EXECUTABLE. The existing Ichor `Stomach` primitive now has a dedicated
-M0–M7 simulation scaffold under `core/src/economy/`. M0 composes the component facades and
-emits Ada-bound secretion metadata; external execution and the Pony↔Tcl runtime bridge remain
-separate integration work. Role C4; scaffold implementation C2.
+EXECUTABLE OUTER-ORGAN SCAFFOLD. `core/src/economy/` composes M1–M7, exposes normalized
+feed/history surfaces, runs the M3 horizon clock, wires M3a/M3b/M3c/M3e through native runtimes,
+stages tax receipts without moving value, and emits Ada-bound secretion metadata. M3d/M3f/M3g
+remain native kernels without equivalent Tcl query bridges. Live custody, signing/broadcasting,
+AI Trader inference, Conductor inference, SAE inference, and the Pony↔Tcl Ichor bridge remain
+open. Role C4; scaffold/runtime implementation C3.
 
 ## 3. Language & location
-**Tcl 8.6 scaffold** · `core/src/economy/`. M0 orchestration is Tcl and preserves the
-existing polyglot plan for later component engines. Pony remains the Ichor-facing transport layer;
-the runtime bridge between Ichor and this scaffold is still open.
+**Tcl 8.6 orchestration** · `core/src/economy/`, with native M3 engines in R, ECLiPSe Prolog,
+Solidity/Foundry, and Fortran 2018. Pony remains the Ichor-facing outer transport layer; the
+runtime bridge between the Tcl economy facade and Ichor is still open.
 
 ## 4. Does / does-not
-- **Does:** host crypto/NFT trading via the Marketplace (M1); run always-on market prediction
-  Sims (M3) fed by live Data Feeds (M2); manage sovereign-custody Wallets (M4); supervise
-  Traders (M5) via a Conductor (M6); guard against anomalies via SAE monitor (M7); collect taxes
-  on trader income and stub transfer to Verschwörern Veregeister wallets; maintain a **ledger of
-  economy-related memories and patterns** (trade history, learned market patterns, calibration
-  state).
-- **Does-not:** consult the organism's Brain for trade decisions (scoped autonomy); route around
-  Ada for organism-bound messages (S1); store **organism** memories (E*) — economy-specific
-  memories stay local; act as the organism's conscience (that's Eth-Int / A6).
+- **Implemented now:** compose M1–M7; accept normalized M2 data; expose bounded M3 predictions
+  through Marketplace; enforce deterministic Marketplace admission, wallet binding/limits,
+  Conductor pause/veto state, SAE call logging/alerts, and simulation-only execution; stage tax
+  receipts; emit an Ada-bound `organ_secretion` summary.
+- **Native M3 integration now:** M3a statistical, M3b sociological, M3c AMM/liquidity, and M3e
+  tokenomics/macro have tested M2→native-runtime→Hub paths. M3d/M3f/M3g are registered native
+  kernels but are not yet facade-queryable.
+- **Does not currently:** hold private keys; sign or broadcast transactions; move tax value;
+  autonomously run AI Trader/Conductor/SAE inference; continuously invoke every native sim from
+  the scheduler; bypass Ada; or join the inner brain bus.
+- **Target architecture:** scoped economic autonomy remains the design goal, but future live-money
+  behavior must still pass M1 law, M4 brakes, M6 supervision, M7 observation, and D1 at the
+  organism boundary.
 
 ## 5. Interface contract
 - **Ichor interface (outbound):** `Envelope(Stomach, AdaBorder, OrganSecretion, payload)` — market
   state summaries, prediction digests, and tax receipts cross Ada to reach the inner brain.
 - **Ichor interface (inbound):** organism directives arrive via Ichor (e.g. risk posture changes,
   budget adjustments from A2 energy).
-- **Internal wiring:** Marketplace (M1) ↔ Data Feeds (M2) ↔ Sims (M3). Wallets (M4) bind to
-  Traders (M5). Conductor (M6) supervises Traders (M5). SAE (M7) acts as an independent
-  antivirus / guarddog / alarm bell — monitors via Ichor-routed messages and alerts M6.
-  All trader actions route through Marketplace.
+- **Internal wiring:** Marketplace (M1) owns the action and prediction-read boundary. M2 stores
+  normalized histories consumed by M3 native bridges. Wallets (M4) currently provide identity
+  binding and exposure brakes only. Conductor (M6) owns veto/pause state. SAE (M7) records
+  Marketplace-level tool calls and constructs alerts for M6. All Trader actions route through
+  Marketplace.
 - **Tax stub:** `transfer_tax(amount, source_wallet, dest_wallet) -> receipt` — automation hook
   for Verschwörern Veregeister internal wallet-to-wallet transfer. **Out of scope** — stub only.
 
@@ -63,10 +70,12 @@ the runtime bridge between Ichor and this scaffold is still open.
   SAE surveillance (M7), and wallet-level limits (M4) each independently constrain risk.
 
 ## 8. Build steps
-1. Build sub-components (M1–M7) individually — each with defined success criteria and ablative tests.
-2. Extend the existing `Stomach` primitive in Ichor to carry the hub facade.
-3. Define internal wiring topology and connect tested sub-components.
-4. Implement tax stub and Verschwörern Veregeister transfer last.
+1. **Done:** executable M1–M7 Tcl scaffold and contract tests.
+2. **Done:** M3 registry/scheduler plus native runtime bridges for M3a/M3b/M3c/M3e.
+3. **Done:** simulation-only tax receipt staging.
+4. **Open:** runtime bridge between the economy facade and Pony/Ichor.
+5. **Open:** M3d/M3f/M3g query bridges and scheduler-driven automatic refresh.
+6. **Open by design:** live custody/signing/broadcast, Trader/Conductor inference, SAE inference.
 
 ## 9. Tests
 Executable contract suite: `tclsh core/src/economy/tests/stomach.test`. The current 17
@@ -79,5 +88,7 @@ integration test.
 
 ## 10. Open items
 - Reward signal protocol from economy organ to organism (TBD, out of scope).
-- Internal communication bus (reuse Ichor internally? separate actor topology?).
-- Language choices per sub-component.
+- Pony↔Tcl process/FFI boundary for the outer-organ facade.
+- Automatic M3 engine scheduling/refresh and failure isolation.
+- Persistent economy state beyond the current in-session Tcl objects.
+- Ratified M4 custody design before any signer or broadcaster exists.

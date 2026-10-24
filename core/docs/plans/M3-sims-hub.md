@@ -12,72 +12,75 @@ The academic foundations span AMM mechanism design [1,2], MEV game theory [3,4,5
 tokenomics via SDEs [6,7], and evolutionary consensus games [8–11].
 
 ## 2. Status / certainty
-EXECUTABLE KERNEL SET. `core/src/economy/sims/` now contains all seven native engine
-trees (M3a–M3g), a seven-engine registry, and a live Tcl event-loop scheduler for all six
-horizons at the specified 90:1-or-faster ratios. The hub still validates/publishes bounded
-predictions. Advanced model layers called out in the individual sub-specs remain incremental
-work; the simulator family is no longer absent. Role C3; kernel implementation C2.
-Mathematical foundations C4; live-market parameterization C1.
+MIXED · EXECUTABLE HUB + FOUR V1 RUNTIME BRIDGES + THREE NATIVE KERNELS.
+`core/src/economy/sims/` contains all seven native engine trees, a seven-engine registry, the
+bounded-prediction hub, and a live Tcl event-loop clock for all six horizons. M3a, M3b, M3c,
+and M3e are wired end-to-end from normalized M2 history through their native runtimes into the
+M3 hub and Marketplace. M3d, M3f, and M3g are tested native kernels but do not yet have equivalent
+Tcl process/query bridges. The scheduler currently advances horizon clocks; it does **not** spawn
+all seven engines or republish every prediction automatically. Role C3; hub/runtime implementation
+C3; live-market parameterization remains data-dependent.
 
 ## 3. Language & location
-**Tcl** · `src/economy/sims/`. The hub is a syntax-agnostic coordinator: Tcl manages
-lifecycle, tick-advancement, and query routing for sub-sims in their native runtimes via
-stdin/stdout JSON — **Fortran** (M3d, M3e, M3g), **Prolog** (M3b, M3f), **R** (M3a),
-**Solidity** (M3c). Tcl imposes no type system or paradigm on the
-sub-processes it orchestrates.
+**Tcl 8.6** · `core/src/economy/sims/`. The hub is syntax-agnostic, but V1 does not force one
+wire protocol on every native engine. Current bridges are deliberately native:
+- **M3a / R:** Tcl invokes the R engine and publishes typed bounded results.
+- **M3b / ECLiPSe Prolog:** Tcl submits native ECLiPSe goals and parses bounded results.
+- **M3c / Solidity:** Tcl uses a read-only ABI against an ephemeral/local EVM query contract in CI.
+- **M3e / Fortran:** Tcl writes normalized numeric history to `tokenomics_query` over stdin and
+  parses its single bounded result line.
+- **M3d / Fortran, M3f / ECLiPSe, M3g / Fortran:** native kernels exist; runtime bridges remain open.
 
 ## 4. Does / does-not
-- **Does:** tick-advance continuously at **90:1** (90 simulated seconds = 1 wall-second)
-  across **six concurrent time horizons** — tick/hourly, daily, weekly, monthly, annual, and
-  5-year forecast windows; every tick advances every sim; maintain populations of Pops whose
-  behaviors emerge from the sim's mathematical model; ingest live data from Data Feeds (M2)
-  for calibration; transform raw sim data into bounded predictions and publish them continuously
-  to the Marketplace via M2; produce outputs with **explicit upper/lower bounds** on every
-  prediction value.
-  | Horizon | Window | Tick step | Effective ratio | Wall time for window |
-  |---------|--------|-----------|-----------------|---------------------|
-  | Tick–hourly | Next 1–60 min | 1s | 90:1 | ~40s |
-  | Daily | Next 24h | 24s | 2,160:1 | ~40s |
-  | Weekly | Next 7d | ~3 min | 15,120:1 | ~40s |
-  | Monthly | Next 30d | 12 min | 64,800:1 | ~40s |
-  | Annual | Next 365d | ~2.5 hr | ~788,000:1 | ~40s |
-  | 5-year | Next 1825d | 12 hr | ~3,942,000:1 | ~40s |
-- **Does-not:** trade (Traders/Marketplace do); make decisions for traders (it informs, they
-  decide); enforce laws (Marketplace does); supervise behavior (Conductor/SAE do); receive
-  trader queries (traders query the Marketplace); skip ticks; run slower than 90:1.
+- **Implemented now:** maintain the canonical seven-engine registry; run the six-horizon wall→sim
+  clock at 90:1 or faster; validate every published prediction against the common bounded schema;
+  retain the latest prediction per sim type; expose those predictions to Traders only through
+  Marketplace; calibrate and query M3a/M3b/M3c/M3e from M2 histories using native runtimes.
+- **Target runtime behavior:** continuously refresh native simulations on their own cadences and
+  publish fresh bounded predictions without a Trader query triggering computation. The horizon
+  clock needed for that loop exists, but the automatic per-engine dispatch/refresh loop is not yet
+  implemented.
+- **Does-not:** trade; make Trader decisions; enforce Marketplace law; supervise Trader behavior;
+  bypass M1, M4, M6, M7, or D1; treat registered source presence as proof that a native engine is
+  runtime-wired.
+
+  | Horizon | Window | Clock ratio |
+  |---------|--------|-------------|
+  | Tick–hourly | Next 1–60 min | 90:1 |
+  | Daily | Next 24h | 2,160:1 |
+  | Weekly | Next 7d | 15,120:1 |
+  | Monthly | Next 30d | 64,800:1 |
+  | Annual | Next 365d | ~788,000:1 |
+  | 5-year | Next 1825d | ~3,942,000:1 |
 
 ## 5. Interface contract
-- `publish(sim_type: SimType, prediction: BoundedPrediction)` — the hub continuously transforms
-  raw sim data into predictions and publishes them to the Marketplace via M2 Data Feeds. This is
-  a constant stream, not on-demand. Traders query predictions from the Marketplace (M1), not from
-  the sim hub.
-  `SimType` ∈ { `statistical`, `sociological`, `amm_liquidity`, `mev_adversarial`,
-  `tokenomics_macro`, `consensus_staking`, `market_microstructure` } (M3a–M3g).
+- `publish(sim_type, BoundedPrediction)` validates and stores the latest bounded result for one
+  of `statistical`, `sociological`, `amm_liquidity`, `mev_adversarial`,
+  `tokenomics_macro`, `consensus_staking`, or `market_microstructure`.
 - `BoundedPrediction { value, lower_bound, upper_bound, confidence, correctness, certainty,
-  time_horizon, sim_type, timestamp, token_ticker, recent_shift }`.
-  Every output is bounded — no point estimates without uncertainty ranges.
-  Three quality metrics, each ∈ [0.00, 10.00]:
-  **confidence** — how sure the model is of this prediction;
-  **correctness** — how accurate the model has been historically (scored against literal
-  market values from M2);
-  **certainty** — how stable the estimate is across perturbations.
-  **token_ticker** — which asset this prediction concerns (e.g. `"ETH"`, `"BTC"`).
-  **recent_shift** — literal observed market movement (ground truth from M2, not sim output).
-  Same M2 source feeds calibration and `correctness` scoring.
-  Gain rates print as `lower - value - upper / 10.00`
-  (e.g. `2.31 - 4.44 - 7.11 / 10.00 gain over next 30 days`);
-  the denominator aids legibility — gain is not capped at 10.00.
-  Example: `{ value: 7.2, lower_bound: 5.8, upper_bound: 8.9, confidence: 7.30,
-  correctness: 8.10, certainty: 6.50, time_horizon: "4h", sim_type: "amm_liquidity",
-  token_ticker: "ETH", recent_shift: -0.023 }`.
-- `status(sim_type?) -> { running, pop_count, last_calibration, data_freshness }` — health check.
-- `calibrate(sim_type, feed_data: [NormalizedDatum])` — Data Feeds (M2) pushes live data for
-  model recalibration.
+  time_horizon, sim_type, timestamp, token_ticker, recent_shift, ...metadata }`.
+  Every hub-facing numeric result obeys `lower_bound ≤ value ≤ upper_bound`; each quality metric
+  is in `[0,10]`. Native engines may preserve extra metadata such as M3b population state,
+  M3c range/routing detail, or M3e yield-allocation weights.
+- `Marketplace.predictions(trader_id, sim_type)` is the Trader-facing read path. Traders never
+  receive the raw hub object or native runtime handle.
+- Current calibrated facade methods on `::stomach::Economy`:
+  `statistical_from_feed_type`, `sociological_from_feed`, `amm_from_feed`, and
+  `tokenomics_from_feed`.
+- Registry presence and horizon-clock state are operational metadata; neither implies automatic
+  native execution.
 
-## 6. Dependencies & stubs
-- M2 Data Feeds — calibration data source; *stub:* canned market data.
-- M1 Marketplace — prediction consumer (via M2); *stub:* print predictions.
-- M3a–M3g sub-specs — individual sim implementations; *stub:* each returns fixed predictions.
+## 6. Dependencies & runtime state
+- **M2 Data Feeds:** implemented in-memory normalized history + explicit backpressure. External
+  WebSocket/RSS/on-chain adapters remain open.
+- **M1 Marketplace:** implemented prediction-consumer facade; holds no native sim handles.
+- **M3a:** V1 native R bridge wired and CI-verified.
+- **M3b:** V1 native ECLiPSe bridge wired and CI-verified.
+- **M3c:** V1 native Solidity/read-only EVM bridge wired and CI-verified.
+- **M3d:** strict-Fortran kernel/tests present; Tcl query bridge open.
+- **M3e:** V1 native Fortran query bridge wired and CI-verified.
+- **M3f:** ECLiPSe kernel/tests present; Tcl query bridge open.
+- **M3g:** strict-Fortran kernel/tests present; Tcl query bridge open.
 
 ## 7. Invariants / laws
 - **L1 (C5):** sims are **always running** — they are not invoked on demand. Traders query
@@ -97,21 +100,27 @@ sub-processes it orchestrates.
 - **L6 (C3):** Pops are **simulation constructs, not AI actors** — they follow mathematical
   rules within the sim. Traders (M5) are the AI actors.
 
-## 8. Build steps
-1. Define `BoundedPrediction` shape (value, bounds, confidence/correctness/certainty).
-2. Build the sim runner (lifecycle management for always-on sims).
-3. Wire M2 Data Feeds → calibration pipeline.
-4. Implement sub-specs M3a–M3g as they land.
-5. Wire continuous prediction publishing → M2 → Marketplace.
+## 8. Build status
+1. **Done:** common `BoundedPrediction` validation and latest-result storage.
+2. **Done:** seven-engine registry and six-horizon live scheduler.
+3. **Done for M3a/M3b/M3c/M3e:** M2 history → native calibration/query → M3 publish.
+4. **Kernel done, bridge open for M3d/M3f/M3g:** add the same process/query boundary.
+5. **Open:** scheduler-driven automatic refresh/publish loop independent of Trader queries.
+6. **Open:** persistent calibration/history storage beyond the in-session M2 buffers.
 
 ## 9. Tests
-Always-on: sim running after init without external trigger. Bounded output: every prediction has
-lower ≤ value ≤ upper. Three metrics: confidence, correctness, certainty all present in every
-output. Publishing: predictions flow continuously to Marketplace via M2. Independence: one sim's
-failure doesn't affect others. Calibration: new data updates model state.
+- `tclsh core/src/economy/sims/tests/hub_runtime.test` verifies the registry and six-horizon clock.
+- `tclsh core/src/economy/tests/stomach.test` verifies bounded publication and Marketplace reads
+  inside the M0 facade.
+- Dedicated CI verifies the native + M2→native→Hub boundaries for M3a, M3b, M3c, and M3e.
+- M3d and M3g compile/test under strict Fortran flags; M3f has native ECLiPSe tests.
+- A future automatic-refresh test must prove predictions update without a Trader-triggered query;
+  that claim is intentionally not made by the current suite.
 
 ## 10. Open items
-- Pop lifecycle (birth/death/mutation within sims, or fixed populations?).
-- Cross-sim aggregation (do traders query individual sims, or is there a meta-prediction layer?).
-- Calibration frequency per sim type.
-- Computational budget per sim (how much CPU/GPU each can consume).
+- Native runtime/query bridges for M3d, M3f, and M3g.
+- Scheduler-driven automatic engine refresh and bounded republishing.
+- Per-sim calibration cadence and failure/degraded-state policy.
+- Cross-sim aggregation or meta-prediction, if added at all.
+- Persistent history/calibration state beyond the in-session M2 buffer.
+- Explicit CPU/GPU budgets and admission/backpressure for expensive native queries.

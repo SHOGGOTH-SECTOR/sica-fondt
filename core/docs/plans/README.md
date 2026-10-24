@@ -49,21 +49,21 @@ Every `NN-<organ>.md` has the same 10 sections:
 | G1 | Stress-loop contract | Cross-cut | C1/C2 | — | _wave 2_ |
 | G2 | Governance | Cross-cut | DESIGN-FIRST (C2) | TBD | _wave 2_ |
 | G3 | Defense model | Cross-cut | emergent | — | _wave 2_ |
-| M0 | Economy organ hub (stomach) | Economy | DESIGN-FIRST | TBD | [M0](M0-economy-organ-hub.md) |
-| M1 | Marketplace (multi-trader harness) | Economy | DESIGN-FIRST | TBD | [M1](M1-marketplace.md) |
-| M2 | Data feeds (market data pipeline) | Economy | DESIGN-FIRST | TBD | [M2](M2-data-feeds.md) |
-| M3 | Sims hub (market prediction) | Economy | DESIGN-FIRST | TBD | [M3](M3-sims-hub.md) |
-| M3a | Statistical & quantitative sims | Economy/Sims | DESIGN-FIRST | TBD | [M3a](M3a-statistical-sims.md) |
-| M3b | Sociological & population sims | Economy/Sims | DESIGN-FIRST | TBD | [M3b](M3b-sociological-sims.md) |
-| M3c | AMM & liquidity pool sims | Economy/Sims | DESIGN-FIRST | TBD | [M3c](M3c-amm-liquidity-sims.md) |
-| M3d | MEV & adversarial extraction sims | Economy/Sims | DESIGN-FIRST | TBD | [M3d](M3d-mev-adversarial-sims.md) |
-| M3e | Tokenomics & macro-state sims | Economy/Sims | DESIGN-FIRST | TBD | [M3e](M3e-tokenomics-macro-sims.md) |
-| M3f | Consensus & staking game sims | Economy/Sims | DESIGN-FIRST | TBD | [M3f](M3f-consensus-staking-sims.md) |
-| M3g | Market microstructure sims | Economy/Sims | DESIGN-FIRST | TBD | [M3g](M3g-market-microstructure-sims.md) |
-| M4 | Wallets (sovereign custody) | Economy | DESIGN-FIRST | TBD | [M4](M4-wallets.md) |
-| M5 | Traders (AI actors) | Economy | DESIGN-FIRST | TBD | [M5](M5-traders.md) |
-| M6 | Conductor (supervisory AI) | Economy | DESIGN-FIRST | TBD | [M6](M6-conductor.md) |
-| M7 | SAE monitor (trader surveillance) | Economy | DESIGN-FIRST | TBD | [M7](M7-sae-monitor.md) |
+| M0 | Economy organ hub (stomach) | Economy | EXECUTABLE SCAFFOLD | Tcl 8.6 | [M0](M0-economy-organ-hub.md) |
+| M1 | Marketplace (multi-trader harness) | Economy | EXECUTABLE SIMULATION | Tcl 8.6 | [M1](M1-marketplace.md) |
+| M2 | Data feeds (market data pipeline) | Economy | EXECUTABLE BUFFER/FEED CORE | Tcl 8.6 | [M2](M2-data-feeds.md) |
+| M3 | Sims hub (market prediction) | Economy | MIXED: 4 V1 BRIDGES + 3 NATIVE KERNELS | Tcl + native runtimes | [M3](M3-sims-hub.md) |
+| M3a | Statistical & quantitative sims | Economy/Sims | V1 IMPLEMENTED + WIRED | R | [M3a](M3a-statistical-sims.md) |
+| M3b | Sociological & population sims | Economy/Sims | V1 IMPLEMENTED + WIRED | ECLiPSe Prolog | [M3b](M3b-sociological-sims.md) |
+| M3c | AMM & liquidity pool sims | Economy/Sims | V1 IMPLEMENTED + WIRED | Solidity / Foundry | [M3c](M3c-amm-liquidity-sims.md) |
+| M3d | MEV & adversarial extraction sims | Economy/Sims | NATIVE KERNEL | Fortran 2018 | [M3d](M3d-mev-adversarial-sims.md) |
+| M3e | Tokenomics & macro-state sims | Economy/Sims | V1 IMPLEMENTED + WIRED | Fortran 2018 | [M3e](M3e-tokenomics-macro-sims.md) |
+| M3f | Consensus & staking game sims | Economy/Sims | NATIVE KERNEL | ECLiPSe Prolog | [M3f](M3f-consensus-staking-sims.md) |
+| M3g | Market microstructure sims | Economy/Sims | NATIVE KERNEL | Fortran 2018 | [M3g](M3g-market-microstructure-sims.md) |
+| M4 | Wallets (sovereign custody) | Economy | PARTIAL: BINDING + LIMITS ONLY | Tcl 8.6 | [M4](M4-wallets.md) |
+| M5 | Traders (AI actors) | Economy | PARTIAL: REGISTRY + PAUSE STATE | Tcl 8.6 | [M5](M5-traders.md) |
+| M6 | Conductor (supervisory AI) | Economy | EXECUTABLE SUPERVISION SCAFFOLD | Tcl 8.6 | [M6](M6-conductor.md) |
+| M7 | SAE monitor (trader surveillance) | Economy | PARTIAL: LOGGING + ALERT ENVELOPES | Tcl 8.6 | [M7](M7-sae-monitor.md) |
 
 ## Integration DAG (who feeds whom)
 ```
@@ -79,13 +79,19 @@ SAE [F2] watches Subagents [F3];  stress-loop [G1]: F2 → A7 (EthInt) → stres
 Storage: INVARIANT [E1] / VARIANT [E2] / RAG+cross-store [E3] sit behind D1.  Medium [D2] = the perfusion bus (unnamed).
 Economy (stomach — independent, scoped autonomy):
   Marketplace [M1] ← Traders [M5] (bound to Wallets [M4]) submit actions; law script + Conductor [M6] veto gate execution.
-  Data Feeds [M2] ↔ Sims [M3: M3a stat, M3b socio, M3c AMM, M3d MEV, M3e tokenomics, M3f consensus, M3g microstructure].
-  SAE [M7] monitors all Trader tool calls → alerts Conductor [M6].  Tax → Verschwörern Veregeister wallets (stub).
-  Stomach [M0] ↔ organism via Ichor; reward signals TBD.
+  Data Feeds [M2] → Sims [M3]. Runtime bridges are live for M3a stat, M3b socio, M3c AMM,
+    and M3e tokenomics; M3d MEV, M3f consensus, and M3g microstructure are native kernels
+    registered in the hub but not yet process-bridged into automatic query/publish paths.
+  SAE [M7] records Marketplace-level Trader calls → alert envelopes → Conductor [M6].
+  Tax is staged only; no wallet transfer occurs.
+  Stomach [M0] has an Ada-bound secretion contract; the Pony↔Tcl runtime bridge to Ichor is open.
 ```
 
 ## Build waves
 - **Wave 0** — this README + **C1** (priority).
 - **Wave 1 (buildable-now)** — A1–A8, B1–B3, C2–C4, D1, D3.
-- **Wave 2 (design-first)** — D2, E1–E3, F1–F3, G1–G3, M0–M7 (+ M3a–M3g sim sub-specs).
+- **Wave 2 (design-first)** — D2, E1–E3, F1–F3, G1–G3.
+- **Economy track (active implementation)** — M0–M7 plus M3a–M3g. M3a/M3b/M3c/M3e have V1
+  native runtime bridges; M3d/M3f/M3g remain native kernel implementations; M4/M5/M7 remain
+  partial by design because custody, agent inference, and SAE inference are not implemented.
 Each spec is independent; review as they land.
