@@ -15,7 +15,7 @@ Native tests live beside the engine. The large-population HJB/Fokker-Planck MFG 
 incremental. Foundations C4; implementation C2; protocol parameterization C1.
 
 ## 3. Language & location
-**ECLiPSe Prolog 7.2** · `src/economy/sims/consensus/`. Libraries: **ic** (interval
+**ECLiPSe Prolog 7.2** · `core/src/economy/sims/consensus/`. Libraries: **ic** (interval
 constraints), **eplex** (LP/MIP via COIN-OR CLP/CBC — Nash equilibrium via linear programming).
 Markov chain transition rules, Nash equilibrium search, and replicator dynamics are
 constraint-satisfaction problems over validator populations; Prolog's backtracking search finds
