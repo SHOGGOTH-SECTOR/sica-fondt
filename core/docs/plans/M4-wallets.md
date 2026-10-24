@@ -50,6 +50,11 @@ Implemented Tcl surface:
 - `spending_check(wallet_id, action)` — independent exposure brake.
 - `record_spend(wallet_id, notional)` — simulation accounting only.
 - `count()`.
+- Target hard-limit record:
+  `WalletLimitVersion { wallet_id, trader_id, version, per_action_limit, cumulative_limit,
+  effective_at, supersedes?, provenance }`.
+  Every admitted action must name the exact active limit version. No API accepts a per-action
+  override.
 
 Future custody surface such as `sign`, `balance`, key generation/import, and transaction
 history is intentionally **not implemented** and must not be inferred from the component name.
@@ -76,7 +81,9 @@ history is intentionally **not implemented** and must not be inferred from the c
 1. **Done:** permanent 1:1 Trader↔wallet binding.
 2. **Done:** per-action and cumulative session exposure brakes.
 3. **Done:** Marketplace-only use of the implemented wallet scaffold.
-4. **Open by design:** key generation/storage, signing, balances, chain adapters, rotation/backup.
+4. **Next:** version hard limits and attach the active limit version to every admitted spend.
+5. **Next:** persist capital-at-risk / spend history per Trader wallet for longitudinal analysis.
+6. **Open by design:** key generation/storage, signing, balances, chain adapters, rotation/backup.
 
 ## 9. Tests
 Current tests verify walletless rejection, wrong-Trader binding rejection, independent per-action
