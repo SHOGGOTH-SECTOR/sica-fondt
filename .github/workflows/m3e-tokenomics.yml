@@ -32,7 +32,13 @@ jobs:
       - name: Compile M3e native tests
         run: |
           mkdir -p /tmp/sica-m3e
-          gfortran -std=f2018 -Wall -Wextra -Werror -pedantic             -J /tmp/sica-m3e src/tokenomics_engine.f90 test/test_tokenomics.f90             -o /tmp/sica-m3e/test_tokenomics
+          gfortran -std=f2018 -Wall -Wextra -Werror -pedantic \
+            -J /tmp/sica-m3e src/tokenomics_engine.f90 test/test_tokenomics.f90 \
+            -o /tmp/sica-m3e/test_tokenomics
+          gfortran -std=f2018 -Wall -Wextra -Werror -pedantic \
+            -J /tmp/sica-m3e src/tokenomics_engine.f90 src/tokenomics_query.f90 \
+            -o /tmp/sica-m3e/tokenomics_query
+          echo "M3E_QUERY_BIN=/tmp/sica-m3e/tokenomics_query" >> "$GITHUB_ENV"
 
       - name: Run M3e native tests
         run: /tmp/sica-m3e/test_tokenomics
