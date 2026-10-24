@@ -7,18 +7,24 @@ produces execution data (fills, positions, P&L) that feeds back into Sims, and S
 predictions that inform Traders operating through the Marketplace. Data Feeds is the bridge.
 
 ## 1A. Operational doctrine
-- **Purpose:** M2 preserves observations; it does not adjudicate reality.
-- **Epistemic rule:** provenance, source, timestamp, confidence, and contradiction are first-class.
-  Conflicting observations coexist intact. M2 must not collapse them into a synthetic consensus
-  datum unless an explicitly named downstream process requests and records that transformation.
-- **Normalization rule:** normalize representation, units, and schema - never silently normalize
-  away disagreement, source identity, uncertainty, or missingness.
-- **Derived belief separation:** source reliability, regime-conditioned trust, and repeated
-  source failure may become durable economic memory, but those assessments are derived records
-  linked back to immutable observations; they do not rewrite M2 history.
-- **Completion criterion:** a source adapter is complete only when it preserves provenance,
-  exposes loss/backpressure behavior explicitly, survives reconnect/replay without duplication,
-  and can reproduce the normalized history consumed by downstream Sims.
+- **Purpose:** preserve observations and provenance for downstream economic reasoning.
+- **Authority:** M2 has no authority to decide what is true. It may validate representation and
+  transport semantics, not adjudicate conflicting claims.
+- **Evidence:** external observations and internal feedback, each with source identity, observed
+  time, received time, confidence/reliability metadata, and provenance.
+- **Permitted decisions:** normalize schema/units, assign stable observation identity, buffer,
+  replay, apply explicit backpressure, and expose conflicting observations side by side.
+- **Prohibited decisions:** silently merge contradiction, overwrite history with derived belief,
+  editorialize payload meaning, or drop observations without explicit loss semantics.
+- **Memory:** raw observations remain immutable/addressable. Regime-conditioned source reliability
+  is stored separately as derived economic memory linked back to observation IDs.
+- **Performance:** provenance completeness, replay fidelity, explicit loss/backpressure behavior,
+  deduplication correctness, and downstream reproducibility.
+- **Failure:** silent drop, silent contradiction collapse, provenance loss, duplicate replay as
+  new evidence, or a derived source assessment masquerading as an observation.
+- **Completion criterion:** each adapter preserves provenance, survives reconnect/replay without
+  duplication, exposes backpressure/loss explicitly, and can reproduce the normalized history
+  consumed by downstream Sims.
 
 ## 2. Status / certainty
 SCAFFOLD · EXECUTABLE. `core/src/economy/feeds.tcl` implements normalized in-session history
