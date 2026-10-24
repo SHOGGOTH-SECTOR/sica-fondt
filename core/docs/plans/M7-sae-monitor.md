@@ -11,22 +11,27 @@ Extends the F2 (SAE monitor) pattern to the economy organ's internal domain. F2 
 subagents at the organism level; M7 watches traders at the stomach level.
 
 ## 1A. Operational doctrine
-- **Purpose:** M7 is an evidence-producing anomaly sensor and memory feeder, not a guilt engine.
-- **Signal taxonomy:** unusualness, danger, suspected compromise, suspected deception,
-  strategy/identity incoherence, and recurrence are distinct signals. They must not be collapsed
-  into one undifferentiated anomaly score.
-- **Anomaly is legitimate until interpreted:** a Trader may intentionally behave unusually because
-  its specialization or market regime demands it. M7 reports the deviation and evidence; M6 decides
-  whether the behavior is dangerous, adaptive, profitable, compromised, or benign.
-- **Repetition matters:** recurring deviations, repeated failed predictions, repeated source/
-  behavior couplings, and recurring precursors accumulate as durable economic memory. Frequency
-  and recurrence are evidence, not automatic enforcement.
-- **Separation of roles:** M7 detects and records; M6 interprets and restricts; M1/M4 enforce hard
-  boundaries. M7 must not become a shadow policy engine.
-- **Completion criterion:** trained M7 is complete only when observations are instrumented,
-  embeddings/features are attributable, recurrence is represented, signal classes are separable,
-  alert evidence is inspectable, feedback from M6/outcomes updates memory, and false-positive /
-  false-negative behavior is measured over time.
+- **Purpose:** produce inspectable evidence about unusual, dangerous, compromised, deceptive, or
+  strategy-incoherent Trader behavior and feed repeated patterns into durable economic memory.
+- **Authority:** M7 has detection/reporting authority only. It cannot block, pause, veto, change
+  limits, declare guilt, or modify Trader behavior.
+- **Evidence:** instrumented Trader activity, expected-behavior baselines, regime context, prior
+  signals, recurrence counts, M6 interpretations, and later realized outcomes.
+- **Permitted decisions:** detect deviation, classify signal type, estimate severity/confidence,
+  count recurrence, assemble evidence references, and emit a signal/alert to M6.
+- **Prohibited decisions:** collapse anomaly into guilt, treat rarity as danger automatically,
+  enforce restrictions, duplicate M1 law, or hide legitimate adaptation because it is unusual.
+- **Memory:** recurrence, repeated prediction failures, repeated strategy incoherence, recurring
+  source/behavior couplings, M6 interpretations, and realized outcomes persist as economic memory.
+- **Performance:** measured detection quality by signal class, evidence usefulness, recurrence
+  sensitivity, false-positive/false-negative rates, and whether legitimate anomalies remain
+  distinguishable from compromise/danger.
+- **Failure:** uninstrumented Trader surfaces, one undifferentiated anomaly score, repeated false
+  accusations without correction, missed recurrent precursors, or any direct enforcement action.
+- **Completion criterion:** trained M7 is complete when observations are instrumented,
+  features/embeddings are attributable, recurrence is represented, signal classes are separable,
+  evidence is inspectable, M6/outcome feedback updates memory, and longitudinal error rates are
+  measured.
 
 ## 2. Status / certainty
 SCAFFOLD · PARTIAL. `core/src/economy/sae.tcl` records Marketplace-level trader calls and
