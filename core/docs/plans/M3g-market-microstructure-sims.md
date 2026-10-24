@@ -17,7 +17,7 @@ under strict gfortran flags. Full order-event simulation and venue adapters rema
 Microstructure C4; Almgren-Chriss C5; implementation C2; DEX-specific calibration C1/C2.
 
 ## 3. Language & location
-**Fortran 2018** (gfortran) · `src/economy/sims/microstructure/`. Build: **fpm**. Dependencies:
+**Fortran 2018** (gfortran) · `core/src/economy/sims/microstructure/`. Build: **fpm**. Dependencies:
 **OpenBLAS** (LAPACK/BLAS via native Fortran interfaces). Hand-rolled: Riccati ODE solver,
 order-book state arrays, JSON I/O against fixed schemas. Almgren-Chriss optimal execution is a
 dense ODE (Riccati equations) — Fortran's home turf; LAPACK is native, array intrinsics map
