@@ -17,18 +17,27 @@ F2 still provides the architectural pattern: watch traders, never the Conductor.
 scaffold C2.
 
 ## 3. Language & location
-TBD · `src/economy/sae/`. ML interpretability (sparse autoencoder over trader action embeddings).
-Shares the architectural pattern with F2 but is a separate instance scoped to the economy organ.
+**Tcl 8.6 observation scaffold** · `core/src/economy/sae.tcl`. V1 records Marketplace tool-call
+events and constructs typed alert envelopes for M6. Sparse-autoencoder embeddings, inference,
+training, learned anomaly thresholds, and model persistence remain future work.
 
 ## 4. Does / does-not
-- **Does:** intercept and log **every trader action at the Marketplace level** — the Marketplace
-  is the only interface traders can act through, so monitoring it captures everything; embed trader
-  action sequences; run SAE anomaly detection over action embeddings; flag suspicious patterns
-  (unusual trading frequency, outsized positions, repeated failed actions); report alerts to the Conductor (M6) with evidence; format alerts **identically to Brain messages** (same structure, same signatures).
-- **Does-not:** block actions directly (Conductor decides); watch the Conductor (the stomach's "homunculus" — echoes F2-L1); correct trader behavior (detection only — F2-L2: no closed elimination loop); trade or access wallets.
+- **Does now:** record every Marketplace submission at the single action ingress; preserve Trader,
+  tool, payload/result metadata in the monitor log; construct `SAEAlert` envelopes with Trader,
+  alert type, evidence, severity, and timestamp for M6.
+- **Does not now:** embed actions, run a sparse autoencoder, learn anomaly thresholds, or infer
+  suspiciousness autonomously.
+- **Does not conceptually:** block actions directly, watch the Conductor, correct Trader behavior,
+  trade, or access wallets. Enforcement remains M6/M1/M4.
 
 ## 5. Interface contract
+Implemented Tcl surface:
+- `record_tool_call(trader_id, tool, payload, result, timestamp)` — append observation.
+- `alert(trader_id, alert_type, evidence, severity, timestamp) -> SAEAlert`.
+- `log()` — current in-memory observations.
 
+Future SAE inference may consume the same observation log, but V1 alerts are explicitly created
+by callers/tests rather than autonomously inferred by a trained sparse autoencoder.
 
 ## 6. Dependencies & stubs
 - 
