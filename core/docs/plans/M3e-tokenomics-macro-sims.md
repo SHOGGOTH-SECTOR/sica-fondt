@@ -25,7 +25,7 @@ verifies the numerical kernel and the M2→Fortran→Hub boundary. Foundations C
 C3; live-token parameterization remains data-driven.
 
 ## 3. Language & location
-**Fortran 2018** (gfortran) · `src/economy/sims/tokenomics/`. Build: **fpm**. Dependencies:
+**Fortran 2018** (gfortran) · `core/src/economy/sims/tokenomics/`. Build: **fpm**. Dependencies:
 **OpenBLAS** (LAPACK/BLAS via native Fortran interfaces). Hand-rolled: Box-Muller RNG, SDE
 solvers, JSON I/O against fixed schemas. SDE solvers (Euler-Maruyama, Milstein), state-space
 estimation, and VAR impulse responses are dense matrix-heavy loops where Fortran's array
