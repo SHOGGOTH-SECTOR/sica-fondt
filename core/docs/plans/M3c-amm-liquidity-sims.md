@@ -6,6 +6,20 @@ loss, and the non-cooperative game between liquidity providers and arbitrageurs*
 **LP positions and arbitrage bots** operating on the $x \cdot y = k$ curve. Grounded in the DEX/AMM
 literature [1,2].
 
+## 1A. Measurement contract
+This Sim inherits the M3 common epistemic contract. Its scope is **impermanent loss, pool return, liquidity range, slippage, and LP withdrawal economics**.
+- Every prediction must identify `target`, `prediction_type`, `horizon`, relevant
+  `conditioning`, and `regime` before its `correctness` score is meaningful.
+- `confidence` describes evidential/model support; `certainty` describes stability under
+  perturbation/model uncertainty; `correctness` is empirical accuracy after realization. These
+  are not synonyms.
+- Correctness is compared longitudinally only within compatible scopes. It is not a universal
+  leaderboard against other M3 domains.
+- Every prediction family must eventually link to a realization and accumulate
+  regime-conditioned calibration loss. Repeated bias or repeated out-of-bound realizations feed
+  M0 durable economic memory.
+- This Sim does not need to agree with another Sim. Cross-domain interpretation belongs to M5/M6.
+
 ## 2. Status / certainty
 IMPLEMENTED · M3c V1 · Solidity/Foundry. `core/src/economy/sims/amm/src/AMMSim.sol`
 implements fee-adjusted constant-product swaps, exact fixed-point impermanent loss, nonlinear
