@@ -240,7 +240,8 @@ contains
       value = max(0d0,total_minted + emission*days)
       width = max(1d-9,uncertainty*max(value,1d0))
     case ('inflation_rate')
-      value = 100d0*emission*365.25d0/max(circulating,1d-12)
+      denom = max(total_minted-burned,1d-12)
+      value = 100d0*emission*365.25d0/denom
       width = max(1d-9,uncertainty*max(abs(value),0.1d0))
     case ('staking_ratio')
       denom = max(circulating+staked+locked,1d-12)
