@@ -210,4 +210,98 @@ contains
     real(8), intent(in) :: collateral,ltv,borrowed
     shortfall=max(0d0,borrowed-collateral*ltv)
   end function
+
+  pure real(8) function clamp_real(x, lo, hi) result(y)
+    real(8), intent(in) :: x, lo, hi
+    y = min(hi,max(lo,x))
+  end function clamp_real
+
+  subroutine tokenomics_prediction(kind, horizon_years, total_minted, circulating, staked, locked, burned, &
+       supplied, borrowed, collateral, ltv, treasury, treasury_burn_rate, velocity, base_emission_rate, &
+       halving_interval, policy_time, exposure_factor, apy, vol, uncertainty, value, lower, upper, detail)
+    character(len=*), intent(in) :: kind
+    real(8), intent(in) :: horizon_years, total_minted, circulating, staked, locked, burned
+    real(8), intent(in) :: supplied, borrowed, collateral, ltv, treasury, treasury_burn_rate
+    real(8), intent(in) :: velocity, base_emission_rate, halving_interval, policy_time, exposure_factor
+    real(8), intent(in) :: apy(:), vol(:), uncertainty
+    real(8), intent(out) :: value, lower, upper
+    real(8), intent(out) :: detail(3)
+    real(8) :: emission, days, width, denom, risk, ratio, weights(size(apy))
+    logical :: unit_interval
+
+    if (size(apy) /= size(vol) .or. size(apy) < 1) error stop 'yield shape'
+    days = max(0d0,horizon_years)*365.25d0
+    emission = halving_emission_rate(base_emission_rate,policy_time,halving_interval)
+    detail = 0d0
+    unit_interval = .false.
+
+    select case (trim(kind))
+    case ('supply_trajectory')
+      value = max(0d0,total_minted + emission*days)
+      width = max(1d-9,uncertainty*max(value,1d0))
+    case ('inflation_rate')
+      value = 100d0*emission*365.25d0/max(circulating,1d-12)
+      width = max(1d-9,uncertainty*max(abs(value),0.1d0))
+    case ('staking_ratio')
+      denom = max(total_minted-burned,1d-12)
+      value = clamp_real(staked/denom,0d0,1d0)
+      width = max(1d-6,uncertainty)
+      unit_interval = .true.
+    case ('velocity_estimate')
+      value = max(0d0,velocity)
+      width = max(1d-9,uncertainty*max(value,0.1d0))
+    case ('halving_impact')
+      if (base_emission_rate <= 1d-15) then
+        value = 0d0
+      else
+        value = clamp_real(1d0-emission/base_emission_rate,0d0,1d0)
+      end if
+      width = max(1d-6,0.5d0*uncertainty)
+      unit_interval = .true.
+    case ('treasury_runway')
+      if (treasury_burn_rate <= 1d-15) then
+        value = 1d12
+      else
+        value = max(0d0,treasury/treasury_burn_rate)
+      end if
+      width = max(1d-9,uncertainty*max(value,1d0))
+    case ('utilization_rate')
+      denom = max(supplied+borrowed,1d-12)
+      value = clamp_real(borrowed/denom,0d0,1d0)
+      width = max(1d-6,uncertainty)
+      unit_interval = .true.
+    case ('liquidation_cascade_risk')
+      denom = max(borrowed,1d-12)
+      risk = liquidation_shortfall(collateral,clamp_real(ltv,0d0,1d0),borrowed)/denom
+      value = clamp_real(risk*(1d0+max(0d0,exposure_factor)),0d0,1d0)
+      width = max(1d-6,uncertainty)
+      unit_interval = .true.
+    case ('systemic_contagion_index')
+      ratio = borrowed/max(collateral*max(ltv,1d-12),1d-12)
+      value = clamp_real(max(0d0,exposure_factor)*ratio,0d0,1d0)
+      width = max(1d-6,1.25d0*uncertainty)
+      unit_interval = .true.
+    case ('optimal_yield_allocation')
+      call yield_weights(apy,vol,2d0,weights)
+      value = maxval(weights)
+      detail = 0d0
+      detail(1:min(3,size(weights))) = weights(1:min(3,size(weights)))
+      width = max(1d-6,uncertainty)
+      unit_interval = .true.
+    case default
+      error stop 'unknown prediction type'
+    end select
+
+    lower = value-width
+    upper = value+width
+    if (unit_interval) then
+      lower = clamp_real(lower,0d0,1d0)
+      upper = clamp_real(upper,0d0,1d0)
+    else
+      lower = max(0d0,lower)
+    end if
+    if (lower > value) lower = value
+    if (upper < value) upper = value
+  end subroutine tokenomics_prediction
+
 end module
