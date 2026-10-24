@@ -6,11 +6,50 @@ design docs (`../gen03_state_of_architecture.md`, `../gen03_body.md`, `../gen03_
 `../../src/endocrine/etr/etr_invariants.md`.
 
 ## How to read a spec
-Every `NN-<organ>.md` has the same 10 sections:
+The historical files use the same 10-section skeleton:
 1. **Component** · 2. **Status/certainty** · 3. **Language & location** · 4. **Does / does-not** ·
-5. **Interface contract** (language-agnostic data shapes — integrate against *this*) ·
-6. **Dependencies & stubs** · 7. **Invariants/laws** (certainty-tagged) · 8. **Build steps**
-(invariants-first: laws → tests → fit) · 9. **Tests** (standalone command) · 10. **Open items**.
+5. **Interface contract** · 6. **Dependencies/runtime state** · 7. **Invariants/laws** ·
+8. **Build status** · 9. **Tests/verification** · 10. **Open items**.
+
+Active specs may also carry **§1A Operational doctrine / Measurement contract**. This is not
+ornament: it states why the component exists and supplies the authority/performance semantics that
+the later interface and tests must implement.
+
+## Tight-spec standard
+When an existing spec is cleaned or a new one is written, make the following explicit rather than
+leaving them implicit in prose:
+
+1. **Purpose** — what outcome the component exists to produce.
+2. **Authority** — what it may decide, what may constrain it, and what it can never override.
+3. **Evidence** — what information it may consume and what provenance/uncertainty must survive.
+4. **Permitted decisions** — concrete state transitions or outputs it owns.
+5. **Prohibited decisions** — surfaces it must literally not possess.
+6. **Memory** — what repeated evidence becomes durable knowledge, with source observations linked
+   rather than rewritten.
+7. **Performance** — the longitudinal metric by which competence is judged.
+8. **Failure condition** — what counts as architectural failure even if a local metric looks good.
+9. **Completion test** — the observable evidence required before the spec may claim implementation.
+
+Build steps should be ordered as **contract → invariant → failing test → implementation →
+realization/outcome feedback → persistence**, not as a list of aspirational features.
+
+## Economy doctrine
+The M-series uses these additional commitments:
+- M0's local terminal objective is durable profit; at organism scale surplus is metabolic capacity,
+  especially compute budget.
+- M1 is constitutional law, not strategy.
+- M2 preserves evidence/provenance/contradiction and does not decide truth.
+- M3 Sims are complementary scopes, not competing oracles; correctness is scope/horizon/regime
+  conditioned.
+- M4 hard ceilings are non-overridable per action.
+- M5 Traders are independent agentic economic entities with independently assigned capital.
+- Trader competence is diagnosed longitudinally by realized outcome versus its own prediction and
+  declared uncertainty; P&L remains the local objective.
+- M6 owns the big picture: portfolio/system risk, uncertainty regimes, ordinary veto/pause, and
+  translation of broad/exceptional Brain restrictions into local enforcement.
+- M7 reports evidence and recurrence; anomaly is not guilt. M6 interprets.
+- Repetition matters everywhere: source reliability, Sim bias, Trader calibration, anomaly
+  recurrence, and intervention outcomes become durable M0 economic memory.
 
 ## Conventions
 - **Certainty tags** (from arch doc): C5 ratified · C4 drafted · C3 partial · C2 explored · C1 stub.
@@ -78,7 +117,9 @@ Hermes ──> [C1] ──> Inference cycle [C3] ──┬─ pulls Drive-Box sn
 SAE [F2] watches Subagents [F3];  stress-loop [G1]: F2 → A7 (EthInt) → stress endomotiv (A4) → A8 drift + full reshuffle (B2)
 Storage: INVARIANT [E1] / VARIANT [E2] / RAG+cross-store [E3] sit behind D1.  Medium [D2] = the perfusion bus (unnamed).
 Economy (stomach — independent, scoped autonomy):
-  Marketplace [M1] ← Traders [M5] (bound to Wallets [M4]) submit actions; law script + Conductor [M6] veto gate execution.
+  Local objective: durable profit → organism metabolic/compute surplus.
+  Marketplace [M1] ← Traders [M5] (independent assigned capital; Wallets [M4]) submit actions;
+    constitutional law + absolute wallet ceilings + Conductor [M6] uncertainty/veto boundaries gate execution.
   Data Feeds [M2] → Sims [M3]. Runtime bridges are live for M3a stat, M3b socio, M3c AMM,
     and M3e tokenomics; M3d MEV, M3f consensus, and M3g microstructure are native kernels
     registered in the hub but not yet process-bridged into automatic query/publish paths.
