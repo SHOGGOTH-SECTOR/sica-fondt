@@ -12,26 +12,28 @@ organism are TBD and out of scope.
 Brain for permission to trade.
 
 ## 1A. Operational doctrine
-- **Local objective:** maximize durable profit. Profit is the stomach's terminal local objective;
-  the organism interprets the resulting surplus as a **metabolic signal and resource flow**,
-  especially additional compute budget.
-- **Success is not raw P&L alone:** a successful stomach compounds capital, survives regime
-  changes, learns from prediction error, preserves optionality, improves capital allocation,
-  develops competent Traders, avoids ruin, and produces surplus sufficient to further the
-  organism's compute capacity.
-- **Authority:** autonomy is constitutional rather than permissive. Routine trade-level judgment
-  remains inside the stomach. The Brain may set broad prohibitions, risk posture, capital/budget
-  envelopes, and in exceptional cases veto an individual trade; ordinary supervision belongs to
-  M6. Brain directives must enter through the organism boundary and may not bypass M1/M4/M6.
-- **Hard hierarchy:** M1 constitutional law and M4 capability ceilings are non-overridable at
-  action time. M6 may narrow what is allowed, never widen it beyond M1/M4.
-- **Memory:** the stomach must form durable economic memory from repetition: source reliability,
-  regime behavior, Trader calibration, recurring protocol precursors, intervention outcomes, and
-  repeated anomaly patterns. Raw observations remain attributable to M2 provenance; learned
-  assessments remain separate derived records.
-- **Failure condition:** architectural failure includes ruin, repeated uncorrected miscalibration,
-  inability to preserve scoped autonomy, or any path that obtains profit by bypassing M1/M4/M6/M7
-  or the organism boundary.
+- **Purpose:** maximize durable profit locally. At organism scale, realized surplus is metabolic
+  capacity - especially additional compute budget - rather than the Brain's terminal objective.
+- **Authority:** scoped autonomy. Routine economic decisions remain inside the stomach. The Brain
+  may set broad trade prohibitions, risk posture, budget envelopes, and exceptionally veto an
+  individual action; ordinary supervision belongs to M6. M1 law and M4 hard ceilings remain
+  non-overridable at action time.
+- **Evidence:** M0 may consume M2 observations, M3 predictions/calibration, M5 outcomes, M6
+  interventions, and M7 anomaly evidence, always retaining their provenance.
+- **Permitted decisions:** compose the economy organ, route directives to the owning component,
+  maintain shared economic memory, expose metabolic summaries, and coordinate component lifecycle.
+- **Prohibited decisions:** M0 does not bypass M1/M4/M6/M7, does not create a Brain→execution
+  shortcut, and does not silently convert derived belief into raw evidence.
+- **Memory:** durable records accumulate source reliability, regime behavior, Sim bias, Trader
+  calibration, repeated anomaly patterns, protocol precursors, and intervention outcomes.
+  Repetition changes trust; source observations are linked, never rewritten.
+- **Performance:** durable profit, capital survival, regime adaptation, improving allocation,
+  retained optionality, competent Traders, and surplus sufficient to further organism compute.
+- **Failure:** ruin, repeated uncorrected miscalibration, loss of scoped autonomy, or profitable
+  behavior achieved by bypassing constitutional/braking/border constraints.
+- **Completion criterion:** M0 is complete when all owned component contracts are runtime-wired,
+  economic memory persists and replays, Brain directives enter only through the organism boundary,
+  metabolic surplus is measurable, and no local execution path bypasses M1/M4/M6/M7.
 
 ## 2. Status / certainty
 EXECUTABLE OUTER-ORGAN SCAFFOLD. `core/src/economy/` composes M1–M7, exposes normalized
