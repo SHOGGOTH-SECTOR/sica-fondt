@@ -6,6 +6,20 @@ flowing into both the Marketplace (M1) and the Sims (M3). Sits between them — 
 produces execution data (fills, positions, P&L) that feeds back into Sims, and Sims produce
 predictions that inform Traders operating through the Marketplace. Data Feeds is the bridge.
 
+## 1A. Operational doctrine
+- **Purpose:** M2 preserves observations; it does not adjudicate reality.
+- **Epistemic rule:** provenance, source, timestamp, confidence, and contradiction are first-class.
+  Conflicting observations coexist intact. M2 must not collapse them into a synthetic consensus
+  datum unless an explicitly named downstream process requests and records that transformation.
+- **Normalization rule:** normalize representation, units, and schema - never silently normalize
+  away disagreement, source identity, uncertainty, or missingness.
+- **Derived belief separation:** source reliability, regime-conditioned trust, and repeated
+  source failure may become durable economic memory, but those assessments are derived records
+  linked back to immutable observations; they do not rewrite M2 history.
+- **Completion criterion:** a source adapter is complete only when it preserves provenance,
+  exposes loss/backpressure behavior explicitly, survives reconnect/replay without duplication,
+  and can reproduce the normalized history consumed by downstream Sims.
+
 ## 2. Status / certainty
 SCAFFOLD · EXECUTABLE. `core/src/economy/feeds.tcl` implements normalized in-session history
 and explicit backpressure without silent drop. External stream adapters remain open. Role C3;
