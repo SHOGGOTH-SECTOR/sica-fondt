@@ -54,11 +54,17 @@ Specialist-trained inference is a future layer, not part of the current executab
 - `receive_alert(alert: SAEAlert) -> { pause(trader_id) | dismiss | escalate }`.
   `SAEAlert { trader_id, alert_type, evidence, severity, timestamp }`.
 - `investigate(trader_id) -> { clear(resume) | veto_pending_actions | restrict(new_limits) }`.
-- `decision_log() -> [ConductorDecision]` — full audit trail of all veto/pause/resume/dismiss.
-- **SAE/Brain message format compatibility:** the Conductor's incoming alert format is
-  **identical in structure and signature** to Brain messages — SAE reports to the Conductor in
-  the same shape it would report to the Brain. This means the Conductor can be swapped for Brain
-  oversight without protocol changes (though the stomach normally operates autonomously).
+- `decision_log() -> [ConductorDecision]` — current in-memory audit trail.
+- Target `UncertaintyRegime { regime_id, scope, action_types, assets?, max_uncertainty,
+  max_capital_at_risk?, effective_at, expires_at?, provenance }`.
+- Target `RiskDirective { directive_id, source, scope, prohibited_trade_types,
+  uncertainty_ceiling?, budget_delta?, action_id?, effective_at, expires_at?, rationale,
+  provenance }`. Brain-origin directives enter through the organism boundary; M6 translates
+  them into restrictions without creating a direct execution path.
+- Target `ConductorDecision { decision_id, action_id?, trader_id?, regime_id, decision,
+  evidence_refs, rationale_digest, reversible, created_at, outcome_ref? }`.
+- SAE/Brain semantic compatibility is a target protocol property; cryptographic signature
+  equivalence is not claimed by V1.
 
 ## 6. Dependencies & runtime state
 - M7 SAE — implemented typed alert envelopes; autonomous SAE detection remains open.
@@ -86,8 +92,13 @@ Specialist-trained inference is a future layer, not part of the current executab
 2. **Done:** M1 one-shot veto integration after deterministic law.
 3. **Done:** Trader pause/resume control.
 4. **Done:** in-memory decision log for veto/pause/resume/dismiss.
-5. **Open:** specialist Conductor inference/investigation.
-6. **Open:** persistent/tamper-evident audit storage and any escalation protocol.
+5. **Next:** implement/version `UncertaintyRegime` and mechanically reject out-of-regime
+   Trader actions before execution.
+6. **Next:** implement Brain/M0 `RiskDirective` intake for broad prohibitions and exceptional
+   individual vetoes.
+7. **Next:** link every restriction/veto to evidence and later outcome for intervention scoring.
+8. **Open:** specialist Conductor inference/investigation.
+9. **Open:** persistent/tamper-evident audit storage and escalation protocol.
 
 ## 9. Tests
 Current tests verify veto, law-before-veto ordering, severe-alert pause, low-severity dismissal
@@ -95,8 +106,9 @@ path, pause blocking M1 actions/prediction reads, resume, and decision logging. 
 specialist-inference or Brain-signature compatibility test because those layers do not exist.
 
 ## 10. Open items
+- Formal uncertainty-regime vocabulary and default boundaries by action/asset/regime.
+- Brain/M0 directive translation and expiry/revocation semantics.
 - Specialist Conductor model/runtime and training/evaluation protocol.
 - Judgment inputs beyond explicit M7 alerts.
-- Persistent audit semantics.
-- Escalation policy, if any, to the organism's Brain while preserving scoped stomach autonomy.
+- Persistent audit and intervention-outcome memory.
 - Redundancy/multiple-Conductor design, if needed.
