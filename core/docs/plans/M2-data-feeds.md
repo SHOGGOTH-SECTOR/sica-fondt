@@ -48,9 +48,16 @@ and persistent storage remain separate ingress work.
 - `FeedType` remains open-ended; the economy currently exercises `price_tick`, `rss_news`,
   `on_chain_event`, and `dex_pool_state`, with `execution_fill` / `portfolio_state`
   reserved for later execution feedback.
-- `NormalizedDatum { feed_type, source, timestamp, payload, confidence }` — common shape.
-  `confidence` ∈ [0.0, 10.0] — data source reliability per position produced (exchange-reported
-  price = high; RSS sentiment = lower). Sims produce even finer-grained confidence.
+- `NormalizedDatum { feed_type, source, timestamp, payload, confidence }` — current common shape.
+  `confidence` is source-supplied/ingress reliability metadata, not M2's declaration of truth.
+- Target provenance revision:
+  `Observation { observation_id, feed_type, source_id, observed_at, received_at, payload,
+  source_confidence, provenance, supersedes? }`.
+  Contradictory observations get different IDs and remain simultaneously addressable.
+- Target derived assessment:
+  `SourceAssessment { source_id, regime, metric, value, recurrence, observation_refs,
+  evaluated_at }`. Assessments live in economic memory and may influence consumers, but never
+  mutate or replace the underlying `Observation`.
 
 ## 6. Dependencies & runtime state
 - External data adapters — open; callers/tests currently provide normalized data directly.
@@ -76,8 +83,12 @@ and persistent storage remain separate ingress work.
 2. **Done:** per-feed ordered in-session history.
 3. **Done:** explicit capacity backpressure with no silent eviction.
 4. **Done:** M3a/M3b/M3c/M3e calibrated history consumers.
-5. **Open:** external source adapters and provider normalization.
-6. **Open:** subscriptions/fan-out, time-range queries, persistence, and execution feedback.
+5. **Next:** assign stable observation IDs and explicit provenance fields.
+6. **Next:** define contradiction/replay semantics: duplicates collapse by identity; conflicting
+   observations coexist.
+7. **Next:** persist regime-conditioned `SourceAssessment` records separately from observations.
+8. **Open:** external source adapters and provider normalization.
+9. **Open:** subscriptions/fan-out, time-range queries, persistence, and execution feedback.
 
 ## 9. Tests
 The M0 suite verifies accepted publishes, capacity backpressure, preserved buffered history, and
