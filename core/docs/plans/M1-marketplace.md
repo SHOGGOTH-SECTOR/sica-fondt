@@ -7,19 +7,25 @@ the Marketplace. Enforces a **deterministic law script** (scoped invariants — 
 own constitution) and integrates the **Conductor's veto** (M6) before execution.
 
 ## 1A. Operational doctrine
-- **Purpose:** M1 is a constitution and execution harness, not a strategy engine. It makes some
-  actions structurally unavailable; it does not decide which lawful action is economically wise.
-- **Authority:** deterministic law is above Trader judgment, M6 judgment, and exceptional Brain
-  vetoes. M6/Brain may further restrict lawful action but may not legalize a constitutional
-  violation.
-- **Scope of law:** encode catastrophic/constitutional prohibitions, capability boundaries,
-  identity/binding requirements, and hard action constraints. Ordinary economic doctrine,
-  opportunity selection, and uncertainty judgment belong to M5/M6.
-- **Auditability:** every decision must be reproducible from the action, law version, M4 brake
-  state, M6 veto state, and logged evidence. A future law DSL must produce a proof/violation trace.
-- **Completion criterion:** M1 is complete for live execution only when the signed immutable law
-  evaluator, M4-authorized signer path, M7 logging, M6 restriction ordering, and simulation/live
-  parity tests all exist. Adding RPC alone is not completion.
+- **Purpose:** serve as the economy constitution and single execution harness. M1 makes prohibited
+  actions unavailable; it does not decide which lawful action is economically wise.
+- **Authority:** deterministic law may reject any action in scope. M5, M6, and Brain restrictions
+  may narrow the lawful set but may never legalize an M1 violation.
+- **Evidence:** action payload, Trader identity, M4 binding/limit state, current law version, and
+  M6 veto/restriction state. Economic opportunity evidence belongs upstream.
+- **Permitted decisions:** validate, admit/reject, produce replayable law decisions, order M4/M6
+  gates, execute only through an authorized adapter, and log every attempt to M7.
+- **Prohibited decisions:** choose strategy, predict markets, override M4, infer Trader intent, or
+  mutate constitutional law during an action.
+- **Memory:** retain law version, proof/violation trace, action identity, gate outcomes, and final
+  execution result for replay/audit.
+- **Performance:** deterministic reproducibility, complete logging, zero bypasses, and parity
+  between simulated and eventual live admission semantics.
+- **Failure:** the same inputs produce different law results; a prohibited action executes; a
+  lawful action bypasses a required gate; or strategy/risk judgment leaks into constitutional law.
+- **Completion criterion:** live M1 requires the signed immutable law evaluator, replayable
+  `LawDecision`, M4-authorized signer path, M6 restriction ordering, M7 logging, and
+  simulation/live parity tests. RPC connectivity alone is not completion.
 
 ## 2. Status / certainty
 SCAFFOLD · EXECUTABLE SIMULATION. `core/src/economy/marketplace.tcl` implements the single
