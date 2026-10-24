@@ -64,13 +64,20 @@ runtime bridge between the Tcl economy facade and Ichor is still open.
 ## 5. Interface contract
 - **Ichor interface (outbound):** `Envelope(Stomach, AdaBorder, OrganSecretion, payload)` — market
   state summaries, prediction digests, and tax receipts cross Ada to reach the inner brain.
-- **Ichor interface (inbound):** organism directives arrive via Ichor (e.g. risk posture changes,
-  budget adjustments from A2 energy).
+- **Ichor interface (inbound):** organism directives arrive via Ichor. Target directive shape:
+  `RiskDirective { directive_id, scope, prohibited_trade_types, uncertainty_ceiling?,
+  budget_delta?, effective_at, expires_at?, rationale, provenance }`. Exceptional individual
+  action vetoes use the same path and name the exact `action_id`; there is no Brain→execution
+  shortcut.
 - **Internal wiring:** Marketplace (M1) owns the action and prediction-read boundary. M2 stores
   normalized histories consumed by M3 native bridges. Wallets (M4) currently provide identity
   binding and exposure brakes only. Conductor (M6) owns veto/pause state. SAE (M7) records
   Marketplace-level tool calls and constructs alerts for M6. All Trader actions route through
   Marketplace.
+- **Economic memory contract (target):**
+  `EconomicMemoryRecord { subject_type, subject_id, regime, metric, value, recurrence,
+  observation_refs, first_seen, last_seen, provenance }`. M0 owns persistence/lookup semantics;
+  producers remain M2/M3/M5/M6/M7. Derived memory never rewrites source observations.
 - **Tax stub:** `transfer_tax(amount, source_wallet, dest_wallet) -> receipt` — automation hook
   for Verschwörern Veregeister internal wallet-to-wallet transfer. **Out of scope** — stub only.
 
@@ -95,9 +102,12 @@ runtime bridge between the Tcl economy facade and Ichor is still open.
 1. **Done:** executable M1–M7 Tcl scaffold and contract tests.
 2. **Done:** M3 registry/scheduler plus native runtime bridges for M3a/M3b/M3c/M3e.
 3. **Done:** simulation-only tax receipt staging.
-4. **Open:** runtime bridge between the economy facade and Pony/Ichor.
-5. **Open:** M3d/M3f/M3g query bridges and scheduler-driven automatic refresh.
-6. **Open by design:** live custody/signing/broadcast, Trader/Conductor inference, SAE inference.
+4. **Next:** define and persist the M0 economic-memory record/lookup contract.
+5. **Next:** define inbound `RiskDirective` handling and prove broad/individual Brain vetoes enter
+   through M6/M1 without bypassing M4.
+6. **Open:** runtime bridge between the economy facade and Pony/Ichor.
+7. **Open:** M3d/M3f/M3g query bridges and scheduler-driven automatic refresh.
+8. **Open by design:** live custody/signing/broadcast, Trader/Conductor inference, SAE inference.
 
 ## 9. Tests
 Executable contract suite: `tclsh core/src/economy/tests/stomach.test`. The current 17
@@ -109,8 +119,10 @@ and the running scheduler. Native simulator tests are driven by
 integration test.
 
 ## 10. Open items
-- Reward signal protocol from economy organ to organism (TBD, out of scope).
+- Define the outbound metabolic signal: realized surplus, available capital, compute-budget
+  contribution, drawdown, and confidence in those quantities.
+- Persistent economic-memory store and replay semantics.
+- Brain `RiskDirective` ingress and exceptional action-veto routing.
 - Pony↔Tcl process/FFI boundary for the outer-organ facade.
 - Automatic M3 engine scheduling/refresh and failure isolation.
-- Persistent economy state beyond the current in-session Tcl objects.
 - Ratified M4 custody design before any signer or broadcaster exists.
