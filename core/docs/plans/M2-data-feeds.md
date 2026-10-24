@@ -12,25 +12,28 @@ and explicit backpressure without silent drop. External stream adapters remain o
 scaffold C2.
 
 ## 3. Language & location
-TBD · `src/economy/feeds/`. Needs async I/O for streaming data (WebSockets, SSE, RSS polling).
-Pony actors are a natural fit (async, backpressure-aware).
+**Tcl 8.6 core buffer** · `core/src/economy/feeds.tcl`. V1 provides normalized in-session
+history and explicit capacity backpressure. External WebSocket/SSE/RSS/RPC adapters, subscriptions,
+and persistent storage remain separate ingress work.
 
 ## 4. Does / does-not
-- **Does:** ingest live market data from external sources (RSS, price APIs, DEX subgraphs,
-  on-chain event logs); normalize heterogeneous data into a common internal format; distribute
-  to Sims (M3) for prediction and to Traders (M5) for decision-making; ingest Marketplace (M1)
-  execution data (fills, portfolio state) and feed it back into Sims for calibration; maintain
-  time-series history within session (ring buffer).
-- **Does-not:** predict (Sims do); trade (Marketplace does); filter or editorialize data — it
-  delivers raw, normalized feeds. Interpretation is the consumer's job.
+- **Does now:** accept already-normalized `NormalizedDatum` records; validate confidence;
+  retain ordered per-feed in-session history up to a configured capacity; return explicit
+  `backpressure` instead of silently evicting or dropping data; expose history to native M3
+  bridges. Current calibrated consumers use `price_tick`, `rss_news`, `dex_pool_state`, and
+  `on_chain_event`.
+- **Does not now:** open external streams, poll APIs, persist history, maintain subscriptions,
+  transform heterogeneous provider payloads, or synthesize execution fills.
+- **Does not conceptually:** predict or trade; interpretation belongs to consumers.
 
 ## 5. Interface contract
-- `subscribe(feed_type: FeedType, consumer_id) -> subscription_handle`.
-  `FeedType` ∈ { `price_tick`, `rss_news`, `on_chain_event`, `dex_pool_state`, `execution_fill`,
-  `portfolio_state` }.
-- `publish(feed_type, data_point: NormalizedDatum)` — internal; sources push into the pipeline.
-- `query_history(feed_type, time_range) -> [NormalizedDatum]` — sims and traders can pull
-  historical data within the session window.
+- Implemented: `publish(feed_type, source, timestamp, payload, confidence)`.
+- Implemented: `history(feed_type) -> [NormalizedDatum]`.
+- Planned, not implemented: source adapters, subscriptions, time-range queries, persistence, and
+  provider-specific normalization.
+- `FeedType` remains open-ended; the economy currently exercises `price_tick`, `rss_news`,
+  `on_chain_event`, and `dex_pool_state`, with `execution_fill` / `portfolio_state`
+  reserved for later execution feedback.
 - `NormalizedDatum { feed_type, source, timestamp, payload, confidence }` — common shape.
   `confidence` ∈ [0.0, 10.0] — data source reliability per position produced (exchange-reported
   price = high; RSS sentiment = lower). Sims produce even finer-grained confidence.
