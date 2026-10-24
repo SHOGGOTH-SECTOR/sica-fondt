@@ -7,6 +7,28 @@ SAE (M7) and acts on them. The Conductor is the stomach's own judgment — it do
 organism's Brain for trade-level decisions. It supervises; the deterministic law script (M1)
 constrains; together they form the multi-layered braking system.
 
+## 1A. Operational doctrine
+- **Purpose:** M6 is the stomach's big-picture intelligence: risk officer, immune response,
+  executive judgment, and portfolio/system situational awareness. Traders optimize locally;
+  M6 sees interactions, concentration, correlated failure, uncertainty regime, and organ-level risk.
+- **Authority:** M6 handles most trade supervision and may veto/pause/restrict lawful Trader
+  behavior. It may never legalize an M1 violation or override an M4 hard ceiling.
+- **Uncertainty regime:** M6 assigns broad admissible uncertainty boundaries by regime, asset,
+  action type, or portfolio condition. Traders choose actions inside those boundaries; actions
+  whose declared uncertainty falls outside the active regime are mechanically prevented.
+- **Brain relationship:** routine supervision stays local. Brain may impose broad trade-type
+  prohibitions, risk posture, budget constraints, and exceptionally veto an individual trade.
+  Such directives enter through the organism boundary and are enforced through M6/M1 rather than
+  creating a direct Brain→execution bypass.
+- **Reconciliation:** M6 does not ask Sims to agree. It interprets complementary scopes together
+  and resolves system-level implications that exceed any one Trader's local view.
+- **Performance:** judge M6 by prevented ruin, calibrated restriction quality, intervention
+  outcomes, false-positive/false-negative rates, and whether it preserves profitable autonomy
+  rather than by the number of vetoes issued.
+- **Completion criterion:** the supervisory AI is complete only when uncertainty-regime policy,
+  portfolio-wide state, intervention reasoning, reversible restrictions, outcome feedback,
+  persistent decision memory, and Brain-directive handling are all explicit and testable.
+
 ## 2. Status / certainty
 SCAFFOLD · EXECUTABLE SUPERVISION. `core/src/economy/conductor.tcl` implements veto ordering,
 pause/resume, alert intake, and an in-memory decision log. Specialist inference and persistent
