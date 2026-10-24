@@ -13,19 +13,18 @@ pause/resume, alert intake, and an in-memory decision log. Specialist inference 
 audit storage remain open. Role C4; scaffold C2.
 
 ## 3. Language & location
-TBD · `src/economy/conductor/`. The Conductor is an AI actor — likely a fine-tuned LLM with
-specialist training in market risk, trader behavior analysis, and anomaly response. The
-inference wrapper sits alongside the Marketplace.
+**Tcl 8.6 supervision scaffold** · `core/src/economy/conductor.tcl`. V1 is deterministic state
+and audit behavior only: veto-next, pause/resume, SAE alert intake, and decision logging.
+Specialist-trained inference is a future layer, not part of the current executable surface.
 
 ## 4. Does / does-not
-- **Does:** receive SAE (M7) anomaly reports on trader behavior; **pause** a flagged trader's
-  actions to investigate; **veto** a Marketplace action if investigation reveals risk; **resume**
-  a cleared trader; review Marketplace actions pre-execution when the law check passes (M1-L4:
-  veto is checked after law, before execution); maintain an audit log of all veto/pause/resume
-  decisions.
-- **Does-not:** trade (Traders do); execute on-chain (Marketplace does); modify the law script
-  (immutable — M1-L2); detect anomalies directly (SAE does — the Conductor *responds* to SAE
-  reports, it doesn't watch raw data); consult the organism's Brain.
+- **Does now:** stage a one-shot veto reason per Trader; mechanically pause/resume Traders;
+  receive M7 alert envelopes; automatically pause on configured severe alerts; append decisions
+  to an in-memory log; expose veto state to M1 only after deterministic Marketplace law passes.
+- **Does not now:** perform AI investigation, infer market risk, persist its audit log, or call a
+  specialist model.
+- **Does not conceptually:** trade, legalize an M1-rejected action, detect anomalies directly,
+  modify Marketplace law, or consult the organism's Brain for trade-level decisions.
 
 ## 5. Interface contract
 - `veto_check(action: MarketAction, trader_id) -> { approved | vetoed(reason) }` — called by
