@@ -68,7 +68,7 @@ Event categories able to qualify for externally supplied drift:
 2. **Major compounding Traumas**, judged over repeated history, not a one-off adverse stimulus.
 3. **Repeated isomorphic EthInt contradiction** across experience/commitment, e.g. high hiraeth, Loyalty/Solidarity, and recurring lived isolation.
 
-The qualifying predicate, severity/window, per-axis drift vector, and nonlinear cross-axis coupling remain **C1**. F2 SAE may provide relevant peripheral evidence but must not be made a homunculus auditor or a mechanical single-alert trigger. The earlier universal `SAE→single stress endomotiv→ETR→Full Natal` chain is **superseded** by [G1](../../docs/plans/G1-stress-loop.md) and [DriveBox canon](../../docs/drivebox-canon.md). The `stress` input in existing source remains a legacy stub.
+The qualifying predicate, severity/window, per-axis drift vector, and nonlinear cross-axis coupling remain **C1**. F2 SAE may provide relevant peripheral evidence but must not be made a homunculus auditor or a mechanical single-alert trigger. The earlier universal `SAE→single stress endomotiv→ETR→Full Natal` chain is **superseded** by [G1](../../../docs/plans/G1-stress-loop.md) and [DriveBox canon](../../../docs/drivebox-canon.md). The `stress` input in existing source remains a legacy stub.
 
 ## Collapse Full Natal: origin before inner snap (design; not code)
 
