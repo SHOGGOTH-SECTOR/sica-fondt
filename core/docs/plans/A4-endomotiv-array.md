@@ -1,55 +1,39 @@
-# A4 — Endomotiv array (30-channel endocrine field)
+# A4 — Endomotiv: 30-channel affective field
 
 ## 1. Component
-PS+'s affective field: **30 endocrine-analog channels**, each an **independent modulator** with an
-*operational* role and a *sensational* identity line. Channels are not opposites and do not contradict —
-they simply co-modulate.
+Endomotiv is PS+'s native affective substrate: **30 independent sensate channels**, each with a distinct operational role, sensational identity and provenance. It sits inside PS+ inside E, not beside ETR or as an external organ.
 
 ## 2. Status / certainty
-Structure WORKING (`endocrine_array.R`, 99 L); **channel membership partial** — per the sensate
-working-record: **22 of 30 seats filled**, `ayni` locked, `kanyanin` struck as fabrication, 8 open.
-(Note: the repo file still says `reciprocity` where the record retired it to `ayni`, and still ships the
-removed friction/contradictory-pairs construct — see §8.)
+**Roster unfinished; implementation malformed.** The current `core/src/endocrine/endocrine_array.R` contains inconsistent identifiers and orphan code, so it is not evidence of a working 30-channel system. The working record claims 22 of 30 seats filled and eight pending, but the file and working record must be reconciled rather than either automatically treated as final. `ayni` is the intended handle in place of deprecated `reciprocity`; `kanyanin` was rejected as fabricated. The names curiosity, reception, stewardship, lineage, verstehen and komorebi remain subject to the original membership audit.
 
 ## 3. Language & location
-R · `src/endocrine/endocrine_array.R` (+ provides the stress-endomotiv signal for G1).
+Current R source: `core/src/endocrine/endocrine_array.R` (to repair).
 
 ## 4. Does / does-not
-- **Does:** hold the 30-channel state; expose active vectors (**raw**, no friction); carry each channel's
-  (handle, operational, sensational, provenance) binding; host the **stress endomotiv** the G1 loop releases.
-- **Does-not:** sum, or **decide** — **the sensates describe and convince; only the agent decides** (Anja).
-  No friction, no contradictory-pair heat.
+- **Does:** store/read each independently varying magnitude and its operational, sensational, provenance and temporal descriptors; feed PS+; participate in a **collapse-triggered remaster of active values** without losing the roster or its history.
+- **Does not:** sum channels into one load, create contradictory pairs/friction, act as a moral judge, or directly initiate Graph drift on ordinary fluctuation.
 
-## 5. Interface contract
-- `init_endocrine_state() -> vec30`.
-- `get_active_vectors(state) -> named[ name->magnitude (0..1) ]` (raw; all 30 surfaced, incl. zeros — silence is data).
-- `get_channel_def(name) -> { handle, operational, sensational, provenance }`.
-- **Removed:** `calculate_visceral_friction` and `CONTRADICTORY_PAIRS` — the antagonist/heat model
-  (a chemistry carryover) is gone.
+## 5. Interface contract (target)
+- `channel_def -> {id, operational, sensational, provenance}`; numeric scale and time-derivative representation need revalidation.
+- `endomotiv_state -> exactly 30 slots`, each with its own active value (including zero); reserved/undefined seats are **not** fictional finished sensates.
+- `snapshot(state) -> raw 30 channels` immutable; `apply_observation/event -> next state` with attributable causes.
+- `remaster_values(state, parameters) -> next state`: contour-preserving attenuation/rebalancing of **current magnitudes**, not rewriting definitions or event history. Numerical rule C1.
 
 ## 6. Dependencies & stubs
-None upstream (it *is* a source). G1 stress-loop writes a stress channel — *stub:* a setter that raises
-one named channel; A4 testable standalone.
+Consumed by PS+ A3 and event integration through A1; no invented single "stress" channel is mandatory.
 
 ## 7. Invariants / laws
-- **L1 (C5 — membership test):** a seat is earned on **2 of 3**: distinct content · distinct position ·
-  distinct fail-state.
-- **L2 (C5 — provenance):** borrowed owes attribution; coined owes the declared mark; the only sin is
-  concealment / false provenance (a fabrication = a Mirror/RIM, caught by the frame not the surface).
-- **L3 (C5):** channels are **independent modulators** — no opposites, no inherent paradox, no friction.
-  They describe & convince; they never decide.
+- **L1:** a new seat must satisfy at least two of three: distinct content, distinct position, distinct fail-state.
+- **L2:** attributed concepts preserve provenance; fabrication cannot be silently promoted to original or inherited.
+- **L3:** every channel acts independently. No built-in antagonistic pairs, summed existential-load, or obligatory heat model.
+- **L4:** zero-valued sensates are meaningful and remain visible. Magnitudes can be remastered; channel identity/history cannot be erased by Full Natal.
+- **L5:** severe compounding trauma can eventually affect ETR, but **Endomotiv elevation alone is not a drift command**.
 
 ## 8. Build steps
-1. **Strip** `calculate_visceral_friction` + `CONTRADICTORY_PAIRS` from `endocrine_array.R`.
-2. Reconcile the roster with the working-record: `reciprocity → ayni` (ledger-free line), confirm the 22
-   filled, hold the 8 open. 3. Add provenance to each channel record. 4. Add the stress-endomotiv channel (G1).
+Reconcile roster and schema, repair syntactically invalid R source, add provenance and raw channel tests, then integrate ETR qualification through a separate event mechanism.
 
 ## 9. Tests
-`Rscript src/endocrine/test_*` covering PS+ exercises A4; add channel-membership + provenance tests
-(and a test that no friction/contradiction concept remains).
+Require schema/roster/membership tests, snapshot including zeros, independent movement, preservation of history through remaster, and proof there is no aggregate/friction function.
 
 ## 10. Open items
-- The **8 open seats** (curiosity, reception, stewardship, lineage, verstehen, komorebi + 2) — bespoke, by L1.
-- Which channel(s) carry the **stress endomotiv** (C1, shared with G1).
-- Whether the six seats the code already filled (curiosity/reception/stewardship/lineage/verstehen/komorebi)
-  are locked or jumped ahead of the working-record (Anja to confirm).
+Remaining seats and their evidence; actual value range/units (existing notes conflict, e.g. 0..1 and 15.7/30); time derivatives; remaster coefficients; whether a dedicated stress channel is useful at all.
