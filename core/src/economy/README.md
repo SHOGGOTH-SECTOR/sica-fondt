@@ -1,6 +1,8 @@
 # Economy organ — M0 stomach
 
-Executable scaffold for M0–M7. The stomach is an OUTER organ: its only organism-facing product is an Ada-bound `organ_secretion`; it never joins the inner bus.
+Executable M0–M7 economy scaffold. The stomach is an OUTER organ: its organism-facing contract is
+an Ada-bound `organ_secretion`; it never joins the inner bus. Native simulation runtime is
+currently end-to-end for M3a/M3b/M3c/M3e and kernel-only for M3d/M3f/M3g.
 
 ## Implemented now
 
@@ -23,16 +25,40 @@ tclsh core/src/economy/tests/stomach.test
 
 Expected: `Total 17 Passed 17 ... Failed 0` once the current branch is checked out.
 
-The simulator family also has its own polyglot driver:
+The simulator family also has its own polyglot native-test driver. This verifies locally
+available native kernels; it does not imply that every engine has a Tcl query bridge:
 
 ```sh
 tclsh core/src/economy/sims/run_tests.tcl
 ```
 
-It executes Tcl + every native suite whose runtime is installed. Use `--strict` to make missing R/ECLiPSe/Foundry runtimes a failure rather than an explicit skip.
+It executes hub/runtime tests plus every native suite whose runtime is installed. Use `--strict`
+to make missing external runtimes a failure rather than an explicit skip. Dedicated GitHub
+Actions workflows additionally verify the M2→native→Hub integration boundaries for M3a, M3b,
+M3c, and M3e. M3d/M3f/M3g still need equivalent facade/query bridges.
 
 ## Public scaffold API
 
 `::stomach::Economy` exposes `register_trader`, `bind_wallet`, `submit_action`, `feed_publish`, `feed_history`, `sim_publish`, `query_predictions`, `statistical_runner_available`, `statistical_query`, `statistical_from_feed`, `amm_runner_available`, `amm_from_feed`, `sociological_runner_available`, `sociological_from_feed`, `tokenomics_runner_available`, `tokenomics_from_feed`, `sim_engines`, `sim_engine_status`, `sim_horizons`, `sim_running`, `sim_advance`, `conductor_veto_next`, `conductor_pause`, `conductor_resume`, `sae_alert`, `tax_event`, and `secretion`.
 
-`secretion` returns the envelope-compatible metadata `source stomach`, `destination ada_border`, `provenance organ_secretion`. The runtime Pony↔Tcl bridge is still an integration task; no code may shortcut D1 while that bridge is built.
+`secretion` returns envelope-compatible metadata `source stomach`, `destination ada_border`,
+`provenance organ_secretion`. This is a contract/staging surface today: the Pony↔Tcl runtime
+bridge is still an integration task. No code may shortcut D1 while that bridge is built.
+
+## Runtime truth table
+
+| Surface | Current state |
+|---|---|
+| M3a statistical | V1 native R bridge, M2 calibrated, Hub published |
+| M3b sociological | V1 native ECLiPSe bridge, persistent populations, Hub published |
+| M3c AMM/liquidity | V1 read-only Solidity bridge, M2 calibrated, Hub published |
+| M3d MEV/adversarial | native Fortran kernel/tests; facade bridge open |
+| M3e tokenomics/macro | V1 native Fortran query bridge, Kalman calibrated, Hub published |
+| M3f consensus/staking | native ECLiPSe kernel/tests; facade bridge open |
+| M3g microstructure | native Fortran kernel/tests; facade bridge open |
+| M4 custody/signing | absent; binding + exposure brakes only |
+| M5 Trader inference | absent; identity/specialization/pause state only |
+| M6 Conductor inference | absent; deterministic veto/pause/alert handling only |
+| M7 SAE inference | absent; Marketplace logging + alert envelopes only |
+| live chain broadcast | deliberately absent |
+| Pony↔Tcl Ichor bridge | open |

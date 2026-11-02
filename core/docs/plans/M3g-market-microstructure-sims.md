@@ -9,6 +9,20 @@ Operates at the highest temporal resolution — where M3a provides statistical f
 models pool mechanics, M3g models the *plumbing* of how orders actually execute, across **six
 concurrent time horizons** at tick-advanced, 90:1 (1s wall = 90s sim).
 
+## 1A. Measurement contract
+This Sim inherits the M3 common epistemic contract. Its scope is **depth, spread, slippage, order impact, execution schedule, cross-venue arbitrage decay, and market regime**.
+- Every prediction must identify `target`, `prediction_type`, `horizon`, relevant
+  `conditioning`, and `regime` before its `correctness` score is meaningful.
+- `confidence` describes evidential/model support; `certainty` describes stability under
+  perturbation/model uncertainty; `correctness` is empirical accuracy after realization. These
+  are not synonyms.
+- Correctness is compared longitudinally only within compatible scopes. It is not a universal
+  leaderboard against other M3 domains.
+- Every prediction family must eventually link to a realization and accumulate
+  regime-conditioned calibration loss. Repeated bias or repeated out-of-bound realizations feed
+  M0 durable economic memory.
+- This Sim does not need to agree with another Sim. Cross-domain interpretation belongs to M5/M6.
+
 ## 2. Status / certainty
 KERNEL IMPLEMENTED · Fortran 2018. `core/src/economy/sims/microstructure/` implements
 depth-consuming buy slippage, bid/ask spread, Almgren-Chriss execution schedules, exponential
@@ -17,7 +31,7 @@ under strict gfortran flags. Full order-event simulation and venue adapters rema
 Microstructure C4; Almgren-Chriss C5; implementation C2; DEX-specific calibration C1/C2.
 
 ## 3. Language & location
-**Fortran 2018** (gfortran) · `src/economy/sims/microstructure/`. Build: **fpm**. Dependencies:
+**Fortran 2018** (gfortran) · `core/src/economy/sims/microstructure/`. Build: **fpm**. Dependencies:
 **OpenBLAS** (LAPACK/BLAS via native Fortran interfaces). Hand-rolled: Riccati ODE solver,
 order-book state arrays, JSON I/O against fixed schemas. Almgren-Chriss optimal execution is a
 dense ODE (Riccati equations) — Fortran's home turf; LAPACK is native, array intrinsics map

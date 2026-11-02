@@ -1,5 +1,10 @@
 # M1 Marketplace — Deterministic Law Script Format Decision Document
 
+> **Status:** design decision, not current runtime. The fixed-combinator S-expression format is
+> the selected target constitution. Current `core/src/economy/marketplace.tcl` still uses a
+> hardcoded deterministic action/chain/notional gate; parser, signatures, proof traces, and
+> startup-loaded immutable law blobs remain implementation work.
+
 ## Executive Summary
 
 The M1 Marketplace's law script is a **constitution**: deterministic, auditable, non-Turing, loaded at startup, immutable at runtime (L2). This document compares three candidate formats for expressing M1's scoped invariants (L1–L5), position limits, drawdown stops, action allowlists, wallet-binding requirements, and chain allowlists. We recommend **S-expressions with a fixed combinator set** for its optimal balance of expressiveness, auditability, non-Turing guarantees, and failure-mode isolation.

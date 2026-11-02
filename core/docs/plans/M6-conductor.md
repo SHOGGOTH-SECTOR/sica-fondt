@@ -7,25 +7,48 @@ SAE (M7) and acts on them. The Conductor is the stomach's own judgment — it do
 organism's Brain for trade-level decisions. It supervises; the deterministic law script (M1)
 constrains; together they form the multi-layered braking system.
 
+## 1A. Operational doctrine
+- **Purpose:** provide the stomach's big-picture intelligence: risk officer, immune response,
+  executive judgment, and portfolio/system situational awareness above local Trader views.
+- **Authority:** M6 may set uncertainty regimes, narrow lawful behavior, veto, pause, restrict,
+  resume, and interpret organism directives. It may never legalize an M1 violation or override an
+  M4 hard ceiling.
+- **Evidence:** M7 signals, M3 scoped predictions, Trader decision/outcome history, portfolio-wide
+  exposure, capital concentration, active uncertainty regime, and Brain/M0 directives.
+- **Permitted decisions:** establish broad uncertainty boundaries, resolve system-level
+  implications across complementary Sims/Traders, impose/release restrictions, and route broad
+  or exceptional Brain vetoes into local enforcement.
+- **Prohibited decisions:** trade, own a wallet, rewrite M1 law, override M4, force Sims to agree,
+  or create a direct Brain→execution path.
+- **Memory:** persist decisions, evidence refs, regime versions, intervention outcomes, false
+  positives/negatives, repeated systemic precursors, and reversal history.
+- **Performance:** prevented ruin, calibrated restriction quality, intervention outcome quality,
+  false-positive/false-negative rates, and preservation of profitable autonomy - not veto count.
+- **Failure:** missing a repeated systemic precursor, chronically suppressing profitable lawful
+  behavior without evidence, allowing out-of-regime uncertainty, or permitting higher authority
+  to bypass M1/M4.
+- **Completion criterion:** supervisory AI is complete only when uncertainty-regime policy,
+  portfolio-wide state, intervention reasoning, reversible restrictions, outcome feedback,
+  persistent memory, and Brain-directive handling are explicit and testable.
+
 ## 2. Status / certainty
 SCAFFOLD · EXECUTABLE SUPERVISION. `core/src/economy/conductor.tcl` implements veto ordering,
 pause/resume, alert intake, and an in-memory decision log. Specialist inference and persistent
 audit storage remain open. Role C4; scaffold C2.
 
 ## 3. Language & location
-TBD · `src/economy/conductor/`. The Conductor is an AI actor — likely a fine-tuned LLM with
-specialist training in market risk, trader behavior analysis, and anomaly response. The
-inference wrapper sits alongside the Marketplace.
+**Tcl 8.6 supervision scaffold** · `core/src/economy/conductor.tcl`. V1 is deterministic state
+and audit behavior only: veto-next, pause/resume, SAE alert intake, and decision logging.
+Specialist-trained inference is a future layer, not part of the current executable surface.
 
 ## 4. Does / does-not
-- **Does:** receive SAE (M7) anomaly reports on trader behavior; **pause** a flagged trader's
-  actions to investigate; **veto** a Marketplace action if investigation reveals risk; **resume**
-  a cleared trader; review Marketplace actions pre-execution when the law check passes (M1-L4:
-  veto is checked after law, before execution); maintain an audit log of all veto/pause/resume
-  decisions.
-- **Does-not:** trade (Traders do); execute on-chain (Marketplace does); modify the law script
-  (immutable — M1-L2); detect anomalies directly (SAE does — the Conductor *responds* to SAE
-  reports, it doesn't watch raw data); consult the organism's Brain.
+- **Does now:** stage a one-shot veto reason per Trader; mechanically pause/resume Traders;
+  receive M7 alert envelopes; automatically pause on configured severe alerts; append decisions
+  to an in-memory log; expose veto state to M1 only after deterministic Marketplace law passes.
+- **Does not now:** perform AI investigation, infer market risk, persist its audit log, or call a
+  specialist model.
+- **Does not conceptually:** trade, legalize an M1-rejected action, detect anomalies directly,
+  modify Marketplace law, or consult the organism's Brain for trade-level decisions.
 
 ## 5. Interface contract
 - `veto_check(action: MarketAction, trader_id) -> { approved | vetoed(reason) }` — called by
@@ -33,16 +56,24 @@ inference wrapper sits alongside the Marketplace.
 - `receive_alert(alert: SAEAlert) -> { pause(trader_id) | dismiss | escalate }`.
   `SAEAlert { trader_id, alert_type, evidence, severity, timestamp }`.
 - `investigate(trader_id) -> { clear(resume) | veto_pending_actions | restrict(new_limits) }`.
-- `decision_log() -> [ConductorDecision]` — full audit trail of all veto/pause/resume/dismiss.
-- **SAE/Brain message format compatibility:** the Conductor's incoming alert format is
-  **identical in structure and signature** to Brain messages — SAE reports to the Conductor in
-  the same shape it would report to the Brain. This means the Conductor can be swapped for Brain
-  oversight without protocol changes (though the stomach normally operates autonomously).
+- `decision_log() -> [ConductorDecision]` — current in-memory audit trail.
+- Target `UncertaintyRegime { regime_id, scope, action_types, assets?, max_uncertainty,
+  max_capital_at_risk?, effective_at, expires_at?, provenance }`.
+- Target `RiskDirective { directive_id, source, scope, prohibited_trade_types,
+  uncertainty_ceiling?, budget_delta?, action_id?, effective_at, expires_at?, rationale,
+  provenance }`. Brain-origin directives enter through the organism boundary; M6 translates
+  them into restrictions without creating a direct execution path.
+- Target `ConductorDecision { decision_id, action_id?, trader_id?, regime_id, decision,
+  evidence_refs, rationale_digest, reversible, created_at, outcome_ref? }`.
+- SAE/Brain semantic compatibility is a target protocol property; cryptographic signature
+  equivalence is not claimed by V1.
 
-## 6. Dependencies & stubs
-- M7 SAE — anomaly reports; *stub:* no alerts (all clear).
-- M1 Marketplace — veto check integration; *stub:* always-approve.
-- M5 Traders — pause/resume control; *stub:* print pause/resume.
+## 6. Dependencies & runtime state
+- M7 SAE — implemented typed alert envelopes; autonomous SAE detection remains open.
+- M1 Marketplace — implemented one-shot veto consumption after law + wallet checks.
+- M5 Traders — implemented pause/resume state target.
+- Specialist Conductor inference runtime — open.
+- Persistent audit store — open; V1 log is in-memory.
 
 ## 7. Invariants / laws
 - **L1 (C5):** the Conductor **can veto, but cannot trade** — it has no wallet, no Marketplace
@@ -52,30 +83,34 @@ inference wrapper sits alongside the Marketplace.
   are rejected before reaching the Conductor — M1-L4).
 - **L3 (C4):** **pause is reversible** — a paused trader can always be resumed after
   investigation. Pause is a breaker, not a sentence (echoes A2-L3).
-- **L4 (C4):** every Conductor decision is **logged** — vetoes, pauses, resumes, dismissals.
-  The audit log is append-only (echoes M1-L2 / S3).
-- **L5 (C4):** SAE alert format and Brain message format are **structurally identical** — same
-  fields, same signatures. The Conductor processes them the same way the Brain would.
+- **L4 (C4):** every V1 Conductor decision is appended to the current in-memory log. Persistent,
+  tamper-evident audit storage is a future requirement and is not implied by the current list.
+- **L5 (C4 target):** SAE and Brain oversight should converge on a compatible alert/message
+  contract. V1 implements the SAE alert fields used by M6; cryptographic Brain-signature
+  equivalence is not implemented or verified here.
 
-## 8. Build steps
-1. Define the Conductor's LLM decision model (specialist-trained; rules are enforced by the
-   Marketplace law script and wallet spending limits — the Conductor applies judgment).
-2. Wire SAE alert intake (M7 → M6).
-3. Wire Marketplace veto check (M1 → M6 → approve/veto).
-4. Implement trader pause/investigate/resume flow.
-5. Implement append-only decision log.
+## 8. Build status
+1. **Done:** M7 alert intake and severity-based pause/dismiss behavior.
+2. **Done:** M1 one-shot veto integration after deterministic law.
+3. **Done:** Trader pause/resume control.
+4. **Done:** in-memory decision log for veto/pause/resume/dismiss.
+5. **Next:** implement/version `UncertaintyRegime` and mechanically reject out-of-regime
+   Trader actions before execution.
+6. **Next:** implement Brain/M0 `RiskDirective` intake for broad prohibitions and exceptional
+   individual vetoes.
+7. **Next:** link every restriction/veto to evidence and later outcome for intervention scoring.
+8. **Open:** specialist Conductor inference/investigation.
+9. **Open:** persistent/tamper-evident audit storage and escalation protocol.
 
 ## 9. Tests
-Veto: flagged action is vetoed; unflagged action approved. Pause: paused trader cannot submit
-actions. Resume: cleared trader resumes normal operation. No trading: Conductor cannot submit
-`MarketAction`. Law supremacy: Conductor cannot override a law violation (never reaches
-Conductor). Audit: every decision appears in the log. Alert format: SAE alert parses identically
-to Brain message structure.
+Current tests verify veto, law-before-veto ordering, severe-alert pause, low-severity dismissal
+path, pause blocking M1 actions/prediction reads, resume, and decision logging. There is no
+specialist-inference or Brain-signature compatibility test because those layers do not exist.
 
 ## 10. Open items
-- Conductor AI model selection and training data (what does "specialist training" look like?).
-- Veto criteria beyond SAE alerts (does the Conductor have independent judgment, or only
-  responds to SAE reports?).
-- Escalation path — if the Conductor is uncertain, does it escalate to the organism's Brain?
-  Or is the stomach fully autonomous? (Current design: fully autonomous.)
-- Multiple Conductors for redundancy?
+- Formal uncertainty-regime vocabulary and default boundaries by action/asset/regime.
+- Brain/M0 directive translation and expiry/revocation semantics.
+- Specialist Conductor model/runtime and training/evaluation protocol.
+- Judgment inputs beyond explicit M7 alerts.
+- Persistent audit and intervention-outcome memory.
+- Redundancy/multiple-Conductor design, if needed.

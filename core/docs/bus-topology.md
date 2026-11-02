@@ -10,8 +10,8 @@ External (world: user / network)
   ▼  outer bus — ICHOR (Pony)
 ┌─────────────────────────────────────────────────────────┐
 │ OUTER ORGANS                                             │
-│   • stomach / economy organ  (small-model operated;      │
-│       digests external input → context)                  │
+│   • stomach / economy organ  (Tcl/polyglot outer organ;  │
+│       M3 native sims + deterministic brakes)             │
 │   • microagents                                          │
 │   • SAE  (sparse autoencoder)                            │
 │   • MoRAG = GoDAGRAG                                     │
@@ -59,6 +59,9 @@ not shared modules.
 | tool-schema store (mini-rag reads this) — *COBOL store #2* | COBOL | decided |
 | COBOL invariant laws / E1 (the law vault, separate) | COBOL | given |
 | drive-box (A1) | R | existing |
+| stomach/economy orchestration (M0–M7) | Tcl 8.6 | executable scaffold |
+| M3a / M3b / M3c / M3e native sim bridges | R / ECLiPSe / Solidity / Fortran | V1 wired |
+| M3d / M3f / M3g native sim kernels | Fortran / ECLiPSe / Fortran | kernels; bridge open |
 | MoRAG / GoDAGRAG (outer) | Haskell or Crystal | open |
 | Hermes | OpenHermes agent (external model) | given |
 
@@ -85,5 +88,7 @@ blocking in a protected action), **tasks = workers** that call into the organs
 - **MoRAG / GoDAGRAG language** (Haskell vs Crystal vs other).
 - Each outer organ's hand-off shape to Ada.
 - ~~The stomach/economy organ's exact placement + which small model runs it.~~
-  **→ placed:** M-series (M0–M7) in `docs/plans/`. Outer organ on Ichor; data feeds via M2 (Data Feeds).
-  See M0 (hub), M6 (Conductor — orchestration, provenance chain, S1/S2 compliance).
+  **→ placed:** M-series (M0–M7) in `docs/plans/`. Outer-organ contract targets Ichor; internal
+  orchestration lives in `core/src/economy/`. M3a/M3b/M3c/M3e are runtime-wired; M3d/M3f/M3g
+  are native kernels. The actual Pony↔Tcl economy/Ichor runtime bridge is still open.
+  See M0 (hub) and M6 (supervision).

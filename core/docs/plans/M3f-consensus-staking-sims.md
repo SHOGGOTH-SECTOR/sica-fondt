@@ -7,6 +7,20 @@ and Byzantine fault tolerance** using evolutionary games and Markov chains. Pops
 financial incentives. Grounded in Cornell evolutionary consensus [8,9], ACM staking pool risk
 theorems [10], and Monash dynamic PBFT modeling [11].
 
+## 1A. Measurement contract
+This Sim inherits the M3 common epistemic contract. Its scope is **validator honesty, staking incentives, slashing risk, validator-state transitions, coordination, and liveness**.
+- Every prediction must identify `target`, `prediction_type`, `horizon`, relevant
+  `conditioning`, and `regime` before its `correctness` score is meaningful.
+- `confidence` describes evidential/model support; `certainty` describes stability under
+  perturbation/model uncertainty; `correctness` is empirical accuracy after realization. These
+  are not synonyms.
+- Correctness is compared longitudinally only within compatible scopes. It is not a universal
+  leaderboard against other M3 domains.
+- Every prediction family must eventually link to a realization and accumulate
+  regime-conditioned calibration loss. Repeated bias or repeated out-of-bound realizations feed
+  M0 durable economic memory.
+- This Sim does not need to agree with another Sim. Cross-domain interpretation belongs to M5/M6.
+
 ## 2. Status / certainty
 KERNEL IMPLEMENTED · ECLiPSe Prolog. `core/src/economy/sims/consensus/engine.ecl`
 implements evolutionary honesty updates, validator-state Markov transitions, an explicit
@@ -15,7 +29,7 @@ Native tests live beside the engine. The large-population HJB/Fokker-Planck MFG 
 incremental. Foundations C4; implementation C2; protocol parameterization C1.
 
 ## 3. Language & location
-**ECLiPSe Prolog 7.2** · `src/economy/sims/consensus/`. Libraries: **ic** (interval
+**ECLiPSe Prolog 7.2** · `core/src/economy/sims/consensus/`. Libraries: **ic** (interval
 constraints), **eplex** (LP/MIP via COIN-OR CLP/CBC — Nash equilibrium via linear programming).
 Markov chain transition rules, Nash equilibrium search, and replicator dynamics are
 constraint-satisfaction problems over validator populations; Prolog's backtracking search finds

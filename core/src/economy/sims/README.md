@@ -1,18 +1,23 @@
 # M3 simulator family
 
-Seven native simulator engines live here behind the Tcl M3 hub.
+Seven native simulator engines live here behind the Tcl M3 hub. **Native source presence is not
+the same thing as runtime integration.** The current state is:
 
-| ID | Engine | Native language | Implemented kernel |
-|---|---|---|---|
-| M3a | statistical | R | V1 complete: GBM/Merton/Heston, CF option calibration, GARCH, HMM/Viterbi, fitted rough vol, DCC+t-copula, Bayesian+ARIMA, VaR/ES, empirical scoring, 7 typed predictions, price+DEX-pool calibration |
-| M3b | sociological | ECLiPSe Prolog | V1 complete: 5 archetypes, replicator + UCB learning, adaptive HK, complex contagion, HJB/FP MFG, pump/dump ABM, 9 bounded predictions, persistent populations, empirical scoring |
-| M3c | AMM/liquidity | Solidity + Foundry | V1 complete: x*y=k, IL/slippage, concentrated positions, LP/JIT strategies, backrun/sandwich pops, two-pool routing, 5 bounded predictions, price+pool calibration |
-| M3d | MEV/adversarial | Fortran 2018 | all-pay PGA, block knapsack, cross-chain path comparison, sandwich score |
-| M3e | tokenomics/macro | Fortran 2018 | V1 complete: conserved token state, Euler-Maruyama, Kalman calibration, halving/burn policy, kinked lending, liquidation cascades, directional VAR contagion, exact yield optimizer, 10 bounded predictions |
-| M3f | consensus/staking | ECLiPSe Prolog | honesty replicator, validator Markov transitions, incentive threshold, liveness |
-| M3g | microstructure | Fortran 2018 | depth/slippage, spread, Almgren-Chriss schedule, arb decay, impact fit |
+| ID | Engine | Native language | Native implementation | Tcl/M3 runtime bridge |
+|---|---|---|---|---|
+| M3a | statistical | R | V1 complete: GBM/Merton/Heston, CF calibration, GARCH, HMM/Viterbi, rough vol, DCC+t-copula, Bayesian+ARIMA, VaR/ES, 7 predictions | **wired + CI verified** |
+| M3b | sociological | ECLiPSe Prolog | V1 complete: 5 archetypes, UCB/replicator, adaptive HK, contagion, HJB/FP MFG, pump/dump, 9 predictions | **wired + CI verified** |
+| M3c | AMM/liquidity | Solidity + Foundry | V1 complete: x*y=k, concentrated positions, LP/JIT, backrun/sandwich, 2-pool routing, 5 predictions | **wired + CI verified** |
+| M3d | MEV/adversarial | Fortran 2018 | PGA, block knapsack, cross-chain paths, sandwich scoring | **open** |
+| M3e | tokenomics/macro | Fortran 2018 | V1 complete: conserved state, SDE, Kalman, policy, lending/cascade, VAR contagion, exact yield optimizer, 10 predictions | **wired + CI verified** |
+| M3f | consensus/staking | ECLiPSe Prolog | honesty replicator, validator Markov transitions, incentive threshold, liveness | **open** |
+| M3g | microstructure | Fortran 2018 | depth/slippage, spread, Almgren-Chriss schedule, arb decay, impact fit | **open** |
 
-`registry.tcl` is the canonical engine inventory. `scheduler.tcl` is the live six-horizon wall→sim clock. It starts at 90 simulated seconds per wall second for tick/hourly and accelerates the longer horizons according to the M3 spec.
+`registry.tcl` is the canonical engine inventory. `scheduler.tcl` is the live six-horizon
+wall→sim clock. It starts at 90 simulated seconds per wall second for tick/hourly and accelerates
+longer horizons according to the M3 spec. The clock does **not yet dispatch every native engine**:
+M3a/M3b/M3c/M3e execute when their calibrated facade query is called; scheduler-driven automatic
+refresh is still an M3 hub task.
 
 Run all locally available native tests:
 
