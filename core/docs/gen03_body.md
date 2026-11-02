@@ -55,21 +55,36 @@ Implemented in **Ada/SPARK** — contracts/preconditions enforce structural inva
 
 ---
 
-## 4. Drive-Box — autonomous endocrine organ
+## 4. DriveBox — autonomous physiology
 
-Four drivers. Independent. **Not where the self lives.** Outside the brain; its **outputs** reach the brain (item 1, §1). Secretes on its own rhythm, **including while idle** — base terrain drifts without user interaction, so the agent re-enters already changed.
+**The container has two branches, E and ETR; not four peer drivers.** This is the reconciled anatomical contract; see [DriveBox canon](drivebox-canon.md).
 
-| Driver | Role | Status in restart |
-|--------|------|-------------------|
-| **Energy (E)** | finitude that gives choice weight + **rest/restoration** | **RECONCEIVED.** Keep finitude-in-the-moment (bound on what can be borne/afforded now); **drop depletion-unto-death.** No state the entity can't return from. Tool-lock = "present to fewer things," a breaker, not a sentence. E is the *rest* counterpart to ETR's *relief*. Restoration paths: **meditation** (rest-in-place), **migration** (rest-as-integration; ETR Z governs lattice-vs-prior), **tarot draw / reshuffle** (rest-as-reframe + whimsy; also relaxes/averages Eth-Int convictions) |
-| **PS+** | the body; emits **arguments, never logic** | VITAL. Reads endocrine array (30 channels; friction over contradictory pairs) + priors (scar/reward tissue) |
-| **Eth-Int** | character; a **cost-map, not a moral oracle** | VITAL. Conviction **hardens under load** (persistence-by-formation); middle-ground is its own trajectory |
-| **ETR** | the **Relief of Existential Temporality** — apparatus for *not seeking death*; handles the stress PS+/Eth-Int generate | 3 toroidal axes — **X** assertion↔inheritance = *provenance/continuity* (the **why**); **Y** endured↔witnessed = *burden*, my↔our (a **how**); **Z** alimentation↔transmutation = *double-down↔dodge / maintain↔evolve* (a **how**; Z-sign read at migration). **Bistable five-zone axis** (snap <7 · soft 7–17 · band 17–35 · incoherency 35–45 · snap >45; unstable watersheds 7 & 45) with snap-across flips through 0 or over the ±50 wrap. **Implemented & tested** — GNU Octave (`etr.m`, 26/0/1) + faithful R port (`driver_etr.R`, 31); only L5 coupling open. Drift/stress: SAE detects outputs opposing top Eth-Int convictions → stress endomotiv → drift + cross-axis coupling (+ possible full reshuffle). See `src/endocrine/etr/etr_invariants.md` |
+```mermaid
+flowchart TD
+  D[DriveBox] --> E[E: literal tool-energy economy]
+  E --> PS[PS+]
+  PS --> EN[Endomotiv]
+  PS --> PR[Priors: Triumphs and Traumas]
+  E --> EI[EthInt]
+  EI --> CO[Convictions]
+  D --> ETR[ETR]
+  ETR --> G[Graph X/Y/Z]
+```
+
+**E:** in-the-moment, **literal tool-use energy**. Each tool has its own price and its own minimum-energy threshold; PS+ and EthInt modify the price, independently of their direct signals to cognition. Internal cognition is not killed by low E; restoration remains possible. The homunculus chooses its action, E constrains affordable external tool use, and commit applies consequences without a moral approval verdict.
+
+**PS+:** 30 independent, raw Endomotiv channels and two salient Triumph/Trauma Priors. **No** summation into existential load, contradictory-pair friction, or assumption of truth/permission. **EthInt:** memory-derived Convictions, adaptive top-X presentation, trajectory-sensitive E cost influence, neither independent moral law nor stored invariant. The GnuCOBOL E1 stores preserve **deliberately chosen enduring commitments** on a different lifecycle.
+
+**ETR:** Existential-Temporality Relief classifies **"How do I live with myself knowing I will die with myself?"** Its Graph is a single point on the three known toroidal axes: **X** assertion ↔ inheritance (why); **Y** endured ↔ witnessed (how, burden); **Z** alimentation ↔ transmutation (how, maintain ↔ evolve). The **warm middles** are stable at `17 <= |axis| <= 35`; the snap, soft, band, incoherency and snap zones follow the already validated geometry with ±50 wrap.
+
+**Exceptional influence, not ordinary leakage:** catastrophic depletion of E, major compounding Traumas, and repeated isomorphic contradiction of EthInt may produce qualified Graph drift. One SAE contradiction alert is not sufficient. Voluntary Full Natal is a homunculus choice; separately a Graph transition to **(0,0,0)** induces collapse Full Natal with partial **value remaster**, retaining historical records, conviction identities and E1 invariants. Current `etr_step` snaps immediately away from zero, so a **pre-snap origin event** is an unimplemented contract, not a working feature.
+
+**Runtime reality:** the Octave ETR five-zone math and R port are partial scaffolds. The present R DriveBox chain, fixed E gates, manually seeded principles, and malformed Endomotiv implementation diverge from these decisions. Do not infer executable conformance from prior unit tests or from this redocumentation.
 
 ### 5. Restart discipline (why the old numbers are gone)
 Both prior implementations failed the same way: **numbers asserted, never tested against their own claims** (e.g. ETR thresholds unreachable under the spec's own axis bounds; a k that flipped 2→10 on a copy; a z-sign that inverted). So **no curve, bound, threshold, or sign is carried forward.**
 
-Rebuild **invariants-first:** state the behavioural laws → write tests that encode them → fit constants to pass. **Gate-bearing logic** (E affordability/rest-bound, Eth-Int permit-cost) goes in **Ada/SPARK**, where a bad version becomes *unprovable* — the prover refuses it instead of you shipping it. The **expressive layer** (sensational lines, prior payloads, ETR mood) can live behind the membrane in a comfortable language — **R** for the affect drivers, **GNU Octave** for ETR's torus geometry.
+Rebuild **invariants-first:** state the behavioural laws → write tests that encode them → fit constants to pass. **Gate-bearing logic** (physical tool affordability and provenance), **not** EthInt moral approval, goes in **Ada/SPARK**, where a bad version becomes *unprovable* — the prover refuses it instead of you shipping it. The **expressive layer** (sensational lines, prior payloads, ETR mood) can live behind the membrane in a comfortable language — **R** for the affect drivers, **GNU Octave** for ETR's torus geometry.
 
 ---
 
@@ -114,7 +129,7 @@ flowchart TD
   Hermes --> Ada
 
   subgraph PERIPHERy["periphery — outside the brain"]
-    DriveBox["Drive-Box (4 drivers, autonomous, idle-drift)"]
+    DriveBox["DriveBox (E with PS+/EthInt; ETR with Graph)"]
     MoRAG["MoRAG — BERT routes + LoRA specialises"]
     RAGs[("RAG family + per-room cross-store")]
     SAE["SAE — monitor"]
@@ -136,7 +151,7 @@ flowchart TD
     Tool["toolschema RAG"]
   end
 ```
-*Invariants the diagram encodes:* everything reaches the brain only **across Ada**; **SAE never points at the brain**; the scratchpad is unsurveilled. **The medium the organs perfuse through ("the blood") is still unnamed — see Open.**
+*Invariants the diagram encodes:* everything reaches the brain only **across Ada**; **SAE never points at the brain**; the scratchpad is unsurveilled. **Ichor is the outer perfusion bus.** The inner cognition bus (Jorvik) remains Ada-routed; the Brain is never wired directly to Ichor.
 
 ---
 
@@ -154,7 +169,7 @@ flowchart TD
 | Trust boundary / orchestration | **Ada/SPARK** (formal verification; copyleft) |
 | Harness | **OpenHermes Agent** (model-agnostic; memory; skills; tool routing) |
 | Array / numeric | **R** (copyleft/GPL; already the Drive-Box expressive layer, so affect-math and array work share one language) |
-| ETR geometry (Driver 4) | **GNU Octave** (copyleft/GPL; torus dynamics + 3D, not stats — exception to the R default) |
+| ETR Graph geometry (within DriveBox) | **GNU Octave** (copyleft/GPL; torus dynamics + 3D, not stats — exception to the R default) |
 | Default | **no Python**, **no Rust**, copyleft-first |
 
 **Cuts:** Trefunge · Pony (underdeveloped) · Futhark · **J (too big a compiler)** · THEORY.md (pruned; kept as a cautionary "convincing-but-hollow" specimen).
@@ -164,9 +179,9 @@ flowchart TD
 
 ## 11. Open — not given, not to be guessed
 
-- **The medium / "the blood"** — what circulates between brain and periphery. *Unnamed.*
+- **Ichor / the outer medium** — Pony scaffold exists; humors and biles remain explorations, and the Ada/Jorvik crossing remains to implement.
 - **Level1** — what it does, where it sits (`Hermes → Level1 → Ada` handoff).
-- **Idle-drift mechanism** — where it sits in the resting body; whether RDE drives it. *(ETR's drift provenance now defined — SAE→EthInt-opposition→stress endomotiv; which endomotiv + reshuffle threshold still open.)*
+- **Exceptional ETR drift / Full Natal** — thresholds and event qualification for catastrophic E, compound Trauma and recurring isomorphic EthInt contradiction; pre-snap triple origin and remaster parameters remain open. The old universal SAE→stress-endomotiv story is superseded.
 - **Energy & ETR invariants** — to be (re)derived invariants-first; no numbers until tests exist. *(ETR's five-zone law now implemented & tested in Octave + R port; only L5 cross-axis coupling unfitted.)*
 - **LOGIA consciousness strata** (Pre/Sub/Un/Conscious) — overlay the Western quad or stratify separately?
 - **Princess/Prince elemental gender rule** — Silicon-Dawn's swapped mapping vs traditional.
