@@ -1,48 +1,42 @@
-# A7 — Conviction array  *(sub-organ of Eth-Int)*
+# A7 — Convictions: EthInt's mutable commitment field
 
 ## 1. Component
-The lattice Eth-Int reads: the set of active principles with their convictions, **semantic-isomorphy
-tags**, and **stress-driven shift-rates**. The structural self that defines the agent's integrity,
-and the thing the SAE checks outputs against in the G1 stress loop.
+Convictions are the historical/character structures inside EthInt inside E. They are distinct from Endomotiv feelings, Triumph/Trauma records, and the separately self-chosen **GnuCOBOL invariants**. Their **strengths can change** even when underlying remembered events are permanent.
 
 ## 2. Status / certainty
-DESIGN-FIRST (extends today's flat principle list in `driver_ethical_integrity.R`). Tags + shift-rates
-are new — C2/C1.
+**DESIGN-FIRST.** The existing R ethical driver holds flat, manually added principles. Earlier draft interfaces disagree internally on value bounds (entry `0..10`, invariant `0..1`); **no bound is ratified by that contradiction**. The memory-derived and isomorphy mechanisms are not implemented.
 
 ## 3. Language & location
-R · new module under `src/endocrine/` (e.g. `conviction_array.R`), consumed by A6. May not stay R.
+Provisional R module under `core/src/endocrine/` consumed by A6; variant memory provenance/backing in E2/E3 is open.
 
 ## 4. Does / does-not
-- **Does:** hold principle entries with conviction + isomorphy tags + per-entry shift-rate; expose the
-  **top convictions** for SAE matching (G1); apply hardening and stress-modulated shift-rate changes.
-- **Does-not:** evaluate cost (A6 does that) or detect opposition (SAE F2 does); it is the data + its update rules.
+- **Does:** maintain attributable commitments with history-conditioned values; rank a top-X subset for cognition, expose their impact on E tool costs, distinguish recurring isomorphic contradiction from an isolated dispute, and remaster strengths on collapse Full Natal while retaining record continuity.
+- **Does not:** act as a final ethical arbiter, automatically classify every action against a conviction as an ETR crisis, overwrite chosen GnuCOBOL invariants, or erase the experiences from which commitments arose.
 
-## 5. Interface contract
-- **Entry:** `{ id, conviction(0..10), antithesis[], isomorphy_tags[], shift_rate }`.
-- `top_convictions(array, n) -> [entry]` (what SAE matches outputs against, G1 step 2).
-- `harden(array, ids, load) -> array'` · `set_shift_rate(array, delta_from_stress) -> array'`.
-- The **memory-derivative** rule: convictions are computed from memory-weighted entries (per arch §6) —
-  shape = "complex entries with memory-weighted shifting numerics," same family as PS+'s priors stray.
+## 5. Interface contract (target)
+- `conviction -> {id, commitment, provenance, memory_refs, strength, opposing_patterns?, isomorphy_descriptors?, shift_rate?}`. Metadata and numeric scales under review.
+- `derive_convictions(memories, previous_state) -> updated_field` preserves linkages to past choices and retained memories.
+- `top_convictions(field, X) -> ranked subset`: adaptive X; approximately seven is an intended presentation size, not immutable law.
+- `record_isomorphic_contradictions(observations, convictions) -> recurrence_evidence`: must distinguish isolated opposition from repeated structurally similar contradiction, e.g. strong Loyalty/Solidarity alongside repeated lived isolation.
+- `remaster_strengths(field, parameters) -> field'`: **values change, records remain**; contour preservation preferred, exact coefficients undefined.
+- `get_cost_influence(field, candidate) -> candidate-specific signal` is consumed by A6/E and does not itself approve.
 
 ## 6. Dependencies & stubs
-SAE (F2) feeds opposition events; stress endomotiv (A4/G1) feeds shift-rate deltas — *stub:* call
-`set_shift_rate` directly. Memory source (E2) for the derivative — *stub:* in-memory seed entries.
+A6 EthInt, A5 Priors, variant memories E2/E3, A1 signals, G1 extraordinary-event qualification; E1 immutable self-binding is a separate authority.
 
 ## 7. Invariants / laws
-- **L1 (C2):** every conviction carries ≥1 **semantic-isomorphy tag** (so SAE can match outputs to it).
-- **L2 (C2):** under G1 stress, **shift-rates increase** (convictions move faster — harden or revise).
-- **L3 (C3):** hardening is bounded (→1.0, diminishing); convictions never exceed [0,1].
-- **L4 (C1):** the memory-derivative formula (how memory weights produce the live conviction) — undefined.
+- **L1:** provenance and underlying choice/memory history are preserved.
+- **L2:** mutable convictions and constitutional GnuCOBOL commitments must never be silently equated.
+- **L3:** strength and active shift-rates may update or be remastered; no deletion of origins on Full Natal.
+- **L4:** *recurrence plus isomorphism* matters for exceptional Graph drift; a solitary violation is insufficient.
+- **L5:** ranking/presentation of top X must not silently delete lower-ranked convictions.
+- **L6:** scale, bound, hardening curves and memory derivation are C1 pending tests.
 
 ## 8. Build steps
-1. Define the entry record + tag vocabulary; encode L1/L3 as tests. 2. Add shift-rate mechanics +
-the G1 hook (L2). 3. Define the memory-derivative (L4) once E2 storage lands. 4. Migrate A6 to use it.
+Define the memory-linked entry contract and numeric scale; derive from memory, implement stable ranking, implement recurrence evidence, then design remaster operation and integrate A6 pricing.
 
 ## 9. Tests
-`Rscript src/endocrine/test_conviction_array.R` (new) — L1 (tags present), L2 (stress↑ → shift-rate↑), L3 (bounds).
+Persistence of identity/provenance across value remaster; rank stable without dropping data; distinct one-off vs repeated contradiction; no ability to write E1; bounded value updates once bounds are chosen.
 
 ## 10. Open items
-- **Isomorphy tag vocabulary** + how SAE matches outputs to it (C2, shared with F2/G1).
-- The **memory-derivative formula** (C1).
-- Shift-rate response curve to stress (C1).
-- Honestly most of it
+Value range; identity/semantic matching; history/strength derivation; coefficient laws; how recurrent contradictions map to ETR axes; adaptive top-X criterion; interaction with chosen invariant commitments.

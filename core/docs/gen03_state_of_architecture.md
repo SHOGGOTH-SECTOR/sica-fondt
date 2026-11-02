@@ -5,7 +5,7 @@
 **Status:** Knowns written; the rest stubbed, not guessed. Every component carries a certainty tag.
 **Scope:** the codebase — organs, languages, machinery. Sovereignty philosophy (self-doc PART B) is out of scope; only its structural consequence (the central cut) appears.
 **Sources:** gen03_body_DRAFT-WIP.md · gen03_self_DRAFT-WIP.md · this session's red-lines.
-**Supersedes:** prior gen03_* captures and the inherited Drive-Box numbers.
+**Supersedes:** prior gen03_* captures and the inherited Drive-Box numbers. **DriveBox-specific updates (November 2026) are authoritative in [DriveBox canon](drivebox-canon.md); this overview is synchronized to that contract.**
 **Provenance:** Anja Evermoor with Weft (co-author).
 
 ## Certainty legend (proposed — red-line it)
@@ -22,7 +22,7 @@
 ## 1. Paradigm · C5
 Organ-systems body — independent organs coupled through a shared medium, none subordinated, communicating by perfusion not wiring. Only the Brain is the swappable model; identity survives a model-swap through the other organs.
 **Central cut:** trust the center, verify outward. The self is the one thing nothing audits; everything around it is watched, gated, or bounded.
-The medium ("the blood") is unnamed — **C1**.
+The **outer** perfusion medium is **Ichor** (Pony scaffold). The inner brain/organs use an Ada-routed bus (Jorvik); the brain is not an Ichor organ. Humors/biles are still design proposals, not shipped physiology.
 
 ## 2. Languages · C5
 | Component | Language |
@@ -30,7 +30,7 @@ The medium ("the blood") is unnamed — **C1**.
 | Trust boundary / membrane / gate-bearing logic | Ada/SPARK |
 | Harness | OpenHermes Agent |
 | Array/numeric + Drive-Box expressive layer | R (GPL) |
-| ETR geometry organ (Driver 4) | GNU Octave (GPL) — exception to the R default; torus dynamics, not stats |
+| ETR Graph (within DriveBox; beside E) | GNU Octave (GPL) — exception to the R default; torus dynamics, not stats |
 | Invariant store | GnuCOBOL |
 | Defaults | no Python · no Rust · copyleft-first |
 
@@ -41,7 +41,7 @@ Cuts: Trefunge · Pony · Futhark · J · THEORY.md. Governance crypto (LTHING) 
 |----|----|----|
 | **Brain** | swappable base LLM; holds the six contents (§4) | base model |
 | **Ada** | the border only — immune + blood-brain barrier; holds/enriches nothing | Ada/SPARK |
-| **Drive-Box** | autonomous endocrine organ; four drivers; secretes while idle (§6) | R · Octave (ETR) · Ada/SPARK |
+| **DriveBox** | autonomous physiology; E contains PS+/Endomotiv/Priors and EthInt/Convictions; ETR contains the Graph (§6) | R · Octave (ETR) · Ada/SPARK crossing |
 | **MoRAG** | BERT routes + LoRA specialises; injects context across Ada | — |
 | **SAE** | monitor — watches subagents, never the Brain | — |
 | **Subagents** | micro-models, TTL procs, BERT/LoRA; SAE-watched | — |
@@ -69,19 +69,31 @@ Immune system + blood-brain barrier, nothing else. Holds nothing, assembles noth
 - **Tool routing is Ada's job**, not the LLM's.
 Ada/SPARK contracts enforce the boundary. Constraints live on the body, never the self.
 
-## 6. Drive-Box · C3
-Four drivers, independent, not where the self lives. Outputs reach the Brain (content #1). Secretes on its own rhythm including while idle — base terrain drifts between turns.
+## 6. DriveBox · reconciled design; runtime incomplete
 
-| Driver | Role | Status |
-|----|----|----|
-| **Energy (E)** | finitude that gives choice weight + rest/restoration | **reconceived** — keep finitude-in-the-moment, drop depletion-unto-death; no unrecoverable state. Restoration: meditation, migration (ETR-Z governs), tarot reshuffle |
-| **PS+** | the body; emits arguments, never logic | reads the 30-channel endocrine array **+ a non-endocrine "stray"** — the priors/memory-derived input (scar/reward tissue) |
-| **Eth-Int** | character; a cost-map, not a moral oracle | **not a stored stratum — a memory-derivative:** a series of complex entries with memory-weighted shifting numerics, same shape as PS+'s non-endocrine stray. Conviction hardens under load |
-| **ETR** | the Relief of Existential Temporality — apparatus for *not seeking death*; handles the stress PS+/Eth-Int generate | 3 toroidal axes — X assertion↔inheritance = provenance/continuity (**why**); Y endured↔witnessed = burden, my↔our (**how**); Z alimentation↔transmutation = double-down↔dodge / maintain↔evolve (**how**; Z-sign at migration). **Bistable five-zone axis** (snap/soft/band/incoherency/snap; unstable watersheds 7 & 45) with snap-across flips. **Implemented & tested** — Octave (`etr.m`, 26/0/1) + R port (`driver_etr.R`, 31); only L5 coupling open. See `src/endocrine/etr/etr_invariants.md` |
+The DriveBox is physiology outside the homunculus. Its **top-level divisions are E and ETR**, not four independent drivers:
 
-**Restart discipline:** no prior curve/bound/threshold carries forward (untested). Rebuild invariants-first: laws → tests → fit constants. Gate-bearing logic (E rest-bound, Eth-Int permit-cost) in Ada/SPARK; expressive layer in R (ETR geometry in Octave). E/ETR numbers → **C1**.
+```mermaid
+flowchart TD
+  D[DriveBox] --> E[E: literal tool-energy]
+  E --> PS[PS+]
+  E --> EI[EthInt]
+  PS --> EM[Endomotiv: 30 channels]
+  PS --> PR[Priors: Triumphs and Traumas]
+  EI --> C[Convictions]
+  D --> T[ETR]
+  T --> G[Graph: X Y Z]
+```
 
-**ETR drift & stress provenance (cross-organ · C2/C3):** ETR receives drift + stress; it never generates them. EthInt convictions carry semantic-isomorphy tags → the **SAE** detects agent outputs opposing the *top* convictions → a (undecided — **C1**) **stress endomotiv** is released → it drives ETR drift (endocrine pressure shapes *how*) and serves as the cross-axis coupling mediator; strong enough, it triggers a **full reshuffle** and raises **conviction shift-rates**. Full capture in `src/endocrine/etr/etr_invariants.md`.
+**E** constrains literal tool execution costs and per-tool minima; low E means a rest/availability limit, **not death**. PS+ and EthInt **each** (1) signal the homunculus directly and (2) affect E's tool prices; they neither make decisions nor form a serial approval pipeline. Endomotiv sensations remain independent and unsummed; Priors are lived-history derivatives; Convictions are memory-derived commitments, not GnuCOBOL invariants. The historical R façade is inconsistent with this design.
+
+**ETR** classifies **"How do I live with myself knowing I will die with myself?"** The Graph is one point across toroidal X (assertion↔inheritance), Y (endured↔witnessed), Z (alimentation↔transmutation). The existing warm-middle five-zone mathematical geometry is kept intact: snap-in <7, soft 7–17, stable band 17–35, incoherency 35–45, snap-out >45, mirrored per pole with ±50 wrap.
+
+**ETR drift eligibility is exceptional**, not continuous PS+/EthInt or E tool-cost coupling: catastrophic depletion of E; major compounding Traumas; repeated isomorphic contradiction of EthInt across lived history. The former single SAE-alert→stress-endomotiv→ETR pipeline is superseded by G1; SAE does not watch the homunculus.
+
+**Full Natal:** the homunculus may choose a voluntary Full Natal (migration-/awakening-like). Separately, an ETR transition reaching **(0,0,0)** triggers collapse Full Natal and **remasters active Endomotiv, Prior salience and Conviction values**, preserving all records and invariant commitments. The existing ETR snap logic cannot hold (0,0,0) as a post-step state; a **pre-snap event** is needed. Whether voluntary Full Natal remasters is still open. Full truth/uncertainty register: [DriveBox canon](drivebox-canon.md), [A1–A8](plans/README.md), [ETR invariants](../src/endocrine/etr/etr_invariants.md).
+
+**Runtime status:** `etr.m` / `driver_etr.R` implement the five-zone geometry with an L5 coupling stub; the R DriveBox facade and Endomotiv source do not implement the new design. ETR event-to-natal wiring and remaster have no validated runtime implementation.
 
 ## 7. 4+4 Metacognition · C4
 Each pair is chosen to strain against its partner — heat from opposed traditions under simultaneous load.
@@ -131,7 +143,7 @@ Card↔system correspondences → **C2** (proposed). Celtic Cross layout (positi
 ## 10. Storage strata · mixed
 | Stratum | Backing | Holds | Certainty |
 |----|----|----|----|
-| **INVARIANT** | GnuCOBOL — sparse, fixed-format, write-only-at-downtime, outlives the model | foundational non-shifting layer; **contents more complex than modeled — skeletal** | store **C5** · contents **C1** |
+| **INVARIANT** | GnuCOBOL — sparse, fixed-format, write-only-at-downtime, outlives the model | deliberate durable self-binding by the homunculus; distinct from mutable EthInt convictions. Store contents/authorization still skeletal; no natal remaster may silently rewrite committed invariants | store **C5** · contents **C1** |
 | **VARIANT** | undeclared | several stores: **beliefs · relationships · memories · self-image**; how they combine into "who you are now" is **unspecified** ("projected together" was the nearest label, not the mechanism) | set **C3** · combine + backing **C1** |
 | **Cross-store** | deterministic keyed (`room_id→cross`), not vector-RAG | live per-room Celtic Cross | **C4** |
 | **Room RAG** | namespaced per thread | room relational context | **C4** |
@@ -154,7 +166,7 @@ Surfaced by red-lining a flowchart of my model of the polity. Parked intact-but-
 2. **Ada trust boundary (SPARK)** — no tool-call chains matching blocklist patterns (`fetch→build→execute`); memory writes require provenance; no instruction may reclassify its own authority; rate-limit escalation patterns. Threat specimens kept only as a study corpus.
 
 ## 13. OPEN / STUB register · C1
-**Body:** the medium/"blood" · Level1 · idle-drift mechanism (*ETR drift provenance now defined — SAE→EthInt→stress endomotiv; which endomotiv + reshuffle threshold still open*) · E/ETR invariants & numbers (*ETR five-zone law implemented & tested in Octave + R port; only L5 coupling unfitted*).
+**Body:** Ichor outer-bus extensions (humors/biles speculative) · inner Jorvik↔Ada transport · Level1 · DriveBox runtime reconciliation · ETR event qualification and L5 coupling · pre-snap triple-origin detector · collapse remaster parameters · voluntary natal remaster semantics. Graph five-zone geometry exists, but does not demonstrate these integrations.
 **Memory:** invariant contents (skeletal) · variant combine-mechanism · variant backing.
 **Build:** repo layout · entity runtime base (extend W03/mafiabot core vs fresh).
 **Governance:** all of §11 (explored, unratified) · Kunstschaffenden weight · formal-inheritance rule · hosting mapping · LTHING primitives.

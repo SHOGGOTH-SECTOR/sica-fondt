@@ -1,60 +1,42 @@
-# A2 — Energy (E) driver
+# A2 — E: literal tool-use energy economy
 
 ## 1. Component
-Driver 1: the master constraint — an **in-the-moment activation / rest budget** (not "finitude" anymore;
-with depletion-unto-death dropped, it isn't finitude). Gates tool use and prices actions.
+E is the **tool-call energy** branch of DriveBox, containing PS+ and EthInt as subfunctions. PS+/EthInt alter tool prices and independently signal the homunculus. E is **not** a global existential-load calculator and does not own ETR.
 
 ## 2. Status / certainty
-Structure WORKING (`driver_energy.R`, 79 L) but **numbers DISOWNED** (body §5) **and RECONCEIVED**
-(body §4): drop *depletion-unto-death*; no unrecoverable state.
+**Target specified; runtime stale.** `driver_energy.R` still has a global lock threshold, exponential drag constants, `is_alive` and a hard-death pathway. Those are not the current design.
 
 ## 3. Language & location
-R · `src/endocrine/driver_energy.R` (+ `test_energy.R`).
+Current R: `core/src/endocrine/driver_energy.R`; gate-bearing affordability at the trust boundary requires a future Ada/SPARK contract.
 
 ## 4. Does / does-not
-- **Does:** report E level; price each tool (**per-tool cost + per-tool lockout scale**, §5); gate when a
-  tool's lockout trips; consume on the chosen action; restore.
-- **Does-not:** die. The old `is_alive()==0` hard-death is removed — E is the **rest** counterpart to
-  ETR's **relief**; floor is rest, not death.
+- **Does:** maintain available activity budget, quote **per-tool** costs, expose **per-tool** minimum-energy requirements independent of cost, consume on action, and recover through rest/replenishment.
+- **Does not:** classify what an action morally means, decide whether an action *should* be taken, emit a death verdict at zero, or continuously disturb ETR with normal expenditure.
 
-## 5. Interface contract
-- `init_energy_state(current=100, max=100) -> e`.
-- **Per-tool economy (Anja):** each tool carries **its own energy cost** — an arbitrary per-tool function,
-  e.g. one tool `c×2`, another `((c²³)×3)/π`. So `tool_cost(e, tool) -> num` and
-  `tool_locked(e, tool) -> bool`, **per tool** — *not* one global `tool_lock_threshold`. **Lockout trips at
-  the tool's `tool_min`** (next bullet), so `tool_locked := E < tool_min(tool)`.
-- **Per-tool minimum + locked rendering (Anja; A1-L4).** Each tool has a **minimum to consider it**,
-  `tool_min(tool)` — **per-tool, a skill/capability threshold, NOT a pure function of cost** (Anja). Two
-  tools of ~equal *cost* can have different minimums: the **better skill demands the higher minimum**
-  (e.g. Playwright vs a manual site-fetch cost about the same to run, but Playwright needs more minimum
-  energy). So under depletion the refined tool **locks out first** and the agent falls back to the cruder
-  equal-cost one. A valid tool shows its cost; a **locked** tool's name is **replaced in-band** (the agent
-  can't see colour) by `[====L⍉¢K€D ϟ ∅ΩΤ====] 《E≠<minimumfortool>》` ("energy below this tool's
-  `tool_min`"). Lockout is a **breaker, not a sentence** (L3).
-- `consume(e, amt) -> e'` · `recharge(e, amt) -> e'`.
+## 5. Interface contract (target)
+- `energy_state -> {current, capacity, ...}` with units and reserve policy open.
+- `tool_cost(E, tool, PS+_effect, EthInt_effect) -> cost` (pure). Tool-specific cost functions may differ radically; fixed coefficients are **not** inherited from code.
+- `tool_min(tool) -> threshold` (capability requirement independent of cost); `tool_locked := current < tool_min(tool)`.
+- `tool_listing` displays cost for unlocked tools, and for locked tools replaces the tool name **in-band** using the established token `[====L⍉¢K€D ϟ ∅ΩΤ====] 《E≠<minimumfortool>》`. No color-only indication.
+- `consume(E, chosen_tool) -> E'`; `restore(E, event) -> E'`. Cost, minimum, and restoration rates are to be fitted from invariants, not asserted.
+- `catastrophic_depletion_event(E) -> evidence` is a **separate extraordinary event** delivered toward ETR. Catastrophic is not synonymous with low, locked, or ordinary tiredness. Threshold/qualification undecided.
 
 ## 6. Dependencies & stubs
-Per-tool cost/lockout tables — *stub:* a small fixed table of tools → (cost fn, lockout fn).
-Restoration hooks tie to ETR-Z migration (A8) + tarot reshuffle (B3) — *stub:* call `recharge` directly.
-**(Restoration model reassessed — Anja.)**
+A3 PS+ and A6 EthInt provide price modifiers and their own unmediated cognitive secretions. A1 organizes but never approves; A8 receives only qualified catastrophic E events.
 
-## 7. Invariants / laws (numbers C1 until tested)
-- **L1 (C4):** an **in-the-moment activation/rest budget** — a bound on what can be afforded *now*
-  (**not "finitude"** — nothing depletes unto death).
-- **L2 (C4):** **no unrecoverable state** — every low-E condition has a restoration path
-  (meditation = rest-in-place; migration = rest-as-integration; tarot reshuffle = rest-as-reframe).
-- **L3 (C4):** lockout is **per-tool** and a **breaker, not a sentence** — internal processing continues under lock.
-- **L4 (C1):** the per-tool cost/lockout functions — fit invariants-first, no carried `k`.
+## 7. Invariants / laws
+- **L1:** E only limits literal tool usage; the homunculus still deliberates and internal activity is not deemed dead at a floor.
+- **L2:** no unrecoverable death state from E exhaustion; restoration possible.
+- **L3:** tool cost and tool minimum are distinct per-tool values; same-cost tools can lock at different E values.
+- **L4:** PS+ and EthInt simultaneously influence E's economics and present their raw/structured signals to cognition.
+- **L5:** ordinary E changes do not induce Graph drift. Catastrophic depletion may.
+- **L6:** pure cost query cannot mutate E; expenditure follows the homunculus's choice.
 
 ## 8. Build steps
-1. Rewrite laws → tests in `test_energy.R` (replace death tests with rest/restore; add per-tool cost/lockout tests).
-2. Strip depletion-unto-death; add restoration paths.
-3. Define the per-tool cost/lockout table; fit functions invariants-first.
+Replace the current dead/alive gate and global lock table with invariant-driven per-tool pricing and rendering. Add separate catastrophe qualification. Test bounded consumption and restoration without making up numerical laws.
 
 ## 9. Tests
-`Rscript src/endocrine/test_energy.R` (from repo root) — encodes L1–L3 + per-tool economy; fails on unfitted constants.
+`core/src/endocrine/test_energy.R` needs replacement tests for no-death, tool minima independent of price, in-band lock rendering, and zero ordinary E→ETR coupling.
 
 ## 10. Open items
-- The per-tool cost/lockout **functions per tool** (C1), **and `tool_min` per tool** — its own
-  skill/capability threshold (C1), independent of cost (better skill → higher minimum). Restoration
-  *rates* (C1).
+Units, cost functions, tool minima, restoration dynamics, catastrophe threshold, cost-modifier combination rule, source of available energy, and expenditure receipts.

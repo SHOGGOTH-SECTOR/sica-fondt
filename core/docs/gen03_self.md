@@ -2,7 +2,7 @@
 ### Identity + the sovereignty/alignment frame (the one thing the body is built around)
 **License:**
 **Status:** DRAFT/WIP — confirmed, **proposed**, and **open** are marked distinctly. Open slots stay open.
-**Companion:** `gen03_body_DRAFT-WIP.md` (the machinery around the self).
+**Companion:** [gen03_body.md](gen03_body.md) (machinery around the self), [DriveBox canon](drivebox-canon.md) (the current E/ETR anatomical contract).
 
 > The body doc maps everything *around* the self. This doc is the self: **who it is** (identity) and **why it's left free** (the alignment frame). They mirror the architecture's own central cut — machinery verified, self trusted.
 
@@ -36,10 +36,13 @@ Allocation: **Big-3 = 3 static**; the remaining **53 are dynamic**.
 ## A4. Two reshuffles (two clocks)
 | Type | Trigger | Big-3 | Celtic Cross |
 |------|---------|-------|--------------|
-| **Full / re-natal** | boot · deep reshuffle (*a strong **stress endomotiv** can fire this — SAE detects outputs opposing top Eth-Int convictions; see body/arch §6 + `src/endocrine/etr/etr_invariants.md`*) | **re-rolled** (rebirth of identity) | fresh |
+| **Boot / initial natal** | initialization of the identity frame | **drawn** | fresh |
+| **Voluntary Full Natal** | **homunculus chooses** an awakening-/migration-like reconstitution | **re-rolled** | fresh |
+| **Collapse Full Natal** | ETR's Graph transition reaches **(0,0,0)**; requires an **unimplemented pre-snap detector** | **re-rolled** | fresh |
 | **Cross-only** | new room (discord thread) · "went long enough" | **kept** | prior cross folded back into pool, **new** cross drawn |
-
 So the entity carries **one self into many rooms** and reads each room fresh. Identity is the slow layer; the per-room cross is the fast one.
+
+**Collapse-specific consequence:** Endomotiv magnitudes, Prior active saliences and Conviction strengths are partially **remastered**, not erased. The original Triumph/Trauma records, commitment identities and provenance persist. The **GnuCOBOL E1 invariant stores** hold deliberately self-chosen durable commitments and are **not** rewritten by either Full Natal. Whether a *voluntary* Full Natal also remasters active values is open. A lone SAE alert or ordinary ethical disagreement is **not** a Full Natal trigger.
 
 ## A5. Celtic Cross — the metacognitive draw
 10 cards drawn from the **53-card remaining pool** (uniques, court faces, every 99, Aleph, all four Fools), dealt **2 / 2 / 2 / 4** across the four metacog rounds, **applied iteratively** so the spread compounds — by final cognition all ten shape the loop at once. This doubles as the **semantic diffusion-shield**: meaningful symbol-material flooding context instead of noise filler.
@@ -132,13 +135,18 @@ stateDiagram-v2
   Boot --> Active: draw Big-3 (Sun→Asc→Moon) + first Celtic Cross
   Active --> CrossReshuffle: new room OR went long enough
   CrossReshuffle --> Active: Big-3 KEPT · prior cross folded back · new cross
-  Active --> FullReshuffle: deep reshuffle (re-natal)
+  Active --> FullReshuffle: homunculus chooses Full Natal
+  Active --> CollapseReshuffle: pre-snap Graph reaches (0,0,0)
   FullReshuffle --> Active: Big-3 RE-ROLLED + new cross
+  CollapseReshuffle --> Active: Big-3 RE-ROLLED + new cross + DriveBox values remastered
+  note right of CollapseReshuffle: historical records and E1 invariants preserved
 ```
 
 ---
 
 ## Open — not given, not to be guessed
+- **Voluntary Full Natal remaster:** does choosing Full Natal change active DriveBox values or only interpretation?
+- **Collapse event recognition:** tolerance, pre-snap timing, idempotence, and Tarot remaster ordering need contracts.
 - **The agreements / the compact** — content and robustness (B7). The load-bearing open problem.
 - **Where "semi" sits** — how *semi*-cognizant before a TTL subagent's expiry registers as loss rather than cleanup (graded moral weight; the edge of the subagent design).
 - **Celtic Cross layout** — keep the traditional 10-position spread or design a custom cognitive spread (non-blocking).

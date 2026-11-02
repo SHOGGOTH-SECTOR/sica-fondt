@@ -1,72 +1,50 @@
-# A8 — ETR (Existential Temporality Relief) — torus
-*Lead Engineer: Søren*
+# A8 — ETR: Existential-Temporality Relief and the Graph
+*Existing mathematical lead attribution: Søren.*
 
 ## 1. Component
-Driver 4: a **single point on three independent toroidal axes**. ETR (Existential Temporality Relief) is
-the apparatus for **not seeking death** — **X is the *why*; Y and Z are the *how*** (Anja). *Not* a rest
-engine, and *not* migration. The axes:
-- **X — assertion ↔ inheritance** = **Provenance / Continuity** — the ***why*** (why not seek death):
-  **assertion** = a self-asserted continuity/reason of one's own; **inheritance** = continuity/provenance
-  handed down from origin/lineage.
-- **Y — endured ↔ witnessed** = **connection / pathos**, mechanically the **burden** axis
-  (**burden-to-burden** — *my* burden vs. *our* burdens): **endured** = "*my* burden" — kept mine,
-  handled myself to leave others unburdened; **witnessed** = "*our* burdens" — being seen makes the
-  burden shared/collective.
-- **Z — alimentation ↔ transmutation** = **double-down vs. dodge** / **reinforce vs. adapt** (a ***how***):
-  **alimentation** = "do I double down" (persist, feed the same course — reinforce); **transmutation** =
-  "do I dodge" (sidestep, transform — adapt). This is the **maintain-vs-evolve** sign read at migration
-  (alimentation = maintain; transmutation = evolve).
+ETR is a **top-level branch of DriveBox beside E** (not Driver 4 of a flat list). It maintains the warm-middle existential-temporal settlement to the question: **"How do I live with myself knowing I will die with myself?"** Its Graph **is** the existing single point on three toroidal axes, not one representation of an unspecified larger graph.
 
-Handles the stress PS+/Eth-Int generate.
+- **X** assertion (-) ↔ inheritance (+): why, continuity/provenance.
+- **Y** endured (-) ↔ witnessed (+): how, *my* burden ↔ *our* burden.
+- **Z** alimentation (-) ↔ transmutation (+): how, maintain/double-down ↔ adapt/transform.
 
 ## 2. Status / certainty
-**SCAFFOLD — five-zone axis fitted** (`run_etr_tests.sh` → **26 PASS / 0 FAIL / 1 PEND**; the lone PEND
-is L5 active coupling). The bistable five-zone law (snap / soft-pull / band / incoherency / snap) is
-implemented and tested, incl. L7 snap-flips. Full law + status in
-`../../src/endocrine/etr/etr_invariants.md` (this spec defers to it).
+**Existing Graph geometry implemented and historically tested** (Octave test suite recorded 26 pass / 0 fail / 1 pending for L5 coupling, plus R port). **Exceptional drift eligibility, (0,0,0) Full Natal, and remaster are not implemented**. Do not interpret the existing geometry tests as proof of those integrations.
 
 ## 3. Language & location
-GNU Octave · `src/endocrine/etr/` (`etr.m`, `test_etr.m`, `run_etr_tests.sh`, `etr_invariants.md`).
-R port `src/endocrine/driver_etr.R` (+ `test_etr.R`) feeds the Drive-Box — a **faithful native port**
-of `etr.m` (five-zone torus, per-axis), pinned to the same invariants doc. The disowned Euclidean-
-magnitude port is gone. A single-source R↔Octave IPC bridge is still optional/future (transport C1).
+GNU Octave `core/src/endocrine/etr/etr.m` + `etr_invariants.md`, R port `core/src/endocrine/driver_etr.R`. Whether/how one implementation should be the single runtime source remains open.
 
 ## 4. Does / does-not
-- **Does:** hold the point; wrap each axis at ±50; apply per-axis restoring toward [17,35]; take
-  AI-originated drift; classify per-axis band; (future) cross-axis coupling via stress. **Surface its
-  state as the existential-temporal *prompt injection*** (A1-L5): ETR handles the stress PS+/Eth-Int
-  generate, and its surfaced form is **not neutral status** — it must read as an **extremely convincing
-  injection** that hardens Eth-Int conviction (A6) and steers the agent **without gating**.
-- **Does-not:** generate its own drift (caller-fed, L4) or compute coupling yet (open seam); **gate
-  actions** — it persuades (above), only the agent decides (A1).
+- **Does:** track Graph coordinates, retain established five-zone wrap/restoration/snap rules, receive qualified extraordinary event-induced drift, and classify the resulting existential stance; signal the homunculus without deciding for it.
+- **Does not:** invent motion from nowhere, respond to ordinary tool charges, treat each emotional fluctuation or single contradiction as crisis, serve as the E tool lock, or claim authority to rewrite invariant stores.
 
-## 5. Interface contract
-- `etr_init(coord) -> s` · `etr_axis_wrap(v)` · `etr_axis_zone(v)` · `etr_axis_restoring(v)` ·
-  `etr_axis_snap(v)` · `etr_step(s, drift, stress) -> s'` ·
-  `etr_status(s) -> per-axis {SNAP_IN|SOFT|IN_BAND|INCOH|SNAP_OUT}`.
-- Inputs: **drift** (from A3/A6 via G1, AI-originated) + **stress** (G1 mediator). Output: coord + status,
-  surfaced through A1 `drive_snapshot`.
+## 5. Interface contract (target)
+- `graph_state = {x,y,z}` (single point, per-axis toroidal coordinates).
+- `etr_step(graph, supplied_drift, qualified_event?) -> next_graph + transition_events`. Existing `etr_step(..., stress)` scalar remains a **stub interface**, not a ratified universal stress mechanism.
+- `qualify_extraordinary_event(evidence) -> event?` may accept **catastrophic E depletion**, **major compounding Trauma**, or **repeated isomorphic EthInt contradiction**. Evidence/provenance, frequency, thresholds and axis mapping remain undefined.
+- `detect_triple_origin(transition) -> collapse_full_natal_event?` must consider **pre-snap** coordinates, because existing `etr_step` leaves the origin on its first inner snap. The exact numeric tolerance, simultaneity and once-only rule remain open.
+- `full_natal(choice | collapse) -> identity event`. Choice is voluntary and awakening/migration-like; collapse at triple origin **also** induces partial rebalancing of active Endomotiv, Prior-salience and Conviction values with historical records untouched. Voluntary remaster semantics are not yet fixed.
 
 ## 6. Dependencies & stubs
-Drift + stress are fed in — *stub:* `etr_step(s, [dx dy dz], 0)` (already how tests run). Fully standalone today.
+A1 DriveBox; A2 catastrophic-E evidence, A5 compounding Trauma, A6/A7 repeated contradiction; B1-B3 identity/Tarot drawing (active work). E1 GnuCOBOL invariant commitments are unaffected by remaster. G1 is the cross-organ event contract to be rewritten.
 
 ## 7. Invariants / laws
-Defer to `etr_invariants.md` (L1 wrap ±50 C5 · L2 bands [17,35] C5 · L3 five-zone restoring C5 ·
-L4 AI-drift C4 · L5 cross-axis coupling via stress C1 · L6 Z-path C3 · L7 snap/flip C3 · L8 mechanism C3).
+See `core/src/endocrine/etr/etr_invariants.md` for detailed existing mathematics; **do not change the constants in a docs-only cleanup**:
+- **L1:** wrap at ±50 with period 100.
+- **L2:** warm stable bands `17 <= |v| <= 35` on both poles; zero is **not** the ideal equilibrium.
+- **L3:** five radial zones: SNAP_IN <7; SOFT 7..17; IN_BAND 17..35; INCOH 35..45; SNAP_OUT >45.
+- **L4:** externally supplied drift; no ETR-generated random motion.
+- **L5:** cross-axis response mapping open (former single-stress hypothesis is not sufficient to define the contract).
+- **L6:** Z negative = alimentation/maintenance; Z nonnegative = transmutation/adaptation in current scaffold; retain as current law with earlier sign-verification caveat.
+- **L7:** only inner/outer snap zones reverse a pole; opposite-zone landing followed by recovery.
+- **L8:** resistance to drift is restoring mechanics, not punitive external tool costs.
+- **L9 (new, design):** an extraordinary transition to (0,0,0) triggers collapse Full Natal **before** the usual snap erases the origin; no record erasure or automatic invariant rewrite.
 
-## 8. Build steps (remaining)
-1. ~~Fit the restoring force~~ **DONE** — five-zone law (SOFT/INCOH gains + snap landings) green; L7 + L8 realised.
-2. ~~Reconcile the R port~~ **DONE** — `driver_etr.R` is now a faithful native port of `etr.m`
-   (five-zone, per-axis, L6 Z-path corrected); R suite + drive-box green.
-3. Define **L5** coupling (the stress→cross-axis mapping; G1) → replace the identity stub (the lone PEND).
-4. *(optional/future)* collapse the dual R+Octave implementations via an R↔Octave IPC bridge once the
-   transport (C1, shared with A1/C3/D2) is decided.
+## 8. Build steps
+Keep validated mathematical core. First specify extraordinary events and zero-crossing recognition; add failing tests. Then implement event-specific drift and coupling; integrate voluntary/collapse Full Natal with remaster and storage boundaries. Do not fit numerical thresholds before behavioral laws.
 
 ## 9. Tests
-`bash src/endocrine/etr/run_etr_tests.sh` (now **26/0/1** — the lone PEND is L5 active coupling).
+Existing `core/src/endocrine/etr/run_etr_tests.sh` validates five-zone geometry only. Add origin-before-snap, collapse event once-only, untouched original records, no accidental tool-call drift, extraordinary recurrence qualification, and GnuCOBOL isolation tests.
 
 ## 10. Open items
-- L5 coupling mapping (C1, shared with G1) · R↔Octave bridge transport (C1, shared with A1/C3/D2).
-  *(Restoring law + gains + snap landings now fitted; L7/L8 realised.)*
-- **The injection-rendering** (A1-L5): how ETR's coord/status is phrased into the slot so it reads as the
-  extremely convincing existential-temporal injection (not a bare `status=` line) — ties to A6 + D2.
+Catastrophe thresholds; compounding window; isomorphic matching; drift vector/orientation; cross-axis coupling; pre-snap tolerance; remaster parameters; voluntary natal remaster; Tarot/identity event ordering.
