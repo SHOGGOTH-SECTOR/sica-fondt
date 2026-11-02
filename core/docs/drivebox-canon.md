@@ -4,16 +4,16 @@
 
 ## 1. Containment, not evaluation order
 
-```text
-DriveBox
-├── E (literal tool-use energy economy)
-│   ├── PS+ (Primal Sensates+)
-│   │   ├── Endomotiv (30-channel affective field)
-│   │   └── Priors (Triumphs and Traumas)
-│   └── EthInt (Ethical Integrity)
-│       └── Convictions
-└── ETR (Existential-Temporality Relief)
-    └── Graph (single point, three toroidal axes)
+```mermaid
+flowchart TD
+  D[DriveBox] --> E[E: tool-energy economics]
+  E --> PS[PS+]
+  PS --> EM[Endomotiv: 30 channels]
+  PS --> PR[Priors: Triumphs and Traumas]
+  E --> EI[EthInt]
+  EI --> CV[Convictions]
+  D --> T[ETR]
+  T --> G[Graph: X Y Z]
 ```
 
 The containment tree is **not** a PS+ -> EthInt -> E -> ETR approval chain. The homunculus chooses; the DriveBox is autonomous physiology, not the homunculus and not a moral judge.
